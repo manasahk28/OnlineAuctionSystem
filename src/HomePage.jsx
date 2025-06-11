@@ -34,7 +34,6 @@ const HomePage = () => {
       </section>
 
       {/* How it works Section */}
-
         <section className="how-section" id="how-it-works">
         <h2 className="how-title">How it works?</h2>
 
@@ -82,13 +81,16 @@ const HomePage = () => {
         </div>
         </section>
 
+
 <hr className="section-divider" />
 
         {/* Preview Listings */}
+        <div className='preview-container'>
         <section className="preview-section">
         <h2 className="preview">Featured Listings</h2>
         <PreviewListings />
       </section>
+      </div>
 
         {/* Footer */}
         <footer className="footer">
