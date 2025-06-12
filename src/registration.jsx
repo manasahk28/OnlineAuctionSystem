@@ -3,7 +3,6 @@ import { FaEye, FaEyeSlash, FaGavel } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import './App.css';
 
-
 const Registration = () => {
   const navigate = useNavigate();
 
@@ -49,7 +48,7 @@ const Registration = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
-    
+
     if (name === 'password') {
       const error = validatePassword(value);
       setPasswordError(error);
@@ -116,9 +115,7 @@ const Registration = () => {
 
   return (
     <>
-      <header className="reg-header">
-        Auction System
-      </header>
+      <header className="reg-header">Auction System</header>
       <div className="registration-container">
         <h2>
           Sign Up for Auction Bid <FaGavel style={{ color: '#f57c1f', marginLeft: '8px' }} />
@@ -126,9 +123,9 @@ const Registration = () => {
         <form onSubmit={handleSubmit}>
           <input
             type="text"
-            name="User Name"
+            name="UserName"
             aria-label="User Name"
-            placeholder="User Name"
+            placeholder="Username"
             value={formData.UserName}
             onChange={handleChange}
             required
@@ -155,16 +152,26 @@ const Registration = () => {
 
           <input
             type="text"
-            name="studentcollegeId"
+            name="collegeId"
             aria-label="Student ID"
-            placeholder="Student ID "
+            placeholder="Student ID"
             value={formData.collegeId}
             onChange={handleChange}
           />
 
+          <input
+            type="text"
+            name="collegeName"
+            aria-label="College Name"
+            placeholder="College Name"
+            value={formData.collegeName}
+            onChange={handleChange}
+            required
+          />
+
           <div className="password-wrapper">
             <input
-              type={showPassword ? "text" : "password"}
+              type={showPassword ? 'text' : 'password'}
               name="password"
               aria-label="Password"
               placeholder="Password"
@@ -172,19 +179,18 @@ const Registration = () => {
               onChange={handleChange}
               required
             />
-            <span 
+            <span
               className="password-toggle"
               onClick={() => setShowPassword(!showPassword)}
             >
               {showPassword ? <FaEyeSlash /> : <FaEye />}
-
             </span>
           </div>
           {passwordError && <p className="error-message">{passwordError}</p>}
 
           <div className="password-wrapper">
             <input
-              type={showConfirmPassword ? "text" : "password"}
+              type={showConfirmPassword ? 'text' : 'password'}
               name="confirmPassword"
               aria-label="Confirm Password"
               placeholder="Confirm Password"
@@ -196,7 +202,7 @@ const Registration = () => {
               className="password-toggle"
               onClick={() => setShowConfirmPassword(!showConfirmPassword)}
             >
-              {showPassword ? <FaEyeSlash /> : <FaEye />}
+              {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
             </span>
           </div>
 
