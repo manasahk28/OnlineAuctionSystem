@@ -6,17 +6,15 @@
 - Flask  
 - requests  
 - flask-cors
+### 🌍 Frontend:
+ - ReactJs
   
-  Install with:
+  Install Backend dependencies with:
 ```bash
 pip install flask flask-cors requests
   
-### 🌍 Frontend:
-ReactJs
-
-Install with:
+Install frontend dependencies with:
 ```bash
-bash
 cd frontend
 npm install
 
@@ -24,15 +22,6 @@ a)Start React Frontend:
  bash
  cd frontend
  npm start
-
-
-
-
-
-
-
-
-
 
 🔗 SheetDB Setup
 You're using SheetDB to store user data.
