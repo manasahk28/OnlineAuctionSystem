@@ -15,7 +15,7 @@ const HomePage = () => {
         <h2>Online Auction</h2>
         <div className="nav-buttons">
           <button className="btn" onClick={() => navigate('/register')}>Register</button>
-          <button className="btn">Login</button>
+          <button className="btn" onClick={() => navigate('/login')}>Login</button>
         </div>
       </nav>
 
