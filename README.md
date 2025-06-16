@@ -10,7 +10,7 @@
 ### 🌍 Frontend:
  - React Js
   
-Install frontend dependencies with:
+Install backend dependencies with:
 ```bash
 pip install flask flask-cors requests
   
