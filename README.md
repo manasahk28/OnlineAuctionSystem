@@ -6,10 +6,11 @@
 - Flask  
 - requests  
 - flask-cors
-### 🌍 Frontend:
- - ReactJs
   
-  Install Backend dependencies with:
+### 🌍 Frontend:
+ - React Js
+  
+Install frontend dependencies with:
 ```bash
 pip install flask flask-cors requests
   
@@ -32,12 +33,10 @@ UserName, collegeId, collegeName, email, password, timestamp
 Connect it via SheetDB and grab the API endpoint (e.g. https://sheetdb.io/api/v1/xxxxxx)
 
 Paste that into your app.py:
-
 python
 Copy
 Edit
 SHEETDB_API_URL = "https://sheetdb.io/api/v1/YOUR_API_ID"
-
 
 
 🧪 Running the App
