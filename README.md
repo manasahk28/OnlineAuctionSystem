@@ -11,23 +11,21 @@
  - React Js
 
 
-
-🔗 SheetDB Setup
+### 🔗 SheetDB Setup
 You're using SheetDB to store user data.
 
-Create a Google Sheet with columns:
+##### Create a Google Sheet with columns:
 UserName, collegeId, collegeName, email, password, timestamp
 
 Connect it via SheetDB and grab the API endpoint (e.g. https://sheetdb.io/api/v1/xxxxxx)
 
-Paste that into your app.py:
+##### Paste that into your app.py:
 python
 Copy
 Edit
 SHEETDB_API_URL = "https://sheetdb.io/api/v1/YOUR_API_ID"
 
-
-🧪 Running the App
+### 🧪 Running the App
 1️⃣ Start the Flask backend:
 bash
 Copy
