@@ -12,7 +12,7 @@ Install with:
 pip install flask flask-cors requests
 
 
-🌍 Frontend:
+**### 🌍 Frontend:**
 Node.js (v18 or higher)
 
 npm
