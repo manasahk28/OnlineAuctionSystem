@@ -6,31 +6,31 @@
 - Flask  
 - requests  
 - flask-cors
+  
+  Install with:
+```bash
+pip install flask flask-cors requests
+  
+### 🌍 Frontend:
+ReactJs
 
 Install with:
 ```bash
-pip install flask flask-cors requests
-
-
-**### 🌍 Frontend:**
-Node.js (v18 or higher)
-
-npm
-
-Install dependencies:
-
 bash
-Copy
-Edit
 cd frontend
 npm install
 
-2️⃣ Start the React frontend:
-bash
-Copy
-Edit
-cd frontend
-npm start
+a)Start React Frontend:
+ bash
+ cd frontend
+ npm start
+
+
+
+
+
+
+
 
 
 
