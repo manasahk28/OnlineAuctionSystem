@@ -4,6 +4,8 @@ import Home from './HomePage';
 import Login from './login';
 import Register from './registration';
 import UserDashboard from './UserDashboard';
+import ExploreItems from './ExploreItems';
+import PostItems from './PostItems';
 
 function App() {
   return (
@@ -13,6 +15,8 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/dashboard" element={<UserDashboard />} />
+        <Route path="/explore" element={<ExploreItems />} />
+        <Route path="/post-item" element={<PostItems />} />
       </Routes>
     </Router>
   );

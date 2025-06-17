@@ -7,17 +7,40 @@ import { faInstagram, faLinkedin, faTwitter } from '@fortawesome/free-brands-svg
 
 const HomePage = () => {
   const navigate = useNavigate();
+  const user = JSON.parse(localStorage.getItem('user')); // assuming you stored user after login
+
+  const handleLogout = () => {
+    localStorage.removeItem('user');
+    navigate('/');
+    window.location.reload(); // refresh to update navbar
+  };
 
   return (
     <div className="homepage">
       {/* Navbar */}
       <nav className="navbar">
-        <h2>Online Auction</h2>
-        <div className="nav-buttons">
-          <button className="btn" onClick={() => navigate('/register')}>Register</button>
-          <button className="btn">Login</button>
+        <div className="navbar-left">
+          <h2>Online Auction</h2>
+        </div>
+
+        <div className="navbar-right">
+          {user ? (
+            <>
+              <a href="/">Home</a>
+              <a href="/explore">Explore</a>
+              <a href="/post-item">Post Item</a>
+              <a href="/dashboard">Profile</a>
+              <button className="logout-btn" onClick={handleLogout}>Logout</button>
+            </>
+          ) : (
+            <>
+              <button className="btn" onClick={() => navigate('/register')}>Register</button>
+              <button className="btn" onClick={() => navigate('/login')}>Login</button>
+            </>
+          )}
         </div>
       </nav>
+
 
       {/* Hero Section */}
     
