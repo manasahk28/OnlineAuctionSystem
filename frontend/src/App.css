@@ -224,7 +224,7 @@ body {
 
 body {
   margin: 0;
-  background: linear-gradient(135deg, #f5f7fa 0%, #eef1f7 100%);
+  background-color: #fff;
   font-family: 'Segoe UI', sans-serif;
   min-height: 100vh;
 }
@@ -815,7 +815,7 @@ h2.preview{
 /*UserDashboard css*/
 .dashboard-wrapper {
   min-height: 100vh;
-  background: linear-gradient(135deg, #f0f4ff, #e0ffe4);
+  background-color: #fff;
   display: flex;
   justify-content: center;
   align-items: center;

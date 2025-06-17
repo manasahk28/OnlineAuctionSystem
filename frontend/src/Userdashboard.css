@@ -1,4 +1,9 @@
 /* Navbar styles */
+body, html{
+  overflow-x: hidden;
+  margin: 0;
+  padding: 0;
+}
 .navbar {
   /* width: 100%; */
   display: flex;
@@ -97,7 +102,7 @@
 /* Make sure this is present or added */
 .dashboard-card {
   position: relative;
-  background: rgba(255, 255, 255, 0.06);  /* more transparent */
+  background: rgba(252, 251, 251, 0.06);  /* more transparent */
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.2);
@@ -111,7 +116,6 @@
 }
 
 
-
 .dashboard-wrapper {
   min-height: 100vh;
   display: flex;
@@ -121,3 +125,205 @@
   padding: 20px;
 }
 
+.dashboard-main {
+  display: flex;
+  height: 100vh;
+  background-color: #fff;
+  color: #fff;
+}
+
+/* Sidebar styles */
+.sidebar-left {
+  width: 250px;
+  background-color: rgba(230, 229, 229, 0.591);
+  padding: 30px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.username {
+  color: #000;        /* makes it black */
+  font-weight: 600;   /* makes it a bit bold */
+  margin-top: 10px;
+  font-size: 16px;
+}
+
+.profile-image {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  cursor: pointer;
+  margin-bottom: 10px;
+}
+.image-placeholder {
+  width: 100px;
+  height: 100px;
+  background-color: #ddd;
+  border-radius: 50%;
+  font-size: 32px;
+  color: #555;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: auto;
+}
+.image-placeholder,
+.preview-image {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background-color: #ddd;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30px;
+  color: #555;
+  object-fit: cover;
+  border: 2px solid #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+/* Hover menu on image */
+.hover-options {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.profile-image:hover .hover-options {
+  opacity: 1;
+}
+
+.hover-btn {
+  background-color: rgba(255, 255, 255, 0.9);
+  border: none;
+  padding: 3px 10px;
+  margin: 5px;
+  border-radius: 2px;
+  font-size: 12px;
+  cursor: pointer;
+  color: #000;
+  transition: background 0.2s ease;
+}
+
+.hover-btn:hover {
+  background-color: #ffa94d;
+}
+
+/* Modal preview */
+.image-modal {
+  position: fixed;
+  /* top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%; */
+  inset: 0; /* shorthand for top, right, bottom, left */
+  background: rgba(0,0,0,0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+  overflow: hidden; /* 🔥 prevents scrollbars */
+
+}
+
+/* .image-modal-content {
+  position: relative;
+  background: #fff;
+  padding: 20px;
+  border-radius: 10px;
+} */
+
+.image-modal-content img {
+  width: 200px;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 50%;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+}
+
+.close-modal {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.profile-image:hover .hover-text {
+  opacity: 1;
+}
+.preview-image {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.change-image {
+  font-size: 12px;
+  margin-top: 8px;
+  color: #eee;
+}
+
+.username {
+  margin: 15px 0;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.sidebar-buttons button {
+  width: 100%;
+  padding: 10px 0;
+  margin: 6px 0;
+  background-color: #f98b16;
+  color: #000;
+  border: none;
+  border-radius: 5px;
+  font-size: 15px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.sidebar-buttons button:hover {
+  background-color: #ffc078;
+}
+
+
+.charts-section {
+  background: #fff;
+  padding: 20px;
+  /* border-radius: 16px; */
+  /* box-shadow: 0 4px 12px rgba(0,0,0,0.1); */
+  margin-left: 20px;
+  width: 100%;
+  max-width: 850px;
+  color: #393939;
+}
+
+.charts-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: space-between;
+}
+
+.chart-card {
+  background: #fefefe;
+  border-radius: 12px;
+  padding: 10px;
+  flex: 1 1 300px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
