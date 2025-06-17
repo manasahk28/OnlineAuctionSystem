@@ -1,48 +1,117 @@
 # Online Auction System
 
+Welcome to the **Online Auction System**, a full-stack web app for managing campus-based product auctions.  
+Users can register, log in, list items for auction, and place bids in real-time!
 
-### 🧠 Backend:
+---
+
+## ✨ Features
+
+- 🔐 Secure User Authentication  
+- 📦 Post items for auction with full details (images, tags, categories)  
+- 🕒 Bidding system with auction timers  
+- 🧾 Admin approval, mini statements, and reporting  
+- 📊 MongoDB database for all backend data  
+- 💻 Built with Flask + ReactJS
+
+---
+
+## Tech Stack
+### Backend
 - Python 3.10+  
 - Flask  
-- requests  
-- flask-cors
-  
-### 🌍 Frontend:
- - React Js
-  
-Install backend dependencies with:
-```bash
-pip install flask flask-cors requests
-  
-Install frontend dependencies with:
-```bash
-cd frontend
-npm install
+- Flask-CORS  
+- PyMongo  
+- MongoDB Atlas
 
-a)Start React Frontend:
- bash
- cd frontend
- npm start
+### Frontend
+- React.js  
+- HTML, CSS, JavaScript  
+- Fetch
 
-🔗 SheetDB Setup
-You're using SheetDB to store user data.
+---
 
-Create a Google Sheet with columns:
-UserName, collegeId, collegeName, email, password, timestamp
+## MongoDB Setup
+Using **MongoDB Atlas** with **PyMongo** to store all user/item/bid data.
 
-Connect it via SheetDB and grab the API endpoint (e.g. https://sheetdb.io/api/v1/xxxxxx)
+### Steps:
+1. Go to [MongoDB Atlas](https://www.mongodb.com/cloud/atlas/register) and create an account.
+2. Create a **Cluster** and a **Database** (e.g., `auctionDB`)
+3. Add collections such as `users`, `items`, `bids`
+4. Get your **connection string**:
+mongodb+srv://<username>:<password>@cluster0.mongodb.net/?retryWrites=true&w=majority
+5. Paste the string in your `app.py`:
+```python
+from pymongo import MongoClient
 
-Paste that into your app.py:
-python
-Copy
-Edit
-SHEETDB_API_URL = "https://sheetdb.io/api/v1/YOUR_API_ID"
+MONGO_URI = "mongodb+srv://<username>:<password>@cluster0.mongodb.net/?retryWrites=true&w=majority"
+client = MongoClient(MONGO_URI)
+db = client["auctionDB"]
+users_collection = db["users"]
+items_collection = db["items"]
+```
 
+---
 
-🧪 Running the App
-1️⃣ Start the Flask backend:
-bash
-Copy
-Edit
-cd backend
-python app.py
+## Running the App
+### 1. Backend Setup (Flask + MongoDB)
+```text
+cd backend  # Navigate to backend folder
+
+pip install flask flask-cors pymongo  # Install required packages
+
+python app.py  # Start the Flask server
+
+```
+The backend runs at: http://localhost:5000/
+
+### 2. Frontend Setup (React)
+```text
+cd frontend  # Navigate to frontend folder
+
+npm install  # Install React dependencies
+
+npm start  # Start the React app
+
+```
+The frontend runs at: http://localhost:3000/
+
+---
+
+## Folder Structure
+
+```text
+Online-Auction-System/
+├── backend/
+│   ├── app.py
+│   ├── database.py (optional)
+│   └── routes/
+│       ├── auth.py
+│       └── auctions.py
+├── frontend/
+│   ├── src/
+│   │   ├── components/
+│   │   ├── pages/
+│   │   └── App.js
+│   └── package.json
+├── README.md
+```
+
+---
+
+## Notes
+- Whitelist your IP in MongoDB Atlas for database access.
+- Store your Mongo URI in an .env file instead of hardcoding it.
+- Payment handling is dummy-only — no real transactions used.
+
+---
+
+## Future Enhancements
+- Razorpay/Stripe integration for real payments
+- Real-time bidding using WebSockets
+- Admin dashboard with reports and analytics
+
+---
+
+### 👩‍💻 Made with 💙 for Students by Students
+Crafted with curiosity and code as part of an academic internship project — to empower student sales with a fun, digital touch! 🚀🎓
