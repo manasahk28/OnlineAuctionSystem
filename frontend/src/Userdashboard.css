@@ -82,22 +82,30 @@ body, html{
 .btn:hover {
   background-color: #fc5400;
 }
+
+
+
 /* Reusing the close-btn style */
 .close-btn {
-  position: absolute;
-  top: 12px;
-  right: 18px;
-  font-size: 20px;
-  background: none;
+  font-size: 1.4rem;
+  font-weight: bold;
+  color: #ffffff;
+  background: linear-gradient(135deg, #ff7f00, #ff5722);
   border: none;
-  color: #888;
+  padding: 14px 28px;
+  border-radius: 50px;
   cursor: pointer;
-  transition: color 0.3s ease;
+  box-shadow: 0 8px 20px rgba(255, 127, 0, 0.3);
+  transition: background 0.3s ease, transform 0.2s ease;
+  margin: 1.5rem auto 0;
+  display: block;
 }
 
 .close-btn:hover {
-  color: #ff4d4d;
+  background: rgb(242, 161, 40);
+  transform: scale(1.05);
 }
+
 
 /* Make sure this is present or added */
 .dashboard-card {
@@ -118,12 +126,13 @@ body, html{
 
 .dashboard-wrapper {
   min-height: 100vh;
+  background-color: #fff;
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color:#f6f7fa;
-  padding: 20px;
+  padding: 2rem;
 }
+
 
 .dashboard-main {
   display: flex;
@@ -131,6 +140,24 @@ body, html{
   background-color: #fff;
   color: #fff;
 }
+
+.dashboard-heading {
+  font-size: 2.8rem;
+  color: #f57c00;
+  margin-bottom: 0.5rem;
+}
+
+.dashboard-user {
+  font-size: 1.1rem;
+  color: #555;
+  margin-bottom: 2rem;
+}
+
+.dashboard-message {
+  font-size: 1.2rem;
+  color: #333;
+  margin-top: 1rem;}
+
 
 /* Sidebar styles */
 .sidebar-left {

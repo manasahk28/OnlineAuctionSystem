@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import './Userdashboard.css';
+import './App.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faInstagram, faLinkedin, faTwitter } from '@fortawesome/free-brands-svg-icons';
 import { useNavigate } from 'react-router-dom';
@@ -75,14 +76,13 @@ const spendingData = [
       {showWelcome ? (
         <div className="dashboard-wrapper">
           <div className="dashboard-card">
-            <button className="close-btn" onClick={() => setShowWelcome(false)}>✖</button>
             <h1 className="dashboard-heading">👋 Welcome!</h1>
             <p className="dashboard-user">
               You're logged in as <strong>{user.email}</strong>
             </p>
             <p className="dashboard-message">
               This is your personalized Auction Dashboard. Explore listings, track bids, or post something of your own!
-            </p>
+            </p><button className="close-btn" onClick={() => setShowWelcome(false)}>→</button>
           </div>
         </div>
       ) : (
