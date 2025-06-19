@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import './Userdashboard.css';
-import './App.css';
+import Payments from './Payments';
+import MyBids from './MyBids';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faInstagram, faLinkedin, faTwitter } from '@fortawesome/free-brands-svg-icons';
 import { useNavigate } from 'react-router-dom';
@@ -17,7 +18,12 @@ const UserDashboard = () => {
   const [profileImage, setProfileImage] = useState(null);
   const fileInputRef = useRef(null); // for triggering file input
   const [showImageModal, setShowImageModal] = useState(false);
-const statsData = [
+  const [activeSection, setActiveSection] = useState('Profile');
+  const [now, setNow] = useState(Date.now());
+
+
+  // Dummy stats and spending
+  const statsData = [
   { name: 'Listings', value: 12 },
   { name: 'Bids', value: 5 },
   { name: 'Wins', value: 3 },
@@ -29,23 +35,65 @@ const spendingData = [
   { month: 'Mar', amount: 7000 },
 ];
 
-  useEffect(() => {
-  if (showImageModal) {
-    document.body.style.overflow = 'hidden';
-  } else {
-    document.body.style.overflow = 'auto';
-  }
 
-  return () => {
-    document.body.style.overflow = 'auto';
-  };
-}, [showImageModal]);
+// Dummy bid data
+  const [bids, setBids] = useState([
+    {
+      id: 1,
+      itemName: 'DSA Book',
+      itemImage: '/assets/dsa-book.png',
+      currentBid: 1200,
+      highestBid: 1500,
+      endTime: Date.now() + 1000 * 60 * 60 * 2,
+      outbid: true,
+    },
+    {
+      id: 2,
+      itemName: 'Wireless Headphones',
+      itemImage: '/assets/headphones.png',
+      currentBid: 2500,
+      highestBid: 2500,
+      endTime: Date.now() + 1000 * 60 * 30,
+      outbid: false,
+    },
+    {
+      id: 3,
+      itemName: 'Hoodie',
+      itemImage: '/assets/hoodie.png',
+      currentBid: 800,
+      highestBid: 900,
+      endTime: Date.now() + 1000 * 60 * 10,
+      outbid: true,
+    },
+  ]);
 
 
+  // useEffect(() => {
+  // if (showImageModal) {
+  //   document.body.style.overflow = 'hidden';
+  // } else {
+  //   document.body.style.overflow = 'auto';
+  // }
+
+//   return () => {
+//     document.body.style.overflow = 'auto';
+//   };
+// }, [showImageModal]);
+
+  // Handle logout
   const handleLogout = () => {
     localStorage.removeItem('user');
     navigate('/login');
   };
+
+    // Modal scroll freeze
+  useEffect(() => {
+    document.body.style.overflow = showImageModal ? 'hidden' : 'auto';
+    return () => {
+      document.body.style.overflow = 'auto';
+    };
+  }, [showImageModal]);
+
 
   if (!user) {
     return (
@@ -60,6 +108,7 @@ const spendingData = [
 
   return (
     <>
+    {/* Navbar */}
       <nav className="navbar">
         <div className="navbar-left">
           <h2>Online Auction</h2>
@@ -73,6 +122,7 @@ const spendingData = [
         </div>
       </nav>
 
+ {/* Welcome */}
       {showWelcome ? (
         <div className="dashboard-wrapper">
           <div className="dashboard-card">
@@ -151,7 +201,7 @@ const spendingData = [
 
 
             <h3 className="username">{user.name || 'Lisa M'}</h3>
-            <div className="sidebar-buttons">
+            {/* <div className="sidebar-buttons">
               <button>Profile</button>
               <button>My Listings</button>
               <button>My Bids</button>
@@ -159,10 +209,22 @@ const spendingData = [
               <button>Notifications</button>
               <button>Recent Activity</button>
             </div>
-          </div>
-          {/* Right-side content will go here next */}
+          </div> */}
 
+          <div className="sidebar-buttons">
+              <button onClick={() => setActiveSection('Profile')}>Profile</button>
+              <button onClick={() => setActiveSection('My Listings')}>My Listings</button>
+              <button onClick={() => setActiveSection('My Bids')}>My Bids</button>
+              <button onClick={() => setActiveSection('Payments')}>Payments</button>
+              <button onClick={() => setActiveSection('Notifications')}>Notifications</button>
+              <button onClick={() => setActiveSection('Recent Activity')}>Recent Activity</button>
+            </div>
+          </div>
+
+
+          {/* Right-side content will go here next */}
         <div className="sidebar-right">
+         {activeSection === 'Profile' && (
           <div className="charts-section">
               <h2>📊 Quick Stats</h2>
               <div className="charts-container">
@@ -212,6 +274,15 @@ const spendingData = [
 </div>
               </div>
               </div>
+        
+              )}
+               {activeSection === 'My Bids' && (
+              <MyBids />
+            )}
+
+            {activeSection === 'Payments' && (
+              <Payments />
+            )}
         </div>
         </div>
               )}

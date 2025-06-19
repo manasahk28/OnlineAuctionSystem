@@ -1,0 +1,101 @@
+/* My Bids Section Styles */
+.my-bids-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  margin-top: 20px;
+}
+.my-bid-card {
+  width: calc((100% - 48px) / 3);
+  aspect-ratio: 1/1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-start;
+  background: #fff7ef;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(255, 140, 0, 0.08);
+  padding: 18px 16px;
+  border: 1px solid #ffe0b2;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+.my-bid-img-wrap {
+  width: 80px;
+  height: 80px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff3e0;
+  border-radius: 10px;
+}
+.my-bid-img {
+  width: 70px;
+  height: 70px;
+  object-fit: contain;
+  border-radius: 8px;
+  background: #fff;
+}
+.my-bid-info {
+  flex: 1;
+  color: #333;
+  word-break: break-word;
+}
+.my-bid-info h4 {
+  margin: 0 0 8px 0;
+  color: #f57c00;
+  font-size: 1.2rem;
+}
+.outbid-notification {
+  background: #ffeaea;
+  color: #d32f2f;
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-size: 0.98rem;
+  margin: 8px 0;
+  display: inline-block;
+  font-weight: 500;
+}
+.increase-bid-form {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+.increase-bid-form input[type='number'] {
+  padding: 6px 10px;
+  border: 1px solid #ffd180;
+  border-radius: 4px;
+  font-size: 1rem;
+  width: 120px;
+  min-width: 0;
+  flex: 1 1 80px;
+}
+.increase-bid-form button {
+  background: linear-gradient(90deg, #ff9800, #ff6d00);
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 6px 16px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+  flex: 0 0 auto;
+}
+.increase-bid-form button:hover {
+  background: linear-gradient(90deg, #ffb74d, #ff9800);
+}
+@media (max-width: 1200px) {
+  .my-bid-card {
+    width: calc((100% - 24px) / 2);
+    aspect-ratio: 1/1;
+  }
+}
+@media (max-width: 900px) {
+  .my-bid-card {
+    width: 100%;
+    aspect-ratio: unset;
+  }
+} 
