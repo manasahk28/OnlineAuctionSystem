@@ -6,6 +6,7 @@ import axios from 'axios';
 const ExploreItems = () => {
   const navigate = useNavigate();
   const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchItems = async () => {
@@ -16,22 +17,67 @@ const ExploreItems = () => {
         }
       } catch (error) {
         console.error('Error fetching items:', error);
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchItems();
   }, []);
 
+  const getColorByIndex = (index) => {
+    const colors = ['#FCEF91', '#FB9E3A', '#E6521F', '#EA2F14'];
+    return colors[index % colors.length];
+  };
+
+  if (loading) {
+    return (
+      <div className="explore-container">
+        <div className="loading-spinner"></div>
+      </div>
+    );
+  }
+
   return (
     <div className="explore-container">
-      <h2 className="explore-heading">🧭 Explore Items</h2>
+      <div className="explore-header">
+        <h2 className="explore-heading">🧭 Explore Items</h2>
+        <div className="header-underline"></div>
+      </div>
+      
       <div className="items-grid">
-        {items.map(item => (
-          <div key={item._id} className="item-card">
-            <img src={item.thumbnail || 'https://via.placeholder.com/150'} alt={item.title} />
-            <h3>{item.title}</h3>
-            <p className="item-price">₹{item.startingPrice}</p>
-            <button onClick={() => navigate(`/item/${item._id}`)}>View</button>
+        {items.map((item, index) => (
+          <div 
+            key={item._id} 
+            className="item-card"
+            style={{ 
+              borderTop: `4px solid ${getColorByIndex(index)}`,
+              backgroundColor: 'white'
+            }}
+          >
+            <div className="square-image-container">
+              <img 
+                src={item.thumbnail || 'https://via.placeholder.com/150'} 
+                alt={item.title} 
+                className="item-image"
+              />
+            </div>
+            <div className="item-content">
+              <h3 className="item-title">{item.title}</h3>
+              <p className="item-price" style={{ color: getColorByIndex(index) }}>
+                ₹{item.startingPrice}
+              </p>
+              <p className="item-desc">{item.description}</p>
+              <button 
+                onClick={() => navigate(`/item/${item._id}`)}
+                style={{ 
+                  backgroundColor: getColorByIndex(index),
+                  color: index % 2 === 0 ? '#333' : 'white'
+                }}
+              >
+                View Details
+              </button>
+            </div>
           </div>
         ))}
       </div>
