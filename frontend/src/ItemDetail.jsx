@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import './ItemDetail.css';
 import axios from 'axios';
 
 const ItemDetail = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [item, setItem] = useState(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
@@ -62,6 +63,15 @@ const ItemDetail = () => {
         <p className="item-price"><strong>Base Price:</strong> ₹{item.startingPrice}</p>
         <p className="item-user"><strong>Posted By:</strong> {item.userName} ({item.userEmail})</p>
         <p className="item-date"><strong>Auction Ends:</strong> {new Date(item.auctionEnd).toLocaleString()}</p>
+
+        <div className="action-buttons">
+          <button className="back-button" onClick={() => navigate('/explore')}>
+            ← Back
+          </button>
+          <button className="bid-button">
+            Bid for Auction
+          </button>
+        </div>
       </div>
     </div>
   );
