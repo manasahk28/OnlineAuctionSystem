@@ -71,3 +71,37 @@
   font-size: 1rem;
   color: #333;
 }
+
+.action-buttons {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.back-button,
+.bid-button {
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  cursor: pointer;
+  border-radius: 8px;
+  border: none;
+  transition: background-color 0.3s ease;
+}
+
+.back-button {
+  background-color: #ccc;
+  color: #333;
+}
+
+.back-button:hover {
+  background-color: #aaa;
+}
+
+.bid-button {
+  background-color: #ffa500;
+  color: white;
+}
+
+.bid-button:hover {
+  background-color: #ffa500;
+}
