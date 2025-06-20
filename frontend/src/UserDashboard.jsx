@@ -270,7 +270,7 @@ const handleImageUpload = (e) => {
             )}
 
 
-            <h3 className="username">{user.name || 'Lisa M'}</h3>
+            <h3 className="username">{profile.UserName || user.UserName || 'Your Name'}</h3>
             {/* <div className="sidebar-buttons">
               <button>Profile</button>
               <button>My Listings</button>
