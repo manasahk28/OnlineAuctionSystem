@@ -1,7 +1,12 @@
-
 .my-listings-page {
   padding: 40px;
   background-color: #fffaf3;
+  min-height: 100vh;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.my-listings-wrapper {
+  padding: 40px;
   min-height: 100vh;
   font-family: 'Segoe UI', sans-serif;
 }
@@ -29,6 +34,7 @@
 }
 
 .listing-card {
+  width: 80%;
   background-color: #fff;
   border: 1px solid #ffd4b3;
   border-radius: 16px;
@@ -76,14 +82,28 @@
   margin-top: 10px;
   font-size: 14px;
   color: #444;
+  flex-direction: column;
+}
+
+.listing-image {
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
+  transition: transform 0.3s ease;
+}
+
+.listing-card:hover .listing-image {
+  transform: scale(1.05);
 }
 
 .price-tag {
+  font-size: 1.2rem;
   font-weight: bold;
   color: #ff6b00;
+  margin-bottom: 8px;
 }
 
 .end-time {
+  font-size: 0.75rem;
   color: #888;
   font-style: italic;
 }

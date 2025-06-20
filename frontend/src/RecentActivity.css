@@ -6,6 +6,7 @@
   font-family: 'Segoe UI', sans-serif;
 }
 
+
 /* .recent-heading {
   font-size: 2rem;
   font-weight: bold;
@@ -33,11 +34,14 @@
 .activity-card {
   background: #fff8f0;
   border-left: 6px solid #ffa94d;
-  padding: 1rem 1.5rem;
+  padding: 0.8rem 1.3rem;
   margin-bottom: 1rem;
+  margin-left: 35px;
   border-radius: 12px;
   box-shadow: 0 3px 6px rgba(255, 107, 0, 0.1);
   transition: all 0.3s ease;
+  height: 60px;
+  width: 800px;
 }
 
 .activity-card:hover {
@@ -48,7 +52,7 @@
 .activity-time {
   font-size: 0.9rem;
   color: #777;
-  margin-bottom: 0.4rem;
+  margin-bottom: 0.2rem;
   display: block;
 }
 
@@ -56,6 +60,7 @@
   font-size: 1.1rem;
   color: #333;
   font-weight: 500;
+  margin-top: 15px;
 } 
 
 /* Color variations for activity type */
@@ -70,81 +75,3 @@
 .activity-card.win {
   border-left-color: #38b000;
 }
-
-/* Navbar styling */
-/* .navbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background-color: #fff6e6;
-  padding: 1rem 2rem;
-  border-bottom: 2px solid #ffe0b3;
-}
-
-.navbar h2 {
-  color: #ff6b00;
-  margin: 0;
-}
-
-.navbar a {
-  margin: 0 0.8rem;
-  color: #444;
-  text-decoration: none;
-  font-weight: 500;
-}
-
-.navbar a:hover {
-  color: #ff6b00;
-}
-
-.logout-btn {
-  background-color: #ff6b00;
-  color: white;
-  border: none;
-  padding: 0.4rem 1rem;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-.logout-btn:hover {
-  background-color: #e55d00;
-} */
-
-/* .footer {
-  background-color: #fff6e6;
-  padding: 2rem 1.5rem;
-  text-align: center;
-  border-top: 2px solid #ffe0b3;
-  margin-top: 3rem;
-}
-
-.footer h3 {
-  color: #ff6b00;
-  margin-bottom: 0.5rem;
-}
-
-.footer p {
-  color: #777;
-  margin-bottom: 1rem;
-}
-
-.footer-links a {
-  margin: 0 1rem;
-  color: #444;
-  text-decoration: none;
-  font-weight: 500;
-}
-
-.footer-links a:hover {
-  color: #ff6b00;
-}
-
-.social-icons a {
-  margin: 0 0.6rem;
-  font-size: 1.4rem;
-  color: #555;
-}
-
-.social-icons a:hover {
-  color: #ff6b00;
-} */

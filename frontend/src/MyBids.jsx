@@ -108,16 +108,17 @@ const MyBids = () => {
                     }}
                     className="increase-bid-form"
                   >
-                    <input
+                    
+                  </form>
+                </div>
+                <input
                       type="number"
                       name="newBid"
                       min={bid.highestBid + 1}
                       placeholder={`Bid more than ₹${bid.highestBid}`}
                       required
                     />
-                    <button type="submit">Increase Bid</button>
-                  </form>
-                </div>
+                <button className='increaseBid' type='submit'>Increase Bid</button>
               </div>
             );
           })}

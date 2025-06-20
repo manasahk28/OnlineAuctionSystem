@@ -4,25 +4,65 @@ import './MyListings.css';
 const MyListings = () => {
   const [listings, setListings] = useState([]);
   const [loading, setLoading] = useState(true);
-  const user = JSON.parse(localStorage.getItem('user'));
+
+
+  // TO BE FETCHED FROM DB
+   
+  // const user = JSON.parse(localStorage.getItem('user'));
+
+  // useEffect(() => {
+  //   const fetchListings = async () => {
+  //     try {
+  //       const response = await fetch(`http://localhost:5000/api/listings/user/${user._id}`);
+  //       const data = await response.json();
+  //       setListings(data);
+  //     } catch (error) {
+  //       console.error('Failed to fetch listings:', error);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
+
+  //   if (user?._id) {
+  //     fetchListings();
+  //   }
+  // }, [user]);
 
   useEffect(() => {
-    const fetchListings = async () => {
-      try {
-        const response = await fetch(`http://localhost:5000/api/listings/user/${user._id}`);
-        const data = await response.json();
-        setListings(data);
-      } catch (error) {
-        console.error('Failed to fetch listings:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
+    // Dummy data with aesthetic images
+    const dummyListings = [
+      {
+        _id: '1',
+        imageUrl: 'https://images.pexels.com/photos/37397/camera-old-antique-voigtlander.jpg', // Vintage Camera
+        title: 'Vintage Camera',
+        description: 'Old-school camera in great condition.',
+        startingPrice: 2500,
+        endTime: new Date(Date.now() + 86400000).toISOString(), // +1 day
+      },
+      {
+        _id: '2',
+        imageUrl: 'https://images.pexels.com/photos/32608375/pexels-photo-32608375.jpeg', // Acoustic Guitar
+        title: 'Acoustic Guitar',
+        description: 'Acoustic guitar, barely used.',
+        startingPrice: 4500,
+        endTime: new Date(Date.now() + 172800000).toISOString(), // +2 days
+      },
+      {
+        _id: '3',
+        imageUrl: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=800&q=80', // Smartphone
+        title: 'Smartphone',
+        description: 'Latest model, excellent condition.',
+        startingPrice: 15000,
+        endTime: new Date(Date.now() + 259200000).toISOString(), // +3 days
+      },
+    ];
 
-    if (user?._id) {
-      fetchListings();
-    }
-  }, [user]);
+    setTimeout(() => {
+      setListings(dummyListings);
+      setLoading(false);
+    }, 1000); // simulate loading delay
+  }, []);
+
 
   return (
     <div className="my-listings-wrapper">

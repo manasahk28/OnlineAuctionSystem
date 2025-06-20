@@ -3,23 +3,39 @@ import './RecentActivity.css';
 
 const RecentActivity = () => {
   const [activities, setActivities] = useState([]);
-  const user = JSON.parse(localStorage.getItem('user'));
+  // const user = JSON.parse(localStorage.getItem('user'));
 
   useEffect(() => {
-    const fetchActivities = async () => {
-      try {
-        const response = await fetch(`http://localhost:5000/api/users/${user._id}/activities`);
-        const data = await response.json();
-        setActivities(data);
-      } catch (error) {
-        console.error('Error fetching activities:', error);
-      }
-    };
+    // Dummy data
+    const dummyActivities = [
+      {
+        type: 'bid',
+        amount: 500,
+        item: 'Wireless Headphones',
+        time: '2025-06-18 10:24 AM',
+      },
+      {
+        type: 'post',
+        amount: 1200,
+        item: 'Bluetooth Speaker',
+        time: '2025-06-17 3:12 PM',
+      },
+      {
+        type: 'win',
+        amount: 850,
+        item: 'Gaming Mouse',
+        time: '2025-06-16 6:45 PM',
+      },
+      {
+        type: 'bid',
+        amount: 999,
+        item: 'Smartwatch',
+        time: '2025-06-15 11:15 AM',
+      },
+    ];
 
-    if (user?._id) {
-      fetchActivities();
-    }
-  }, [user._id]);
+    setActivities(dummyActivities);
+  }, []);
 
   const getActivityMessage = (activity) => {
     switch (activity.type) {
@@ -33,7 +49,7 @@ const RecentActivity = () => {
         return '❔ Unknown activity';
     }
   };
-<p>haii</p>
+  
   return (
     <div className="recent-activity-wrapper">
       <div className="profile-header">

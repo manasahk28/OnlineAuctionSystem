@@ -18,15 +18,15 @@ import {
 } from 'recharts';
 
 
-function App() {
-  const [profileImage, setProfileImage] = useState(
-    JSON.parse(localStorage.getItem('user'))?.profileImage || ''
-  );
+// function App() {
+//   const [profileImage, setProfileImage] = useState(
+//     JSON.parse(localStorage.getItem('user'))?.profileImage || ''
+//   );
 
-  return (
-    <ProfilePage profileImage={profileImage} setProfileImage={setProfileImage} />
-  );
-}
+//   return (
+//     <ProfilePage profileImage={profileImage} setProfileImage={setProfileImage} />
+//   );
+// }
 
 const UserDashboard = () => {
   const navigate = useNavigate();
@@ -270,16 +270,7 @@ const handleImageUpload = (e) => {
             )}
 
 
-            <h3 className="username">{user.name || 'Lisa M'}</h3>
-            {/* <div className="sidebar-buttons">
-              <button>Profile</button>
-              <button>My Listings</button>
-              <button>My Bids</button>
-              <button>Payments</button>
-              <button>Notifications</button>
-              <button>Recent Activity</button>
-            </div>
-          </div> */}
+            <h3 className="username">{profile.UserName || 'Name'}</h3>
 
           <div className="sidebar-buttons">
               <button onClick={() => setActiveSection('ProfilePage')}>Profile</button>
@@ -294,7 +285,16 @@ const handleImageUpload = (e) => {
 
           {/* Right-side content will go here next */}
         <div className="sidebar-right">
-         {activeSection === 'Profile' && (
+         {activeSection === 'ProfilePage' ? (
+          <div className="scroll-container">
+                          <ProfilePage
+                            profileImage={profileImage}
+                            setProfileImage={setProfileImage}
+                          />
+                        </div>
+                      ) : (
+                        <>
+                          {activeSection === 'Profile' && (
           <div className="charts-section">
               <h2>📊 Quick Stats</h2>
               <div className="charts-container">
@@ -351,11 +351,11 @@ const handleImageUpload = (e) => {
                {activeSection === 'My Listings' && <MyListings />}
                {activeSection === 'Notifications' && <Notifications />}
                {activeSection === 'RecentActivity' && <RecentActivity/>}
-               {activeSection === 'ProfilePage' && (
+               {/* {activeSection === 'ProfilePage' && (
                 <profile
                 profileImage={profileImage}
-                setProfileImage={setProfileImage}
-                />
+                setProfileImage={setProfileImage} */}
+                </>
                )}
         </div>
         </div>
