@@ -17,6 +17,7 @@ client = MongoClient(MONGO_URI)
 db = client["auction_db"]
 users_collection = db["users"]
 profiles_collection = db["profiles"]
+items_collection = db["items"]
 
 @app.route('/api/register', methods=['POST'])
 def register():
@@ -72,6 +73,30 @@ def login():
     else:
         return jsonify({'status': 'fail', 'message': 'Invalid email or password'}), 401
 
+@app.route('/api/post-item', methods=['POST'])
+def post_item():
+    data = request.get_json()
+
+    required_fields = ['title', 'description', 'category', 'startingPrice', 'condition', 'auctionEnd', 'userEmail', 'userName']
+    for field in required_fields:
+        if field not in data or not data[field]:
+            return jsonify({'status': 'fail', 'message': f'Missing required field: {field}'}), 400
+
+    images = data.get('images', [])
+    if not isinstance(images, list):
+        return jsonify({'status': 'fail', 'message': 'Images must be a list'}), 400
+
+    if len(images) > 3:
+        return jsonify({'status': 'fail', 'message': 'You can only upload up to 3 images'}), 400
+
+    for img in images:
+        if not isinstance(img, str) or not img.startswith('data:image'):
+            return jsonify({'status': 'fail', 'message': 'Invalid image format'}), 400
+
+    data['timestamp'] = datetime.datetime.now().isoformat()
+    items_collection.insert_one(data)
+
+    return jsonify({'status': 'success', 'message': 'Item posted successfully!'}), 201
 
 @app.route('/api/get-profile', methods=['GET'])
 def get_profile():
@@ -85,7 +110,6 @@ def get_profile():
     if not user:
         return jsonify({'status': 'fail', 'message': 'User not found'}), 404
 
-    # Safely fallback for each field
     combined = {
         'email': user.get('email', ''),
         'timestamp': profile.get('createdAt', user.get('timestamp', '')) if profile else user.get('timestamp', ''),
@@ -98,7 +122,6 @@ def get_profile():
     }
 
     return jsonify({'status': 'success', 'profile': combined}), 200
-
 
 @app.route('/api/update-profile', methods=['PUT'])
 def update_profile():
