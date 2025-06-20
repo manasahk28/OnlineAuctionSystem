@@ -17,25 +17,27 @@
 
 
 .left-section {
-  margin-top: -10px;
-  flex: 1;
-  min-width: 600px;
-  padding: 10px;
+  flex: 2;
+  /* min-width: 600px;
+  padding: 10px; */
 }
 
 .right-section {
-  margin-top: -10px;
+
+  /* margin-top: -10px; */
   flex: 1;
-  padding: 10px;
+  /* padding: 10px; */
 }
 
 
 .notification-preferences {
-  margin-bottom: 15px;
+  /* margin-bottom: 15px; */
   padding: 10px;
   background-color: #fff;
   border-radius: 8px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  box-sizing: border-box;
+  width: 97%;
   color: #222;
 }
 .notification-preferences h4 {
@@ -45,14 +47,29 @@
 }
 
 .toggle-item {
+  margin-right: 20px;
+  display: flex;
+  align-items: center;
   margin-bottom: 10px;
-  font-size: 14px;
+  /* font-size: 14px; */
   color: #444;
 }
 
-.toggle-item input {
-  margin-right: 8px;
-  transform: scale(1.1);
+.toggle-item input[type="checkbox"] {
+  margin-right: 10px;
+  width: 15px;
+  height: 15px;
+  accent-color: #1c05b2;
+  cursor: pointer;
+}
+
+.toggle-item label {
+  display: flex;
+  align-items: center;
+  font-size: 0.9rem;
+  color: #333;
+  gap: 0.3rem;
+  cursor: pointer;
 }
 
 .notification-list {
