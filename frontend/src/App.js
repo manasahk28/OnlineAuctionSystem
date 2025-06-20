@@ -6,6 +6,7 @@ import Register from './registration';
 import UserDashboard from './UserDashboard';
 import ExploreItems from './ExploreItems';
 import PostItems from './PostItems';
+import ItemDetail from './ItemDetail';
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
         <Route path="/dashboard" element={<UserDashboard />} />
         <Route path="/explore" element={<ExploreItems />} />
         <Route path="/post-item" element={<PostItems />} />
+        <Route path="/item/:id" element={<ItemDetail />} />
       </Routes>
     </Router>
   );

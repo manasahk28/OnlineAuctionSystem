@@ -270,7 +270,16 @@ const handleImageUpload = (e) => {
             )}
 
 
-            <h3 className="username">{profile.UserName || 'Name'}</h3>
+            <h3 className="username">{profile.UserName || user.UserName || 'Your Name'}</h3>
+            {/* <div className="sidebar-buttons">
+              <button>Profile</button>
+              <button>My Listings</button>
+              <button>My Bids</button>
+              <button>Payments</button>
+              <button>Notifications</button>
+              <button>Recent Activity</button>
+            </div>
+          </div> */}
 
           <div className="sidebar-buttons">
               <button onClick={() => setActiveSection('ProfilePage')}>Profile</button>
