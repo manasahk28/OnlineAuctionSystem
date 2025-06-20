@@ -5,6 +5,7 @@ import datetime
 import bcrypt  
 from dotenv import load_dotenv
 import os
+from bson import ObjectId
 
 app = Flask(__name__)
 CORS(app)
@@ -154,6 +155,31 @@ def update_profile():
     users_collection.update_one({'email': email}, {'$set': users_update})
 
     return jsonify({'status': 'success', 'message': 'Profile updated'}), 200
+
+@app.route('/api/items', methods=['GET'])
+def get_all_items():
+    items = list(items_collection.find())
+    for item in items:
+        item['_id'] = str(item['_id'])  # Convert ObjectId to string
+        if 'images' in item and isinstance(item['images'], list) and item['images']:
+            item['thumbnail'] = item['images'][0]  # Use first image as thumbnail
+        else:
+            item['thumbnail'] = ''  # Default if no image
+
+    return jsonify({'status': 'success', 'items': items}), 200
+
+@app.route('/api/item/<item_id>', methods=['GET'])
+def get_single_item(item_id):
+    try:
+        item = items_collection.find_one({'_id': ObjectId(item_id)})
+        if not item:
+            return jsonify({'status': 'fail', 'message': 'Item not found'}), 404
+
+        item['_id'] = str(item['_id'])  # Convert ObjectId to string
+        return jsonify({'status': 'success', 'item': item}), 200
+
+    except Exception as e:
+        return jsonify({'status': 'fail', 'message': 'Invalid item ID'}), 400
 
 @app.route('/')
 def home():
