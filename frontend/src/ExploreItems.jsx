@@ -31,7 +31,6 @@ const ExploreItems = () => {
             <img src={item.thumbnail || 'https://via.placeholder.com/150'} alt={item.title} />
             <h3>{item.title}</h3>
             <p className="item-price">₹{item.startingPrice}</p>
-            <p className="item-desc">{item.description}</p>
             <button onClick={() => navigate(`/item/${item._id}`)}>View</button>
           </div>
         ))}
