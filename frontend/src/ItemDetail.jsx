@@ -69,7 +69,7 @@ const ItemDetail = () => {
             ← Back
           </button>
           <button className="bid-button">
-            Bid for Auction
+            💰 Bid for Auction
           </button>
         </div>
       </div>
