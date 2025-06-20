@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './PostItem.css';
 
 const PostItem = () => {
@@ -8,28 +8,83 @@ const PostItem = () => {
     category: '',
     startingPrice: '',
     condition: '',
-    auctionEnd: ''
+    auctionEnd: '',
+    images: [],
+    userEmail: '',
+    userName: ''
   });
+
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem('user'));
+    if (user) {
+      setItemData(prev => ({
+        ...prev,
+        userEmail: user.email,
+        userName: user.UserName || ''
+      }));
+    }
+  }, []);
 
   const handleChange = (e) => {
     setItemData({ ...itemData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log('Submitting item:', itemData);
+  const handleImageUpload = (e) => {
+    const files = Array.from(e.target.files).slice(0, 3); // limit to 3
+    const readers = [];
+    let imagesLoaded = 0;
 
-    // Send to backend API here
-    // fetch('/api/post-item', { method: 'POST', body: JSON.stringify(itemData), ... })
-    alert("🎉 Item posted successfully!");
-    setItemData({
-      title: '',
-      description: '',
-      category: '',
-      startingPrice: '',
-      condition: '',
-      auctionEnd: ''
+    files.forEach((file) => {
+      if (file.size > 300 * 1024) {
+        alert(`${file.name} is too large. Upload under 300KB.`);
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        readers.push(reader.result);
+        imagesLoaded++;
+        if (imagesLoaded === files.length) {
+          setItemData((prev) => ({ ...prev, images: readers }));
+        }
+      };
+      reader.readAsDataURL(file);
     });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (itemData.images.length === 0) {
+      alert('Please upload at least one image.');
+      return;
+    }
+
+    try {
+      const response = await fetch('http://localhost:5000/api/post-item', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(itemData),
+      });
+
+      const result = await response.json();
+      alert(result.message || 'Item posted successfully!');
+
+      setItemData({
+        title: '',
+        description: '',
+        category: '',
+        startingPrice: '',
+        condition: '',
+        auctionEnd: '',
+        images: [],
+        userEmail: itemData.userEmail,
+        userName: itemData.userName
+      });
+    } catch (err) {
+      alert('Failed to post item');
+      console.error(err);
+    }
   };
 
   return (
@@ -65,6 +120,17 @@ const PostItem = () => {
 
         <label>Auction End Date & Time:</label>
         <input type="datetime-local" name="auctionEnd" value={itemData.auctionEnd} onChange={handleChange} required />
+
+        <label>Item Images (Max 3):</label>
+        <input type="file" accept="image/*" multiple onChange={handleImageUpload} />
+
+        {itemData.images.length > 0 && (
+          <div className="preview-images">
+            {itemData.images.map((img, index) => (
+              <img key={index} src={img} alt={`preview-${index}`} width={100} style={{ marginRight: 10 }} />
+            ))}
+          </div>
+        )}
 
         <button type="submit">Post Item 🛒</button>
       </form>
