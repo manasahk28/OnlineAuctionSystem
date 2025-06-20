@@ -84,6 +84,11 @@ body, html{
 }
 
 
+/* Profile headings */
+.profile-header {
+  text-align: left;
+  margin: 20px 0;
+}
 
 /* Reusing the close-btn style */
 .close-btn {

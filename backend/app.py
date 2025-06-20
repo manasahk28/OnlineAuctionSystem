@@ -58,7 +58,17 @@ def login():
     user = users_collection.find_one({'email': data['email']})
 
     if user and bcrypt.checkpw(data['password'].encode('utf-8'), user['password'].encode('utf-8')):
-        return jsonify({'status': 'success', 'message': 'Login successful', 'user': {'email': user['email']}}), 200
+        return jsonify({
+            'status': 'success',
+            'message': 'Login successful',
+            'user': {
+                'email': user['email'],
+                'UserName': user.get('UserName', ''),
+                'collegeId': user.get('collegeId', ''),
+                'collegeName': user.get('collegeName', ''),
+                'timestamp': user.get('timestamp', '')
+            }
+        }), 200
     else:
         return jsonify({'status': 'fail', 'message': 'Invalid email or password'}), 401
 

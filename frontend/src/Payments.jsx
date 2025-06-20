@@ -12,9 +12,12 @@ const Payments = () => {
 
   return (
     <div className="charts-section">
-      <h2 style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <span role="img" aria-label="money bag">💰</span> Payments Summary
-      </h2>
+      <div className="profile-header">
+        <h2 style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span role="img" aria-label="money bag">💵</span>Payments
+        </h2>
+      </div>
+
       <div style={{ fontSize: '1.2rem', margin: '16px 0 24px 0' }}>
         <b>Total due amount:</b> ₹{totalDue} (dummy)
       </div>

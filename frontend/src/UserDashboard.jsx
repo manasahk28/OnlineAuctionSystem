@@ -1,7 +1,13 @@
 import React, { useState, useRef, useEffect } from 'react';
 import './Userdashboard.css';
+
+import ProfilePage from './Profile'; 
+import MyListings from './MyListings';
 import Payments from './Payments';
 import MyBids from './MyBids';
+import RecentActivity from './RecentActivity';
+import Notifications from './Notifications';
+
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faInstagram, faLinkedin, faTwitter } from '@fortawesome/free-brands-svg-icons';
 import { useNavigate } from 'react-router-dom';
@@ -11,6 +17,17 @@ import {
   ResponsiveContainer
 } from 'recharts';
 
+
+function App() {
+  const [profileImage, setProfileImage] = useState(
+    JSON.parse(localStorage.getItem('user'))?.profileImage || ''
+  );
+
+  return (
+    <ProfilePage profileImage={profileImage} setProfileImage={setProfileImage} />
+  );
+}
+
 const UserDashboard = () => {
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem('user'));
@@ -18,6 +35,7 @@ const UserDashboard = () => {
   const [profileImage, setProfileImage] = useState(null);
   const fileInputRef = useRef(null); // for triggering file input
   const [showImageModal, setShowImageModal] = useState(false);
+  const [profile, setProfile] = useState({});
   const [activeSection, setActiveSection] = useState('Profile');
   const [now, setNow] = useState(Date.now());
 
@@ -86,6 +104,27 @@ const spendingData = [
     navigate('/login');
   };
 
+  useEffect(() => {
+      const userData = JSON.parse(localStorage.getItem("user") || '{}');
+      if (!userData.email) return;
+    
+      fetch(`http://localhost:5000/api/get-profile?email=${userData.email}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.status === 'success') {
+            setProfile(data.profile);
+            setProfileImage(data.profile.profileImage || null);
+            localStorage.setItem("user", JSON.stringify({ ...userData, ...data.profile }));
+          }
+        });
+    }, [activeSection]); // <-- this makes sure it refreshes when you return from profile
+  
+  
+    useEffect(() => {
+      const interval = setInterval(() => setNow(Date.now()), 1000);
+      return () => clearInterval(interval);
+    }, []);
+
     // Modal scroll freeze
   useEffect(() => {
     document.body.style.overflow = showImageModal ? 'hidden' : 'auto';
@@ -93,6 +132,37 @@ const spendingData = [
       document.body.style.overflow = 'auto';
     };
   }, [showImageModal]);
+
+const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onloadend = async () => {
+      const updatedImage = reader.result;
+      setProfileImage(updatedImage);
+      setProfile(prev => ({ ...prev, profileImage: updatedImage }));
+
+      try {
+        const res = await fetch('http://localhost:5000/api/update-profile', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: user.email,
+            profileImage: updatedImage
+          })
+        });
+        const result = await res.json();
+        if (result.status === 'success') {
+          localStorage.setItem('user', JSON.stringify({ ...user, profileImage: updatedImage }));
+        } else {
+          alert('Failed to update profile image');
+        }
+      } catch (err) {
+        console.error('Error saving profile image:', err);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
 
 
   if (!user) {
@@ -212,12 +282,12 @@ const spendingData = [
           </div> */}
 
           <div className="sidebar-buttons">
-              <button onClick={() => setActiveSection('Profile')}>Profile</button>
+              <button onClick={() => setActiveSection('ProfilePage')}>Profile</button>
               <button onClick={() => setActiveSection('My Listings')}>My Listings</button>
               <button onClick={() => setActiveSection('My Bids')}>My Bids</button>
               <button onClick={() => setActiveSection('Payments')}>Payments</button>
               <button onClick={() => setActiveSection('Notifications')}>Notifications</button>
-              <button onClick={() => setActiveSection('Recent Activity')}>Recent Activity</button>
+              <button onClick={() => setActiveSection('RecentActivity')}>Recent Activity</button>
             </div>
           </div>
 
@@ -276,13 +346,17 @@ const spendingData = [
               </div>
         
               )}
-               {activeSection === 'My Bids' && (
-              <MyBids />
-            )}
-
-            {activeSection === 'Payments' && (
-              <Payments />
-            )}
+               {activeSection === 'My Bids' && <MyBids />}
+               {activeSection === 'Payments' && <Payments />}
+               {activeSection === 'My Listings' && <MyListings />}
+               {activeSection === 'Notifications' && <Notifications />}
+               {activeSection === 'RecentActivity' && <RecentActivity/>}
+               {activeSection === 'ProfilePage' && (
+                <profile
+                profileImage={profileImage}
+                setProfileImage={setProfileImage}
+                />
+               )}
         </div>
         </div>
               )}

@@ -58,8 +58,12 @@ const MyBids = () => {
 
   return (
     <div className="charts-section">
-      <h2>My Bids</h2>
-      {bids.length === 0 ? (
+      <div className="profile-header">
+        <h2 style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span role="img" aria-label="money bag">💰</span>My Bids
+        </h2>
+      </div> 
+     {bids.length === 0 ? (
         <p>You have not placed any bids yet.</p>
       ) : (
         <div className="my-bids-list">
