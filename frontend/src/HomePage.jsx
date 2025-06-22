@@ -1,4 +1,4 @@
-// mport React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './App.css';
 import PreviewListings from './PreviewListings'; // adjust path if needed
@@ -7,12 +7,50 @@ import { faInstagram, faLinkedin, faTwitter } from '@fortawesome/free-brands-svg
 
 const HomePage = () => {
   const navigate = useNavigate();
-  const user = JSON.parse(localStorage.getItem('user')); // assuming you stored user after login
+  // const user = JSON.parse(localStorage.getItem('user')); // assuming you stored user after login
+  const [isSessionLoggedIn, setIsSessionLoggedIn] = useState(false);
+  const [showLogoutPopup, setShowLogoutPopup] = useState(false);
+  const [showFarewell, setShowFarewell] = useState(false);
+  const [fadePopup, setFadePopup] = useState(false); //  new
+
+  // const handleLogout = () => {
+  //   localStorage.removeItem('user');
+  //   navigate('/');
+  //   window.location.reload(); // refresh to update navbar
+  // };
+
+   useEffect(() => {
+    const sessionStatus = sessionStorage.getItem('loggedIn');
+    if (sessionStatus === 'true') {
+      setIsSessionLoggedIn(true);
+    }
+  }, []);
 
   const handleLogout = () => {
+    setShowLogoutPopup(true); // show popup first
+  };
+
+  const confirmLogout = () => {
     localStorage.removeItem('user');
-    navigate('/');
-    window.location.reload(); // refresh to update navbar
+    sessionStorage.removeItem('loggedIn');
+    setIsSessionLoggedIn(false);
+    setShowFarewell(true); // show goodbye message in the popup
+    setTimeout(() => {
+      setFadePopup(true); // trigger fade after 4s
+    }, 4000);
+    setTimeout(() => {
+      setShowLogoutPopup(false); // hide popup
+      setShowFarewell(false);
+      setFadePopup(false);
+      navigate('/');
+      window.location.reload();
+    }, 3000);
+  };
+
+  const cancelLogout = () => {
+    setShowLogoutPopup(false);
+    setShowFarewell(false);
+    setFadePopup(false); // reset fade state
   };
 
   return (
@@ -24,7 +62,7 @@ const HomePage = () => {
         </div>
 
         <div className="navbar-right">
-          {user ? (
+          {isSessionLoggedIn ? (
             <>
               <a href="/">Home</a>
               <a href="/explore">Explore</a>
@@ -41,6 +79,26 @@ const HomePage = () => {
         </div>
       </nav>
 
+    {/* Logout Confirmation Popup */}
+      {showLogoutPopup && (
+        <div className="popup-overlay">
+          <div className={`popup-box ${showFarewell ? 'fade-out' : ''}`}>
+            {!showFarewell ? (
+              <>
+                <p>Are you sure you want to logout?</p>
+                <div className="popup-actions">
+                  <button className="btn confirm" onClick={confirmLogout}>Yes</button>
+                  <button className="btn cancel" onClick={cancelLogout}>No</button>
+                </div>
+              </>
+            ) : (
+              <p className="farewell-text">We'll miss you! Come back soon ❤️</p>
+            )}
+          </div>
+        </div>
+      )}
+
+      
 
       {/* Hero Section */}
     

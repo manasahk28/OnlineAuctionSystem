@@ -32,12 +32,14 @@ const Login = () => {
 
       if (data.status === 'success') {
         localStorage.setItem('user', JSON.stringify(data.user || { email }));
+        sessionStorage.setItem('loggedIn', 'true'); // 👈✨ THIS is the line to add!
         setSuccess('Login successful!');
         setError('');
         setTimeout(() => {
           navigate('/dashboard');
         }, 500);
-      } else {
+      } 
+      else {
         setError(data.message || 'Login failed');
         setSuccess('');
       }
@@ -87,7 +89,7 @@ const Login = () => {
         </form>
 
         <p className="switch-link">
-          Don’t have an account?{' '}
+          Don"t have an account?{' '}
           <button type="button" onClick={() => navigate('/register')}>
             Register here
           </button>
