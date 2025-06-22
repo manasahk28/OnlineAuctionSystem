@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import './ItemDetail.css';
+import Layout from './Layout';
 import axios from 'axios';
 
 const ItemDetail = () => {
@@ -44,6 +45,7 @@ const ItemDetail = () => {
       : 'https://via.placeholder.com/300';
 
   return (
+    <Layout>
     <div className="item-detail-container">
       <div className="left-panel">
         <div className="carousel-wrapper">
@@ -74,6 +76,7 @@ const ItemDetail = () => {
         </div>
       </div>
     </div>
+    </Layout>
   );
 };
 

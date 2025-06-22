@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import './Userdashboard.css';
+import Layout from './Layout';
 
 import ProfilePage from './Profile'; 
 import MyListings from './MyListings';
@@ -8,8 +9,6 @@ import MyBids from './MyBids';
 import RecentActivity from './RecentActivity';
 import Notifications from './Notifications';
 
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faInstagram, faLinkedin, faTwitter } from '@fortawesome/free-brands-svg-icons';
 import { useNavigate } from 'react-router-dom';
 import {
   PieChart, Pie, Cell,
@@ -31,6 +30,7 @@ import {
 const UserDashboard = () => {
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem('user'));
+
   const [showWelcome, setShowWelcome] = useState(true);
   const [profileImage, setProfileImage] = useState(null);
   const fileInputRef = useRef(null); // for triggering file input
@@ -39,6 +39,12 @@ const UserDashboard = () => {
   const [activeSection, setActiveSection] = useState('Profile');
   const [now, setNow] = useState(Date.now());
 
+  // useEffect(() => {
+  //   const user = sessionStorage.getItem("user"); // or token/login key
+  //   if (!user) {
+  //     navigate("/"); // 👈 redirect to landing page
+  //   }
+  // }, []);
 
   // Dummy stats and spending
   const statsData = [
@@ -98,11 +104,6 @@ const spendingData = [
 //   };
 // }, [showImageModal]);
 
-  // Handle logout
-  const handleLogout = () => {
-    localStorage.removeItem('user');
-    navigate('/login');
-  };
 
   useEffect(() => {
       const userData = JSON.parse(localStorage.getItem("user") || '{}');
@@ -164,33 +165,10 @@ const handleImageUpload = (e) => {
     reader.readAsDataURL(file);
   };
 
-
-  if (!user) {
-    return (
-      <div className="dashboard-wrapper">
-        <div className="dashboard-card">
-          <h2>User not found</h2>
-          <p>Please login again.</p>
-        </div>
-      </div>
-    );
-  }
+  if (!user) return null;
 
   return (
-    <>
-    {/* Navbar */}
-      <nav className="navbar">
-        <div className="navbar-left">
-          <h2>Online Auction</h2>
-        </div>
-        <div className="navbar-right">
-          <a href="/">Home</a>
-          <a href="/explore">Explore</a>
-          <a href="/post-item">Post Item</a>
-          <a href="/dashboard">Profile</a>
-          <button className="logout-btn" onClick={handleLogout}>Logout</button>
-        </div>
-      </nav>
+    <Layout>
 
  {/* Welcome */}
       {showWelcome ? (
@@ -271,15 +249,6 @@ const handleImageUpload = (e) => {
 
 
             <h3 className="username">{profile.UserName || user.UserName || 'Your Name'}</h3>
-            {/* <div className="sidebar-buttons">
-              <button>Profile</button>
-              <button>My Listings</button>
-              <button>My Bids</button>
-              <button>Payments</button>
-              <button>Notifications</button>
-              <button>Recent Activity</button>
-            </div>
-          </div> */}
 
           <div className="sidebar-buttons">
               <button onClick={() => setActiveSection('ProfilePage')}>Profile</button>
@@ -370,31 +339,7 @@ const handleImageUpload = (e) => {
         </div>
               )}
 
-        {/* Footer */}
-        <footer className="footer">
-        <div className="footer-content">
-            <h3>Online Auction</h3>
-            <p>© 2025 Campus Auction System · All rights reserved</p>
-            <div className="footer-links">
-            <a href="/about">About</a>
-            <a href="/contact">Contact</a>
-            <a href="/help">Help</a>
-            </div>
-        </div>
-        <div className="social-icons">
-            <a href="https://www.instagram.com" target="_blank" rel="noreferrer">
-                <FontAwesomeIcon icon={faInstagram} />
-            </a>
-            <a href="https://www.linkedin.com" target="_blank" rel="noreferrer">
-                <FontAwesomeIcon icon={faLinkedin} />
-            </a>
-            <a href="https://www.twitter.com" target="_blank" rel="noreferrer">
-                <FontAwesomeIcon icon={faTwitter} />
-            </a>
-        </div>
-
-        </footer>
-    </>
+    </Layout>
   );
 };
 

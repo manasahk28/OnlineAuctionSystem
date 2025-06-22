@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './ExploreItems.css';
+import Layout from './Layout';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
@@ -39,6 +40,7 @@ const ExploreItems = () => {
   }
 
   return (
+    <Layout>
     <div className="explore-container">
       <div className="explore-header">
         <h2 className="explore-heading">🧭 Explore Items</h2>
@@ -82,6 +84,7 @@ const ExploreItems = () => {
         ))}
       </div>
     </div>
+    </Layout>
   );
 };
 

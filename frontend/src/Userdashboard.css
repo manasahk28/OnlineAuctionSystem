@@ -1,86 +1,7 @@
-/* Navbar styles */
 body, html{
   overflow-x: hidden;
   margin: 0;
   padding: 0;
-}
-.navbar {
-  /* width: 100%; */
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background-color: #f57c1f;
-  padding: 15px 70px;
-  padding-right: 0;
-  color: white;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
-
-.navbar-left h2 {
-  margin: 0;
-  margin-left: 30px;
-  font-size: 28px;
-  font-weight: bold;
-}
-
-.navbar-right{
-  display: flex;
-  align-items: center;
-  margin-right: 30px;
-}
-
-.navbar-right a {
-  margin: 2px 12px;
-  margin-left: 10px;
-  text-decoration: none;
-  color: white;
-  font-size: 20px;
-  font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
-  transition: color 0.3s ease;
-}
-
-.navbar-right a:hover {
-  color: #2b2c2c;
-}
-
-.logout-btn {
-    padding: 0.6rem 1rem;
-  display: flex;
-  margin-right: 30px;
-  align-items: center;
-  background-color: #f86903;
-  border: none;
-  color: white;
-  margin-left: 12px;
-  margin-right: 12px;
-  border-radius: 4px;
-  margin-top: 4px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-.logout-btn:hover {
-  background-color: #e60000;
-}
-.navbar-right .btn {
-  padding: 0.6rem 1rem;
-  display: flex;
-  font-size: 15px;
-  margin-right: 30px;
-  align-items: center;
-  background-color: #fd8b3a;
-  border: none;
-  color: white;
-  margin-left: 12px;
-  margin-right: 12px;
-  border-radius: 4px;
-  margin-top: 4px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-.btn:hover {
-  background-color: #fc5400;
 }
 
 
@@ -163,8 +84,7 @@ body, html{
   color: #333;
   margin-top: 1rem;}
 
-/* Logout */
-.popup-overlay {
+/* .popup-overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -214,12 +134,12 @@ body, html{
   color: #2c3e50;
 }
 
-/* @keyframes fadeInOut {
+@keyframes fadeInOut {
   0% { opacity: 0; }
   20% { opacity: 1; }
   80% { opacity: 1; }
   100% { opacity: 0; }
-} */
+}
 .fade-out {
   animation: fadeAway 3s forwards;
   pointer-events: none;
@@ -235,7 +155,7 @@ body, html{
     transform: scale(0.95);
   }
 }
-
+ */
 
 /* Sidebar styles */
 .sidebar-left {

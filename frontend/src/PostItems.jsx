@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './PostItem.css';
+import Layout from './Layout';
+
 import { useNavigate } from 'react-router-dom';
 import { FaCamera, FaUpload, FaRupeeSign, FaCalendarAlt } from 'react-icons/fa';
 
@@ -105,6 +107,7 @@ const PostItem = () => {
   };
 
   return (
+    <Layout>
     <div className="post-item-container">
       <div className="post-item-header">
         <div className="decoration-circle circle-1"></div>
@@ -308,6 +311,7 @@ const PostItem = () => {
         </button>
       </form>
     </div>
+    </Layout>
   );
 };
 

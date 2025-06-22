@@ -2,22 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './App.css';
 import PreviewListings from './PreviewListings'; // adjust path if needed
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faInstagram, faLinkedin, faTwitter } from '@fortawesome/free-brands-svg-icons';
+import Layout from './Layout';
 
 const HomePage = () => {
   const navigate = useNavigate();
   // const user = JSON.parse(localStorage.getItem('user')); // assuming you stored user after login
   const [isSessionLoggedIn, setIsSessionLoggedIn] = useState(false);
-  const [showLogoutPopup, setShowLogoutPopup] = useState(false);
-  const [showFarewell, setShowFarewell] = useState(false);
-  const [fadePopup, setFadePopup] = useState(false); //  new
 
-  // const handleLogout = () => {
-  //   localStorage.removeItem('user');
-  //   navigate('/');
-  //   window.location.reload(); // refresh to update navbar
-  // };
 
    useEffect(() => {
     const sessionStatus = sessionStorage.getItem('loggedIn');
@@ -25,80 +16,12 @@ const HomePage = () => {
       setIsSessionLoggedIn(true);
     }
   }, []);
-
-  const handleLogout = () => {
-    setShowLogoutPopup(true); // show popup first
-  };
-
-  const confirmLogout = () => {
-    localStorage.removeItem('user');
-    sessionStorage.removeItem('loggedIn');
-    setIsSessionLoggedIn(false);
-    setShowFarewell(true); // show goodbye message in the popup
-    setTimeout(() => {
-      setFadePopup(true); // trigger fade after 4s
-    }, 4000);
-    setTimeout(() => {
-      setShowLogoutPopup(false); // hide popup
-      setShowFarewell(false);
-      setFadePopup(false);
-      navigate('/');
-      window.location.reload();
-    }, 3000);
-  };
-
-  const cancelLogout = () => {
-    setShowLogoutPopup(false);
-    setShowFarewell(false);
-    setFadePopup(false); // reset fade state
-  };
+ 
 
   return (
-    <div className="homepage">
-      {/* Navbar */}
-      <nav className="navbar">
-        <div className="navbar-left">
-          <h2>Online Auction</h2>
-        </div>
+    <Layout>
 
-        <div className="navbar-right">
-          {isSessionLoggedIn ? (
-            <>
-              <a href="/">Home</a>
-              <a href="/explore">Explore</a>
-              <a href="/post-item">Post Item</a>
-              <a href="/dashboard">Profile</a>
-              <button className="logout-btn" onClick={handleLogout}>Logout</button>
-            </>
-          ) : (
-            <>
-              <button className="btn" onClick={() => navigate('/register')}>Register</button>
-              <button className="btn" onClick={() => navigate('/login')}>Login</button>
-            </>
-          )}
-        </div>
-      </nav>
-
-    {/* Logout Confirmation Popup */}
-      {showLogoutPopup && (
-        <div className="popup-overlay">
-          <div className={`popup-box ${showFarewell ? 'fade-out' : ''}`}>
-            {!showFarewell ? (
-              <>
-                <p>Are you sure you want to logout?</p>
-                <div className="popup-actions">
-                  <button className="btn confirm" onClick={confirmLogout}>Yes</button>
-                  <button className="btn cancel" onClick={cancelLogout}>No</button>
-                </div>
-              </>
-            ) : (
-              <p className="farewell-text">We'll miss you! Come back soon ❤️</p>
-            )}
-          </div>
-        </div>
-      )}
-
-      
+    <div className="homepage">      
 
       {/* Hero Section */}
     
@@ -173,32 +96,8 @@ const HomePage = () => {
       </section>
       </div>
 
-        {/* Footer */}
-        <footer className="footer">
-        <div className="footer-content">
-            <h3>Online Auction</h3>
-            <p>© 2025 Campus Auction System · All rights reserved</p>
-            <div className="footer-links">
-            <a href="/about">About</a>
-            <a href="/contact">Contact</a>
-            <a href="/help">Help</a>
-            </div>
-        </div>
-        <div className="social-icons">
-            <a href="https://www.instagram.com" target="_blank" rel="noreferrer">
-                <FontAwesomeIcon icon={faInstagram} />
-            </a>
-            <a href="https://www.linkedin.com" target="_blank" rel="noreferrer">
-                <FontAwesomeIcon icon={faLinkedin} />
-            </a>
-            <a href="https://www.twitter.com" target="_blank" rel="noreferrer">
-                <FontAwesomeIcon icon={faTwitter} />
-            </a>
-        </div>
-
-        </footer>
-
       </div>
+      </Layout>
   );
 };
 
