@@ -46,7 +46,7 @@
 
 .items-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  grid-template-columns: repeat(4, 1fr);
   gap: 1.5rem;
   padding: 0 1rem;
 }
@@ -67,6 +67,7 @@
 }
 
 .square-image-container {
+  position: relative;
   width: 100%;
   aspect-ratio: 1/1;
   overflow: hidden;
@@ -81,6 +82,19 @@
 
 .item-card:hover .item-image {
   transform: scale(1.05);
+}
+
+.exclusive-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background-color: gold;
+  color: black;
+  font-size: 1rem;
+  font-weight: bold;
+  padding: 3px 6px;
+  border-radius: 4px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
 }
 
 .item-content {
@@ -101,18 +115,11 @@
   font-weight: bold;
   font-size: 1.3rem;
   margin: 0.5rem 0;
+  text-align: center;
 }
 
 .item-desc {
-  font-size: 0.9rem;
-  color: #666;
-  text-align: center;
-  margin: 0.5rem 0 1rem;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  flex-grow: 1;
+  display: none;
 }
 
 .item-card button {
@@ -131,11 +138,17 @@
   transform: translateY(-2px);
 }
 
+@media (max-width: 992px) {
+  .items-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
 @media (max-width: 768px) {
   .items-grid {
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    grid-template-columns: repeat(2, 1fr);
   }
-  
+
   .explore-heading {
     font-size: 2rem;
   }
