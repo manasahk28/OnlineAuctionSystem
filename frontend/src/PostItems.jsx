@@ -1,9 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './PostItem.css';
 import Layout from './Layout';
 
 const PostItems = () => {
-  const [form, setForm] = useState({
+    const navigate = useNavigate();
+    const [customCategory, setCustomCategory] = useState('');
+    const [fileInputKey, setFileInputKey] = useState(Date.now()); // unique key for input refresh
+    const [showTerms, setShowTerms] = useState(false);
+    const [warranty, setWarranty] = useState('No');
+    const [itemCondition, setItemCondition] = useState('');
+    const [form, setForm] = useState({
     title: '',
     description: '',
     category: '',
@@ -28,37 +35,184 @@ const PostItems = () => {
     report_reason: '',
     highlights: '',
     item_condition: '',
-    warranty: ''
+    warranty: '',
+    warranty_duration: '',
+    damage_description: ''
   });
 
-  const handleChange = (e) => {
-    const { name, value, type, checked, files } = e.target;
-    if (type === 'checkbox') {
-      setForm({ ...form, [name]: checked });
-    } else if (type === 'file') {
-      const selectedFiles = Array.from(files).slice(0, 3);
-      setForm({ ...form, images: selectedFiles });
-    } else {
-      setForm({ ...form, [name]: value });
+  const requiredFields = [
+  'title',
+  'description',
+  'category',
+  'tags',
+  'images',
+  'starting_price',
+  'minimum_increment',
+  'start_date_time',
+  'end_date_time',
+  'seller_id',
+  'contact_email',
+  'item_condition',
+  'pickup_method',
+  'terms_accepted'
+];
+
+
+ const handleChange = (e) => {
+  const { name, value, type, checked, files } = e.target;
+
+  if (name === 'warranty') setWarranty(value);
+  if (name === 'item_condition') setItemCondition(value);
+
+  if (type === 'checkbox') {
+    setForm({ ...form, [name]: checked });
+  } else if (type === 'file') {
+  const selectedFiles = Array.from(files);
+  const totalImages = form.images.length + selectedFiles.length;
+
+  if (totalImages > 3) {
+    alert(`You can only upload 3 images. You already added ${form.images.length}.`);
+    return;
+  }
+    setForm(prev => ({
+    ...prev,
+    images: [...prev.images, ...selectedFiles]}));
+  }else if (type === 'file') {
+  const selectedFiles = Array.from(files);
+  const totalImages = form.images.length + selectedFiles.length;
+
+  if (totalImages > 3) {
+    alert(`You can only upload 3 images. You already added ${form.images.length}.`);
+    return;
+  }
+
+  setForm((prev) => ({
+    ...prev,
+    images: [...prev.images, ...selectedFiles],
+  }));
+
+  // reset the file input
+  setFileInputKey(Date.now());
+}
+   else {
+    setForm({ ...form, [name]: value });
+  }
+};
+
+
+const handleSubmit = (e) => {
+  e.preventDefault();
+
+  const missingFields = requiredFields.filter(field => {
+    return !form[field] || (typeof form[field] === 'string' && form[field].trim() === '');
+  });
+
+  if (missingFields.length > 0) {
+    alert(`🚫 Please fill all required fields:\n${missingFields.join(', ')}`);
+    return;
+  }
+  console.log("Form submitted:", form);
+
+  // ALL GOOD! Submit the form
+  alert("Your item has been posted successfully!");
+  navigate("/dashboard");
+};
+
+  const handleEstimatePrice = () => {
+    const baseInput = parseFloat(form.starting_price);
+    if (isNaN(baseInput) || baseInput <= 0) {
+      alert("Please enter a valid Starting Price first.");
+      return;
     }
+  
+    const damageText = form.damage_description.toLowerCase();
+    const issues = ["scratch", "crack", "not working", "broken", "no power", "display issue"];
+    let deductionAmount = 0;
+  
+    // First: Detect known damage keywords
+    let matched = false;
+    issues.forEach(issue => {
+      if (damageText.includes(issue)) {
+        matched = true;
+      }
+    });
+  
+    // Smart deduction based on price slabs
+    if (baseInput >=30 && baseInput <= 60) {
+      deductionAmount = matched ? 5 : 2;
+    } else if (baseInput > 60 && baseInput <= 150) {  
+      deductionAmount = matched ? 12 : 10;
+    } else if (baseInput > 150 && baseInput <= 500) {
+      deductionAmount = matched ? (baseInput * 0.1) : (baseInput * 0.05);
+    } else {
+      deductionAmount = matched ? (baseInput * 0.15) : (baseInput * 0.1);
+    }
+  
+    const estimated = Math.max(baseInput - deductionAmount, 10); // ensure it's not too low
+    setForm(prev => ({ ...prev, starting_price: estimated.toFixed(2) }));
+    alert(`Estimated Price (based on damage): ₹${estimated.toFixed(2)}`);
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log('Form Submitted:', form);
-    // Post to backend here
+useEffect(() => {
+  const user = JSON.parse(localStorage.getItem('user')); // or sessionStorage
+  if (user && user.collegeId) {
+    setForm(prev => ({ ...prev, seller_id: user.collegeId }));
+  }
+}, []);
+
+   const renderInput = (label, name, type = 'text', placeholder = '', isTextarea = false) => {
+    const isRequired = requiredFields.includes(name);
+    return (
+      <div className="input-row">
+        <label htmlFor={name}>
+          {isRequired && <span className="required-star">*</span>} {label}
+        </label>
+        {isTextarea ? (
+          <textarea id={name} name={name} placeholder={placeholder} onChange={handleChange} />
+        ) : (
+          <input id={name} type={type} name={name} placeholder={placeholder} onChange={handleChange} />
+        )}
+      </div>
+    );
   };
 
-  const renderInput = (label, name, type = 'text', placeholder = '', isTextarea = false) => (
-  <div className="input-row">
-    <label htmlFor={name}>{label}</label>
-    {isTextarea ? (
-      <textarea id={name} name={name} placeholder={placeholder} onChange={handleChange} />
-    ) : (
-      <input id={name} type={type} name={name} placeholder={placeholder} onChange={handleChange} />
-    )}
-  </div>
-);
+const renderSelect = (label, name, options) => {
+    const isRequired = requiredFields.includes(name);
+    return (
+      <div className="input-row">
+        <label htmlFor={name}>
+          {isRequired && <span className="required-star">*</span>} {label}
+        </label>
+        <select id={name} name={name} value={form[name]} onChange={handleChange}>
+          <option value="">Select an option</option>
+          {options.map((option, index) => (
+            <option key={index} value={option}>{option}</option>
+          ))}
+        </select>
+      </div>
+    );
+  };
+
+
+
+const getBuyNowPlaceholder = () => {
+  const base = parseFloat(form.starting_price);
+  if (!isNaN(base) && base > 0) {
+    return `Should be more than ₹${base}`;
+  }
+  return "e.g. ₹200";
+};
+
+const handleRemoveImage = (index) => {
+  setForm((prev) => {
+    const updatedImages = [...prev.images];
+    updatedImages.splice(index, 1);
+    return { ...prev, images: updatedImages };
+  });
+
+  setFileInputKey(Date.now()); // refresh file input
+};
+
 
   return (
     <Layout>
@@ -70,24 +224,153 @@ const PostItems = () => {
           <h3>🖼️ Item Basics</h3>
           {renderInput('Title', 'title', 'text', 'Item Title')}
           {renderInput('Description', 'description', 'text', 'Description', true)}
-          {renderInput('Category', 'category', 'text', 'Category')}
+          <div className="input-row">
+            <label htmlFor="category">Category</label>
+            <select
+              id="category"
+              name="category"
+              onChange={(e) => {
+                handleChange(e);
+                if (e.target.value === 'Other') {
+                  setCustomCategory(''); // Reset previous input if any
+                }
+              }}
+              defaultValue=""
+            >
+              <option value="" disabled>Select a category</option>
+              <option value="Books">📚 Books</option>
+              <option value="Electronics">🔌 Electronics</option>
+              <option value="Clothing">👕 Clothing</option>
+              <option value="Stationery">✏️ Stationery</option>
+              <option value="Lab Equipment">⚗️ Lab Equipment</option>
+              <option value="Sports Gear">🏏 Sports Gear</option>
+              <option value="Hostel Essentials">🛏️ Hostel Essentials</option>
+              <option value="Cycle/Bike Accessories">🚲 Cycle/Bike Accessories</option>
+              <option value="Art Supplies">🎨 Art Supplies</option>
+              <option value="Other">🧩 Other</option>
+            </select>
+          </div>
+          
+          {form.category === 'Other' && (
+            <div className="input-row">
+              <label htmlFor="customCategory">Specify Category</label>
+              <input
+                type="text"
+                id="customCategory"
+                name="customCategory"
+                placeholder="Enter your category"
+                value={customCategory}
+                onChange={(e) => setCustomCategory(e.target.value)}
+              />
+            </div>
+          )}
+
+
           {renderInput('Tags', 'tags', 'text', 'Tags (comma separated)')}
         </div>
 
-        <div className="form-section">
-          <h3>📸 Item Media</h3>
-          <div className="input-group">
-            <label>Images (max 3)</label>
-            <input type="file" name="images" multiple accept="image/*" onChange={handleChange} />
-          </div>
-          {renderInput('Video URL', 'video_url', 'text', 'Video URL (optional)')}
-        </div>
+
+       <div className="form-section">
+  <h3>📸 Item Media</h3>
+  <div className="input-row side-by-side">
+  <label htmlFor="images">Images (max 3)</label>
+  <input
+    type="file"
+    name="images"
+    id="images"
+    key={fileInputKey} // reset input on change
+    multiple
+    accept="image/*"
+    onChange={handleChange}
+  />
+  <p className="image-count">
+  {form.images.length} of 3 images selected
+</p>
+
+</div>
+
+{form.images.length > 0 && (
+  <div className="image-pre-container">
+    {form.images.map((file, index) => (
+      <div className="image-wrapper" key={index}>
+        <img
+          src={URL.createObjectURL(file)}
+          alt={`preview-${index}`}
+          className="pre-image"
+        />
+        <button
+          type="button"
+          className="remove-image-btn"
+          onClick={() => handleRemoveImage(index)}
+        >
+          ❌
+        </button>
+      </div>
+    ))}
+  </div>
+)}
+
+
+
+  {renderInput('Video URL', 'video_url', 'text', 'Video URL (optional)')}
+</div>
+
 
         <div className="form-section">
-          <h3>💰 Bidding Details</h3>
-          {renderInput('Starting Price', 'starting_price', 'text', 'Starting Price')}
-          {renderInput('Minimum Increment', 'minimum_increment', 'text', 'Minimum Increment')}
-          {renderInput('Buy Now Price', 'buy_now_price', 'text', 'Buy Now Price (optional)')}
+  <h3>💰 Bidding Details</h3>
+
+  <div className="input-row">
+    <label htmlFor="starting_price">Starting Price</label>
+    <input
+      type="number"
+      id="starting_price"
+      name="starting_price"
+      className="styled-number"
+      placeholder="e.g. ₹50"
+      min="10"
+      step="1"
+      value={form.starting_price}
+      onChange={handleChange}
+    />
+  </div>
+
+  <div className="input-row">
+    <label htmlFor="minimum_increment">Minimum Increment</label>
+    <input
+      type="number"
+      id="minimum_increment"
+      name="minimum_increment"
+      className="styled-number"
+      placeholder="e.g. ₹10"
+      min="1"
+      step="1"
+      value={form.minimum_increment}
+      onChange={handleChange}
+    />
+  </div>
+
+  <div className="input-row">
+  <label htmlFor="buy_now_price">Buy Now Price (optional)</label>
+  <input
+    type="number"
+    id="buy_now_price"
+    name="buy_now_price"
+    className="styled-number"
+    placeholder={getBuyNowPlaceholder()}
+    min={form.starting_price ? parseFloat(form.starting_price) + 1 : 0}
+    step="5"
+    value={form.buy_now_price}
+    onChange={handleChange}
+  />
+</div>
+
+</div>
+
+
+        <div className="form-section">
+          <h3>🔧 Item Condition Details</h3>
+          {renderInput('Damage Description', 'damage_description', 'text', 'E.g. Slight scratch on screen', true)}
+          <button type="button" onClick={handleEstimatePrice} className="estimate-btn">Estimate Price</button>
         </div>
 
         <div className="form-section">
@@ -98,20 +381,59 @@ const PostItems = () => {
         </div>
 
         <div className="form-section">
-          <h3>👤 Seller Info</h3>
-          {renderInput('Seller ID', 'seller_id', 'text', 'Your ID')}
-          {renderInput('Contact Email', 'contact_email', 'text', 'Email (optional)')}
-          {renderInput('Location', 'location', 'text', 'Location (optional)')}
-        </div>
+  <h3>👤 Seller Info</h3>
+  <div className="input-row">
+    <label htmlFor="seller_id">Seller ID</label>
+    <input
+      type="text"
+      name="seller_id"
+      value={form.seller_id}
+      readOnly
+      placeholder="Your ID"
+      className='readonly-input'
+      title='Auto-filled. You cannot edit this..'
+    />
+  </div>
+  {renderInput('Contact Email', 'contact_email', 'text', 'Email (optional)')}
+  {renderInput('Location', 'location', 'text', 'Location (optional)')}
+</div>
+
 
         <div className="form-section">
           <h3>🚚 Shipping & Pickup</h3>
-          {renderInput('Pickup Method', 'pickup_method', 'text', 'Pickup Method')}
-          {renderInput('Delivery Charge', 'delivery_charge', 'text', 'Delivery Charge (optional)')}
+          <div className="input-row">
+            <label htmlFor="pickup_method">Pickup Method</label>
+            <select
+              name="pickup_method"
+              value={form.pickup_method || ''}
+              onChange={handleChange}
+            >
+              <option value="">Select a method</option>
+              <option value="Meet on Campus">Meet on Campus</option>
+              <option value="Home Delivery">Home Delivery</option>
+              <option value="Pickup from Seller">Pickup from Seller</option>
+            </select>
+          </div>
+          <div className="input-row">
+  <label htmlFor="delivery_charge">Delivery Charge</label>
+  <input
+    type="number"
+    name="delivery_charge"
+    id="delivery_charge"
+    className="styled-number"
+    placeholder="Delivery Charge (optional)"
+    onChange={handleChange}
+    value={form.delivery_charge}
+    min="0"
+    max="999"
+  />
+</div>
+
+
           {renderInput('Return Policy', 'return_policy', 'text', 'Return Policy (optional)')}
         </div>
 
-        <div className="form-section">
+        {/* <div className="form-section">
           <h3>⚠️ Approval & Status</h3>
           <div className="input-group">
             <label>Status</label>
@@ -126,353 +448,106 @@ const PostItems = () => {
           <div className="input-group">
             <label><input type="checkbox" name="is_approved" onChange={handleChange} /> Approved</label>
           </div>
-        </div>
+        </div> */}
+
+        <div className="form-section">
+  <h3>🌟 Bonus</h3>
+
+  <div className="input-row">
+    <label htmlFor="highlights">Auction Highlights</label>
+    <input
+      type="text"
+      name="highlights"
+      placeholder="e.g. Used only once"
+      onChange={handleChange}
+    />
+  </div>
+
+  <div className="input-row">
+    <label htmlFor="item_condition">Item Condition</label>
+    <select
+      name="item_condition"
+      value={itemCondition}
+      onChange={(e) => {
+        setItemCondition(e.target.value);
+        handleChange(e);
+      }}
+    >
+      <option value="">Select condition</option>
+      <option value="Brand New">Brand New</option>
+      <option value="Like New">Like New</option>
+      <option value="Used">Used</option>
+      <option value="For Parts">For Parts</option>
+    </select>
+  </div>
+
+  <div className="input-row">
+    <label htmlFor="warranty">Warranty</label>
+    <select
+      name="warranty"
+      value={warranty}
+      onChange={(e) => {
+        setWarranty(e.target.value);
+        handleChange(e);
+      }}
+    >
+      <option value="No">No</option>
+      <option value="Yes">Yes</option>
+    </select>
+  </div>
+
+  {warranty === 'Yes' && (
+    <div className="input-row">
+      <label htmlFor="warranty_duration">Warranty Duration</label>
+      <input
+        type="text"
+        name="warranty_duration"
+        placeholder="e.g. 6 months"
+        onChange={handleChange}
+      />
+    </div>
+  )}
+</div>
+
 
         <div className="form-section">
           <h3>🔒 Rules</h3>
           <div className="input-group">
-            <label><input type="checkbox" name="terms_accepted" onChange={handleChange} /> I accept the terms & conditions</label>
+            <label>
+              <input type="checkbox" name="terms_accepted" onChange={handleChange} />
+              I accept the <span className="terms-link" onClick={() => setShowTerms(true)}>terms & conditions</span>
+            </label>
           </div>
-        </div>
+          {showTerms && (
+          <div className="terms-overlay">
+            <div className="terms-popup">
+              <div className="terms-content">
+                <h3>📜 Terms & Conditions</h3>
+                <ul className="terms-list">
+                  <li>✅ You must own the item you're listing. No stolen or borrowed goods.</li>
+                  <li>📷 Use only real photos of your item. No fake or stock images.</li>
+                  <li>❌ No listing of illegal or restricted items (drugs, weapons, etc.).</li>
+                  <li>💬 Describe your item honestly. No misleading info.</li>
+                  <li>💸 Start price must be fair. No fake bids allowed.</li>
+                  <li>🧑‍🎓 Only students can post, buy, or bid. Campus use only.</li>
+                  <li>🤝 Post-auction, deliver the item after online payment.</li>
+                  <li>🔍 Admins can review or remove listings anytime.</li>
+                  <li>🚨 Violations may lead to listing removal or account action.</li>
+                  <li>✅ By posting, you agree to all auction and campus rules.</li>
+                </ul>
+                <button className="close-btn-bottom" onClick={() => setShowTerms(false)}>Close</button>
+              </div>
+            </div>
+          </div>
+        )}
 
-        <div className="form-section">
-          <h3>🌟 Bonus</h3>
-          {renderInput('Auction Highlights', 'highlights', 'text', 'Auction Highlights (e.g. Used once)')}
-          {renderInput('Item Condition', 'item_condition', 'text', 'Condition (Brand New, Like New...)')}
-          {renderInput('Warranty', 'warranty', 'text', 'Warranty (Yes/No + Duration)')}
-        </div>
-
+      </div>
         <button type="submit">Post Item</button>
       </form>
     </div>
+    
     </Layout>
   );
 };
 
 export default PostItems;
-
-
-
-
-
-
-
-
-// import React, { useState, useEffect } from 'react';
-// import './PostItem.css';
-// import Layout from './Layout';
-
-// import { useNavigate } from 'react-router-dom';
-// import { FaCamera, FaUpload, FaRupeeSign, FaCalendarAlt } from 'react-icons/fa';
-
-// const PostItem = () => {
-//   const navigate = useNavigate();
-//   const [itemData, setItemData] = useState({
-//     title: '',
-//     description: '',
-//     category: '',
-//     startingPrice: '',
-//     condition: '',
-//     auctionEnd: '',
-//     images: [],
-//     userEmail: '',
-//     userName: ''
-//   });
-
-//   const [activeField, setActiveField] = useState(null);
-//   const [isSubmitting, setIsSubmitting] = useState(false);
-
-//   useEffect(() => {
-//     const user = JSON.parse(localStorage.getItem('user'));
-//     if (user) {
-//       setItemData(prev => ({
-//         ...prev,
-//         userEmail: user.email,
-//         userName: user.UserName || ''
-//       }));
-//     }
-//   }, []);
-
-//   const handleChange = (e) => {
-//     setItemData({ ...itemData, [e.target.name]: e.target.value });
-//   };
-
-//   const handleImageUpload = (e) => {
-//     const files = Array.from(e.target.files).slice(0, 3);
-//     const readers = [];
-//     let imagesLoaded = 0;
-
-//     files.forEach((file) => {
-//       if (file.size > 300 * 1024) {
-//         alert(`${file.name} is too large. Upload under 300KB.`);
-//         return;
-//       }
-
-//       const reader = new FileReader();
-//       reader.onloadend = () => {
-//         readers.push(reader.result);
-//         imagesLoaded++;
-//         if (imagesLoaded === files.length) {
-//           setItemData((prev) => ({ ...prev, images: readers }));
-//         }
-//       };
-//       reader.readAsDataURL(file);
-//     });
-//   };
-
-//   const handleSubmit = async (e) => {
-//     e.preventDefault();
-    
-//     if (itemData.images.length === 0) {
-//       alert('Please upload at least one image.');
-//       return;
-//     }
-
-//     setIsSubmitting(true);
-    
-//     try {
-//       const response = await fetch('http://localhost:5000/api/post-item', {
-//         method: 'POST',
-//         headers: { 'Content-Type': 'application/json' },
-//         body: JSON.stringify(itemData),
-//       });
-
-//       const result = await response.json();
-//       alert(result.message || 'Item posted successfully!');
-
-//       setItemData({
-//         title: '',
-//         description: '',
-//         category: '',
-//         startingPrice: '',
-//         condition: '',
-//         auctionEnd: '',
-//         images: [],
-//         userEmail: itemData.userEmail,
-//         userName: itemData.userName
-//       });
-      
-//       navigate('/my-listings');
-//     } catch (err) {
-//       alert('Failed to post item');
-//       console.error(err);
-//     } finally {
-//       setIsSubmitting(false);
-//     }
-//   };
-
-//   const getColorByIndex = (index) => {
-//     const colors = ['#FCEF91', '#FB9E3A', '#E6521F'];
-//     return colors[index % colors.length];
-//   };
-
-//   return (
-//     <Layout>
-//     <div className="post-item-container">
-//       <div className="post-item-header">
-//         <div className="decoration-circle circle-1"></div>
-//         <div className="decoration-circle circle-2"></div>
-//         <h2>
-//           <span className="icon-emoji">📦</span>
-//           <span>Post New Auction Item</span>
-//           <span className="icon-emoji">💰</span>
-//         </h2>
-//         <p className="subtitle">Fill in the details to start your auction</p>
-//         <div className="header-underline"></div>
-//       </div>
-      
-//       <form onSubmit={handleSubmit} className="post-item-form">
-//         <div className="form-section" style={{ borderLeft: '4px solid #FCEF91' }}>
-//           <h3 className="section-title">
-//             <span className="section-icon">ℹ️</span>
-//             Item Information
-//           </h3>
-          
-//           <div className="form-group" onFocus={() => setActiveField('title')} onBlur={() => setActiveField(null)}>
-//             <label className={activeField === 'title' ? 'active' : ''}>Title</label>
-//             <input 
-//               type="text" 
-//               name="title" 
-//               value={itemData.title} 
-//               onChange={handleChange} 
-//               required 
-//               className={activeField === 'title' ? 'active' : ''}
-//               placeholder="Enter item title"
-//             />
-//             <div className="input-decoration"></div>
-//           </div>
-
-//           <div className="form-group" onFocus={() => setActiveField('description')} onBlur={() => setActiveField(null)}>
-//             <label className={activeField === 'description' ? 'active' : ''}>Description</label>
-//             <textarea 
-//               name="description" 
-//               value={itemData.description} 
-//               onChange={handleChange} 
-//               required 
-//               className={activeField === 'description' ? 'active' : ''}
-//               placeholder="Describe your item in detail"
-//             />
-//             <div className="input-decoration"></div>
-//           </div>
-//         </div>
-
-//         <div className="form-section" style={{ borderLeft: '4px solid #FB9E3A' }}>
-//           <h3 className="section-title">
-//             <span className="section-icon">📊</span>
-//             Auction Details
-//           </h3>
-          
-//           <div className="form-row">
-//             <div className="form-group" onFocus={() => setActiveField('category')} onBlur={() => setActiveField(null)}>
-//               <label className={activeField === 'category' ? 'active' : ''}>Category</label>
-//               <div className="select-wrapper">
-//                 <select 
-//                   name="category" 
-//                   value={itemData.category} 
-//                   onChange={handleChange} 
-//                   required
-//                   className={activeField === 'category' ? 'active' : ''}
-//                 >
-//                   <option value="">--Select Category--</option>
-//                   <option value="electronics">Electronics</option>
-//                   <option value="fashion">Fashion</option>
-//                   <option value="books">Books</option>
-//                   <option value="home">Home</option>
-//                 </select>
-//               </div>
-//               <div className="input-decoration"></div>
-//             </div>
-
-//             <div className="form-group" onFocus={() => setActiveField('condition')} onBlur={() => setActiveField(null)}>
-//               <label className={activeField === 'condition' ? 'active' : ''}>Condition</label>
-//               <div className="select-wrapper">
-//                 <select 
-//                   name="condition" 
-//                   value={itemData.condition} 
-//                   onChange={handleChange} 
-//                   required
-//                   className={activeField === 'condition' ? 'active' : ''}
-//                 >
-//                   <option value="">--Select Condition--</option>
-//                   <option value="new">Brand New</option>
-//                   <option value="like new">Like New</option>
-//                   <option value="used">Used</option>
-//                   <option value="for parts">For Parts</option>
-//                 </select>
-//               </div>
-//               <div className="input-decoration"></div>
-//             </div>
-//           </div>
-
-//           <div className="form-row">
-//             <div className="form-group" onFocus={() => setActiveField('startingPrice')} onBlur={() => setActiveField(null)}>
-//               <label className={activeField === 'startingPrice' ? 'active' : ''}>
-//                 <FaRupeeSign className="input-icon" />
-//                 Starting Price
-//               </label>
-//               <input 
-//                 type="number" 
-//                 name="startingPrice" 
-//                 value={itemData.startingPrice} 
-//                 onChange={handleChange} 
-//                 required 
-//                 className={activeField === 'startingPrice' ? 'active' : ''}
-//                 placeholder="Enter starting bid amount"
-//               />
-//               <div className="input-decoration"></div>
-//             </div>
-
-//             <div className="form-group" onFocus={() => setActiveField('auctionEnd')} onBlur={() => setActiveField(null)}>
-//               <label className={activeField === 'auctionEnd' ? 'active' : ''}>
-//                 <FaCalendarAlt className="input-icon" />
-//                 Auction End
-//               </label>
-//               <input 
-//                 type="datetime-local" 
-//                 name="auctionEnd" 
-//                 value={itemData.auctionEnd} 
-//                 onChange={handleChange} 
-//                 required 
-//                 className={activeField === 'auctionEnd' ? 'active' : ''}
-//               />
-//               <div className="input-decoration"></div>
-//             </div>
-//           </div>
-//         </div>
-
-//         <div className="form-section" style={{ borderLeft: '4px solid #E6521F' }}>
-//           <h3 className="section-title">
-//             <span className="section-icon">📷</span>
-//             Item Images
-//           </h3>
-          
-//           <div className="form-group">
-//             <div className="file-upload-container">
-//               <label className="file-upload-label">
-//                 <FaUpload className="upload-icon" />
-//                 <span>Choose Images (Max 3)</span>
-//                 <input 
-//                   type="file" 
-//                   accept="image/*" 
-//                   multiple 
-//                   onChange={handleImageUpload} 
-//                   style={{ display: 'none' }} 
-//                 />
-//               </label>
-//               <div className="file-upload-text">
-//                 {itemData.images.length > 0 
-//                   ? `${itemData.images.length} image(s) selected` 
-//                   : 'No images selected yet'}
-//               </div>
-//             </div>
-            
-//             {itemData.images.length > 0 && (
-//               <div className="preview-images">
-//                 {itemData.images.map((img, index) => (
-//                   <div 
-//                     key={index} 
-//                     className="image-preview"
-//                     style={{ borderColor: getColorByIndex(index) }}
-//                   >
-//                     <img src={img} alt={`preview-${index}`} />
-//                     <button 
-//                       type="button" 
-//                       className="remove-image"
-//                       style={{ backgroundColor: getColorByIndex(index) }}
-//                       onClick={() => {
-//                         const newImages = [...itemData.images];
-//                         newImages.splice(index, 1);
-//                         setItemData({...itemData, images: newImages});
-//                       }}
-//                     >
-//                       ×
-//                     </button>
-//                   </div>
-//                 ))}
-//               </div>
-//             )}
-//           </div>
-//         </div>
-
-//         <button 
-//           type="submit" 
-//           className="submit-button" 
-//           disabled={isSubmitting}
-//           style={{ backgroundColor: '#FB9E3A' }}
-//         >
-//           {isSubmitting ? (
-//             <span className="button-loading">Posting...</span>
-//           ) : (
-//             <>
-//               <span className="button-text">Post Item Now</span>
-//               <span className="button-icon">🚀</span>
-//             </>
-//           )}
-//         </button>
-//       </form>
-//     </div>
-//     </Layout>
-//   );
-// };
-
-// export default PostItem;

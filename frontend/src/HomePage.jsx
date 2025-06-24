@@ -41,48 +41,32 @@ const HomePage = () => {
         <section className="how-section" id="how-it-works">
         <h2 className="how-title">How it works?</h2>
 
-        <div className="steps-wrapper">
+        <div className="steps-horizontal">
+  {/* Step 1 */}
+  <div className="how-step">
+    <h3 className="step-title orange">Step 1: Post Your Item</h3>
+    <img src="/images/step1.png" alt="Post Item" className="how-img" />
+    <p>📸 Click a pic. Add details. Set a starting price.</p>
+    <p className="note">→ It's free to list, and takes less than a minute.</p>
+  </div>
 
-            {/* Step 1 */}
-             <div className="step-container">
-                <div className="step-content">
-                <h3>Step 1: Post Your Item</h3>
-                <p>📸 Click a pic. Add details. Set a starting price.<br />
-                    Whether it's books, headphones, or hoodies — if you don't need it, someone else might!</p>
-                <p className="note">→ It's free to list, and takes less than a minute.</p>
-                </div>
-                                <img src="/images/step1.png" alt="Step 1" className="step-img" />
+  {/* Step 2 */}
+  <div className="how-step">
+    <h3 className="step-title orange">Step 2: Let the Bidding Begin</h3>
+    <img src="/images/step2.png" alt="Bidding" className="how-img" />
+    <p>🛎️ Watch your item get attention!</p>
+    <p className="note">→ You'll get real-time notifications and updates.</p>
+  </div>
 
-            </div>  
-        
+  {/* Step 3 */}
+  <div className="how-step">
+    <h3 className="step-title orange">Step 3: Meet & Exchange</h3>
+    <img src="/images/step3.png" alt="Exchange" className="how-img" />
+    <p>🤝 Once the auction ends, the winner pays online</p>
+    <p className="note">→ Simple, secure, and student-only.</p>
+  </div>
+</div>
 
-            {/* Step 2 */}
-            <div className="step-container reverse">
-                <img src="/images/step2.png" alt="Let the bidding begin" className="step-img2" />
-                <div className="step-content">
-                    <h3 className="step-heading orange-light">Step 2: Let the Bidding Begin</h3>
-                    <p> 🛎️ Watch your item get attention!<br />
-                    Others on campus can place bids before the timer ends. The highest bidder wins!
-                    </p>
-                    <p className="note">→ You'll get real-time notifications and updates.</p>
-                    </div>
-            </div>
-
-            {/* Step 3 */}
-            <div className="step-container">
-
-          <div className="step-content">
-            <h3 className="step-heading orange">Step 3: Meet & Exchange</h3>
-            <p>
-              🤝 Once the auction ends, the winner pays online (fake payment in demo)<br />
-              Then, just meet up on campus and swap the item.
-            </p>
-            <p className="note">→ Simple, secure, and student-only.</p>
-          </div>
-            <img src="/images/step3.png" alt="Meet and exchange" className="step-img" />
-
-        </div>
-        </div>
         </section>
 
 

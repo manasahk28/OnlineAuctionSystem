@@ -587,7 +587,7 @@ body {
 }
 
 .step-container.reverse {
-  margin-left: 390px;
+  margin-left: 450px;
   margin-right: 0;
 }
 
@@ -647,6 +647,58 @@ body {
   width: 70%;
   align-self: center;
   opacity: 0.4;
+}
+
+.steps-horizontal {
+  display: flex;
+  justify-content: space-around;
+  align-items: flex-start;
+  gap: 2rem;
+  flex-wrap: wrap;
+  padding: 2rem 1rem;
+  background-color: #f9f9f9;
+  border-radius: 12px;
+}
+
+.how-step {
+  width: 300px;
+  text-align: center;
+  padding: 1rem;
+  background-color: white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  border-radius: 10px;
+  transition: transform 0.3s ease;
+}
+
+.how-step:hover {
+  transform: translateY(-5px);
+}
+
+.step-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 0.8rem;
+}
+
+.how-img {
+  width: 100%;
+  height: auto;
+  max-height: 180px;
+  object-fit: contain;
+  margin-bottom: 0.8rem;
+}
+
+.note {
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.orange {
+  color: #ff6600;
+}
+
+.orange-light {
+  color: #ff9900;
 }
 
 .preview-container {
