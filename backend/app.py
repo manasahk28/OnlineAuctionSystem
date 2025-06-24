@@ -181,6 +181,18 @@ def get_single_item(item_id):
     except Exception as e:
         return jsonify({'status': 'fail', 'message': 'Invalid item ID'}), 400
 
+@app.route('/api/items/user/<email>', methods=['GET'])
+def get_user_items(email):
+    try:
+        user_items = list(items_collection.find({'userEmail': email}))
+        for item in user_items:
+            item['_id'] = str(item['_id'])  # Convert ObjectId to string
+            item['thumbnail'] = item['images'][0] if item.get('images') else ''
+        return jsonify({'status': 'success', 'items': user_items}), 200
+    except Exception as e:
+        return jsonify({'status': 'fail', 'message': str(e)}), 500
+
+
 @app.route('/')
 def home():
     return "Flask with MongoDB backend is live!"

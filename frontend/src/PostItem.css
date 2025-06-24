@@ -1,4 +1,110 @@
-.post-item-container {
+.post-items-form {
+  max-width: 850px;
+  margin: 2rem auto;
+  background-color: #fdfdfd;
+  padding: 2.5rem;
+  border-radius: 20px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.07);
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.post-items-form h2 {
+  font-size: 30px;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  color: #333;
+}
+
+.post-items-form h3 {
+  font-size: 20px;
+  margin-bottom: 1rem;
+  color: #555;
+  border-bottom: 2px solid #eee;
+  padding-bottom: 4px;
+}
+
+.form-section {
+  background-color: #fafafa;
+  padding: 1.5rem;
+  margin: 1.5rem 0;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+}
+
+.input-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+  gap: 1rem;
+}
+
+.input-row label {
+  min-width: 180px;
+  font-weight: 500;
+  color: #333;
+}
+
+.input-row input,
+.input-row textarea,
+.input-row select {
+  flex: 1;
+  padding: 0.6rem 1rem;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  font-size: 16px;
+  background-color: #fff;
+}
+
+button[type='submit'] {
+  background-color: #4caf50;
+  color: white;
+  padding: 1rem 2.5rem;
+  font-size: 16px;
+  border: none;
+  border-radius: 15px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-top: 1.5rem;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+button[type='submit']:hover {
+  background-color: #43a047;
+}
+
+@media (max-width: 600px) {
+  .post-items-form {
+    padding: 1rem;
+  }
+
+  .form-section {
+    padding: 1rem;
+  }
+
+  .input-group {
+    flex-direction: column;
+  }
+
+  .post-items-form h2 {
+    font-size: 24px;
+  }
+
+  .post-items-form h3 {
+    font-size: 18px;
+  }
+}
+
+
+
+
+
+
+
+
+
+/* .post-item-container {
   max-width: 800px;
   margin: 30px auto;
   padding: 30px;
@@ -361,4 +467,4 @@ select {
   input, select, textarea {
     padding: 12px;
   }
-}
+} */

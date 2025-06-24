@@ -3,39 +3,34 @@ import './RecentActivity.css';
 
 const RecentActivity = () => {
   const [activities, setActivities] = useState([]);
-  // const user = JSON.parse(localStorage.getItem('user'));
+  const user = JSON.parse(localStorage.getItem('user'));
 
   useEffect(() => {
-    // Dummy data
-    const dummyActivities = [
-      {
-        type: 'bid',
-        amount: 500,
-        item: 'Wireless Headphones',
-        time: '2025-06-18 10:24 AM',
-      },
-      {
-        type: 'post',
-        amount: 1200,
-        item: 'Bluetooth Speaker',
-        time: '2025-06-17 3:12 PM',
-      },
-      {
-        type: 'win',
-        amount: 850,
-        item: 'Gaming Mouse',
-        time: '2025-06-16 6:45 PM',
-      },
-      {
-        type: 'bid',
-        amount: 999,
-        item: 'Smartwatch',
-        time: '2025-06-15 11:15 AM',
-      },
-    ];
+    const fetchPostedItems = async () => {
+      try {
+        const response = await fetch(`http://localhost:5000/api/items/user/${user.email}`);
+        const data = await response.json();
 
-    setActivities(dummyActivities);
-  }, []);
+        if (data.status === 'success') {
+          const postActivities = data.items.map((item) => ({
+            type: 'post',
+            amount: item.startingPrice,
+            item: item.title,
+            time: new Date(item.timestamp || item.auctionEnd).toLocaleString(), // fallback to endTime if timestamp is missing
+          }));
+          setActivities(postActivities);
+        } else {
+          console.error('Failed to fetch activities:', data.message);
+        }
+      } catch (error) {
+        console.error('Error fetching user listings:', error);
+      }
+    };
+
+    if (user?.email) {
+      fetchPostedItems();
+    }
+  }, [user]);
 
   const getActivityMessage = (activity) => {
     switch (activity.type) {
@@ -49,12 +44,12 @@ const RecentActivity = () => {
         return '❔ Unknown activity';
     }
   };
-  
+
   return (
     <div className="recent-activity-wrapper">
       <div className="profile-header">
         <h2 style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#444' }}>
-          <span role="img" aria-label="money bag">🗒️</span>Recent Activity
+          <span role="img" aria-label="recent activity">🗒️</span>Recent Activity
         </h2>
       </div>
       {activities.length === 0 ? (

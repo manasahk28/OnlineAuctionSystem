@@ -137,6 +137,24 @@ body, html{
   background-color: #218838;
 }
 
+.completion-text {
+  background-color: #faf7f4;
+  border-left: 4px solid #eb8a0c;
+  color: #0369a1;
+  padding: 10px 16px;
+  margin: 16px 0;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  display: inline-block;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+}
+
+.completion-text strong {
+  color: #6e4a0c;
+  font-weight: bold;
+}
 
 
 

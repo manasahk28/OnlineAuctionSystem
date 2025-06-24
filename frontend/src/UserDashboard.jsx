@@ -134,36 +134,50 @@ const spendingData = [
     };
   }, [showImageModal]);
 
-const handleImageUpload = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onloadend = async () => {
-      const updatedImage = reader.result;
-      setProfileImage(updatedImage);
-      setProfile(prev => ({ ...prev, profileImage: updatedImage }));
+const handleImageUpload = async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
 
-      try {
-        const res = await fetch('http://localhost:5000/api/update-profile', {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            email: user.email,
-            profileImage: updatedImage
-          })
-        });
-        const result = await res.json();
-        if (result.status === 'success') {
-          localStorage.setItem('user', JSON.stringify({ ...user, profileImage: updatedImage }));
-        } else {
-          alert('Failed to update profile image');
-        }
-      } catch (err) {
-        console.error('Error saving profile image:', err);
+  const reader = new FileReader();
+  reader.onloadend = async () => {
+    const updatedImage = reader.result;
+    setProfileImage(updatedImage);
+
+    try {
+      // Fetch existing profile
+      const res1 = await fetch(`http://localhost:5000/api/get-profile?email=${user.email}`);
+      const data1 = await res1.json();
+      const existingProfile = data1.profile;
+
+      // Merge with existing fields
+      const updatedProfile = {
+        ...existingProfile,
+        email: user.email,
+        profileImage: updatedImage
+      };
+
+      const res = await fetch('http://localhost:5000/api/update-profile', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedProfile)
+      });
+
+      const result = await res.json();
+      if (result.status === 'success') {
+        localStorage.setItem('user', JSON.stringify({ ...user, profileImage: updatedImage }));
+        setProfile(updatedProfile);
+      } else {
+        alert('Failed to update profile image');
       }
-    };
-    reader.readAsDataURL(file);
+    } catch (err) {
+      console.error('Error saving profile image:', err);
+    }
   };
+
+  reader.readAsDataURL(file);
+};
+
+
 
   if (!user) return null;
 
@@ -223,18 +237,10 @@ const handleImageUpload = (e) => {
                 type="file"
                 accept="image/*"
                 ref={fileInputRef}
-                onChange={(e) => {
-                  const file = e.target.files[0];
-                  if (file) {
-                    const reader = new FileReader();
-                    reader.onloadend = () => {
-                      setProfileImage(reader.result);
-                    };
-                    reader.readAsDataURL(file);
-                  }
-                }}
+                onChange={handleImageUpload}  // ✅ This sends to backend
                 style={{ display: 'none' }}
               />
+
             </div>
 
             {/* Image Preview Modal */}
