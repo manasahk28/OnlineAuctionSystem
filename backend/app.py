@@ -78,10 +78,19 @@ def login():
 def post_item():
     data = request.get_json()
 
-    required_fields = ['title', 'description', 'category', 'startingPrice', 'condition', 'auctionEnd', 'userEmail', 'userName']
+    required_fields = [
+        'title', 'description', 'category',
+        'starting_price', 'minimum_increment',
+        'start_date_time', 'end_date_time',
+        'seller_id', 'contact_email',
+        'item_condition', 'pickup_method',
+        'terms_accepted'
+    ]
+
     for field in required_fields:
-        if field not in data or not data[field]:
+        if field not in data or data[field] in [None, '', [], False]:
             return jsonify({'status': 'fail', 'message': f'Missing required field: {field}'}), 400
+
 
     images = data.get('images', [])
     if not isinstance(images, list):
@@ -94,12 +103,12 @@ def post_item():
         if not isinstance(img, str) or not img.startswith('data:image'):
             return jsonify({'status': 'fail', 'message': 'Invalid image format'}), 400
 
-    # Optional: Validate video
+    # Validate optional video
     video = data.get('video')
     if video and (not isinstance(video, str) or not video.startswith('data:video')):
         return jsonify({'status': 'fail', 'message': 'Invalid video format'}), 400
 
-    # Clean item data
+    # Construct item object with all fields
     item = {
         'title': data.get('title', ''),
         'description': data.get('description', ''),
@@ -126,15 +135,13 @@ def post_item():
         'highlights': data.get('highlights', ''),
         'item_condition': data.get('item_condition', ''),
         'warranty': data.get('warranty', ''),
+        'warranty_duration': data.get('warranty_duration', ''),
+        'damage_description': data.get('damage_description', ''),
         'limitedCollection': data.get('limitedCollection', False),
         'timestamp': datetime.datetime.now().isoformat()
     }
 
     items_collection.insert_one(item)
-    
-    # data['timestamp'] = datetime.datetime.now().isoformat()
-    # items_collection.insert_one(data)
-
     return jsonify({'status': 'success', 'message': 'Item posted successfully!'}), 201
 
 @app.route('/api/get-profile', methods=['GET'])
