@@ -55,6 +55,13 @@
   gap: 1rem;
 }
 
+.right-panel p,
+.right-panel h1 {
+  margin: 0;         
+  padding: 0;
+  line-height: 2;  
+}
+
 .item-title {
   font-size: 2rem;
   font-weight: bold;

@@ -63,13 +63,16 @@ const ExploreItems = () => {
                 alt={item.title} 
                 className="item-image"
               />
+              {item.limitedCollection && (
+                  <div className="exclusive-badge" title="Exclusive Item">⭐</div>
+                )}
             </div>
             <div className="item-content">
               <h3 className="item-title">{item.title}</h3>
               <p className="item-price" style={{ color: getColorByIndex(index) }}>
                 ₹{item.startingPrice}
               </p>
-              <p className="item-desc">{item.description}</p>
+              {/* <p className="item-desc">{item.description}</p> */}
               <button 
                 onClick={() => navigate(`/item/${item._id}`)}
                 style={{ 

@@ -94,8 +94,46 @@ def post_item():
         if not isinstance(img, str) or not img.startswith('data:image'):
             return jsonify({'status': 'fail', 'message': 'Invalid image format'}), 400
 
-    data['timestamp'] = datetime.datetime.now().isoformat()
-    items_collection.insert_one(data)
+    # Optional: Validate video
+    video = data.get('video')
+    if video and (not isinstance(video, str) or not video.startswith('data:video')):
+        return jsonify({'status': 'fail', 'message': 'Invalid video format'}), 400
+
+    # Clean item data
+    item = {
+        'title': data.get('title', ''),
+        'description': data.get('description', ''),
+        'category': data.get('category', ''),
+        'tags': data.get('tags', ''),
+        'images': images,
+        'video': video if video else '',
+        'starting_price': data.get('starting_price', ''),
+        'minimum_increment': data.get('minimum_increment', ''),
+        'buy_now_price': data.get('buy_now_price', ''),
+        'start_date_time': data.get('start_date_time', ''),
+        'end_date_time': data.get('end_date_time', ''),
+        'duration': data.get('duration', ''),
+        'seller_id': data.get('seller_id', ''),
+        'contact_email': data.get('contact_email', ''),
+        'location': data.get('location', ''),
+        'pickup_method': data.get('pickup_method', ''),
+        'delivery_charge': data.get('delivery_charge', ''),
+        'return_policy': data.get('return_policy', ''),
+        'is_approved': data.get('is_approved', False),
+        'status': data.get('status', 'Draft'),
+        'terms_accepted': data.get('terms_accepted', False),
+        'report_reason': data.get('report_reason', ''),
+        'highlights': data.get('highlights', ''),
+        'item_condition': data.get('item_condition', ''),
+        'warranty': data.get('warranty', ''),
+        'limitedCollection': data.get('limitedCollection', False),
+        'timestamp': datetime.datetime.now().isoformat()
+    }
+
+    items_collection.insert_one(item)
+    
+    # data['timestamp'] = datetime.datetime.now().isoformat()
+    # items_collection.insert_one(data)
 
     return jsonify({'status': 'success', 'message': 'Item posted successfully!'}), 201
 

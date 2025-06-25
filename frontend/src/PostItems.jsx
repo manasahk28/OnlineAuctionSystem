@@ -4,19 +4,22 @@ import './PostItem.css';
 import Layout from './Layout';
 
 const PostItems = () => {
-    const navigate = useNavigate();
+    // const navigate = useNavigate();
     const [customCategory, setCustomCategory] = useState('');
     const [fileInputKey, setFileInputKey] = useState(Date.now()); // unique key for input refresh
     const [showTerms, setShowTerms] = useState(false);
     const [warranty, setWarranty] = useState('No');
     const [itemCondition, setItemCondition] = useState('');
+    const [imagePreviews, setImagePreviews] = useState([]);
+    const [videoPreview, setVideoPreview] = useState(null);
+    
     const [form, setForm] = useState({
     title: '',
     description: '',
     category: '',
     tags: '',
     images: [],
-    video_url: '',
+    video: null,
     starting_price: '',
     minimum_increment: '',
     buy_now_price: '',
@@ -37,7 +40,8 @@ const PostItems = () => {
     item_condition: '',
     warranty: '',
     warranty_duration: '',
-    damage_description: ''
+    damage_description: '',
+    limitedCollection: false
   });
 
   const requiredFields = [
@@ -94,28 +98,57 @@ const PostItems = () => {
   // reset the file input
   setFileInputKey(Date.now());
 }
+else if (name === 'video') {
+        const videoFile = files[0];
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setForm({ ...form, video: reader.result });
+          setVideoPreview(reader.result);
+        };
+        reader.readAsDataURL(videoFile);
+      }
    else {
     setForm({ ...form, [name]: value });
   }
 };
 
 
-const handleSubmit = (e) => {
+const handleSubmit = async (e) => {
   e.preventDefault();
 
   const missingFields = requiredFields.filter(field => {
     return !form[field] || (typeof form[field] === 'string' && form[field].trim() === '');
   });
 
+  if (form.images.length === 0) {
+      alert('Please upload at least one image.');
+      return;
+    }
+
   if (missingFields.length > 0) {
     alert(`🚫 Please fill all required fields:\n${missingFields.join(', ')}`);
     return;
   }
-  console.log("Form submitted:", form);
 
-  // ALL GOOD! Submit the form
-  alert("Your item has been posted successfully!");
-  navigate("/dashboard");
+  if (!form.terms_accepted) {
+      alert('You must accept the terms and conditions.');
+      return;
+    }
+  // console.log("Form submitted:", form);
+
+  try {
+      const response = await fetch('http://localhost:5000/api/post-item', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form)
+      });
+
+      const result = await response.json();
+      alert(result.message || 'Item posted successfully!');
+    } catch (err) {
+      alert('Failed to post item');
+      console.error(err);
+    }
 };
 
   const handleEstimatePrice = () => {
@@ -267,6 +300,16 @@ const handleRemoveImage = (index) => {
 
 
           {renderInput('Tags', 'tags', 'text', 'Tags (comma separated)')}
+          <div className="input-group">
+              <label>
+                <input
+                  type="checkbox"
+                  name="limitedCollection"
+                  checked={form.limitedCollection}
+                  onChange={handleChange}
+                /> Limited Collection Item
+              </label>
+            </div>
         </div>
 
 
@@ -310,9 +353,16 @@ const handleRemoveImage = (index) => {
   </div>
 )}
 
-
-
-  {renderInput('Video URL', 'video_url', 'text', 'Video URL (optional)')}
+  <div className="input-group">
+              <label>Video File (optional)</label>
+              <input type="file" name="video" accept="video/*" onChange={handleChange} />
+            </div>
+            {videoPreview && (
+              <div className="media-preview">
+                <h4>Video Preview:</h4>
+                <video src={videoPreview} controls className="preview-video" />
+              </div>
+            )}
 </div>
 
 
