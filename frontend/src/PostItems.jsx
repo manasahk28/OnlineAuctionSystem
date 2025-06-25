@@ -62,53 +62,47 @@ const PostItems = () => {
 ];
 
 
- const handleChange = (e) => {
+const handleChange = (e) => {
   const { name, value, type, checked, files } = e.target;
 
   if (name === 'warranty') setWarranty(value);
   if (name === 'item_condition') setItemCondition(value);
 
   if (type === 'checkbox') {
-    setForm({ ...form, [name]: checked });
-  } else if (type === 'file') {
-  const selectedFiles = Array.from(files);
-  const totalImages = form.images.length + selectedFiles.length;
+    setForm((prev) => ({ ...prev, [name]: checked }));
+  } else if (type === 'file' && name === 'images') {
+    const selectedFiles = Array.from(files);
+    const totalImages = form.images.length + selectedFiles.length;
 
-  if (totalImages > 3) {
-    alert(`You can only upload 3 images. You already added ${form.images.length}.`);
-    return;
-  }
-    setForm(prev => ({
-    ...prev,
-    images: [...prev.images, ...selectedFiles]}));
-  }else if (type === 'file') {
-  const selectedFiles = Array.from(files);
-  const totalImages = form.images.length + selectedFiles.length;
+    if (totalImages > 3) {
+      alert(`You can only upload 3 images. You already added ${form.images.length}.`);
+      return;
+    }
 
-  if (totalImages > 3) {
-    alert(`You can only upload 3 images. You already added ${form.images.length}.`);
-    return;
-  }
+    // Convert images to base64
+    selectedFiles.forEach((file) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setForm((prev) => ({
+          ...prev,
+          images: [...prev.images, reader.result],
+        }));
+        setImagePreviews((prev) => [...prev, reader.result]);
+      };
+      reader.readAsDataURL(file);
+    });
 
-  setForm((prev) => ({
-    ...prev,
-    images: [...prev.images, ...selectedFiles],
-  }));
-
-  // reset the file input
-  setFileInputKey(Date.now());
-}
-else if (name === 'video') {
-        const videoFile = files[0];
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          setForm({ ...form, video: reader.result });
-          setVideoPreview(reader.result);
-        };
-        reader.readAsDataURL(videoFile);
-      }
-   else {
-    setForm({ ...form, [name]: value });
+    setFileInputKey(Date.now());
+  } else if (type === 'file' && name === 'video') {
+    const videoFile = files[0];
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setForm((prev) => ({ ...prev, video: reader.result }));
+      setVideoPreview(reader.result);
+    };
+    reader.readAsDataURL(videoFile);
+  } else {
+    setForm((prev) => ({ ...prev, [name]: value }));
   }
 };
 
@@ -116,14 +110,17 @@ else if (name === 'video') {
 const handleSubmit = async (e) => {
   e.preventDefault();
 
-  const missingFields = requiredFields.filter(field => {
-    return !form[field] || (typeof form[field] === 'string' && form[field].trim() === '');
+  const missingFields = requiredFields.filter((field) => {
+    const value = form[field];
+    if (typeof value === 'boolean') return value !== true;
+    if (Array.isArray(value)) return value.length === 0;
+    return !value || (typeof value === 'string' && value.trim() === '');
   });
 
   if (form.images.length === 0) {
-      alert('Please upload at least one image.');
-      return;
-    }
+    alert('Please upload at least one image.');
+    return;
+  }
 
   if (missingFields.length > 0) {
     alert(`🚫 Please fill all required fields:\n${missingFields.join(', ')}`);
@@ -131,24 +128,28 @@ const handleSubmit = async (e) => {
   }
 
   if (!form.terms_accepted) {
-      alert('You must accept the terms and conditions.');
-      return;
-    }
-  // console.log("Form submitted:", form);
+    alert('You must accept the terms and conditions.');
+    return;
+  }
+
+  const payload = {
+    ...form,
+    category: form.category === 'Other' ? customCategory : form.category,
+  };
 
   try {
-      const response = await fetch('http://localhost:5000/api/post-item', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form)
-      });
+    const response = await fetch('http://localhost:5000/api/post-item', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
 
-      const result = await response.json();
-      alert(result.message || 'Item posted successfully!');
-    } catch (err) {
-      alert('Failed to post item');
-      console.error(err);
-    }
+    const result = await response.json();
+    alert(result.message || 'Item posted successfully!');
+  } catch (err) {
+    alert('❌ Failed to post item');
+    console.error(err);
+  }
 };
 
   const handleEstimatePrice = () => {
@@ -243,9 +244,14 @@ const handleRemoveImage = (index) => {
     return { ...prev, images: updatedImages };
   });
 
-  setFileInputKey(Date.now()); // refresh file input
-};
+  setImagePreviews((prev) => {
+    const updatedPreviews = [...prev];
+    updatedPreviews.splice(index, 1);
+    return updatedPreviews;
+  });
 
+  setFileInputKey(Date.now());
+};
 
   return (
     <Layout>
@@ -334,10 +340,10 @@ const handleRemoveImage = (index) => {
 
 {form.images.length > 0 && (
   <div className="image-pre-container">
-    {form.images.map((file, index) => (
+    {imagePreviews.map((src, index) => (
       <div className="image-wrapper" key={index}>
         <img
-          src={URL.createObjectURL(file)}
+          src={src}
           alt={`preview-${index}`}
           className="pre-image"
         />
@@ -482,23 +488,6 @@ const handleRemoveImage = (index) => {
 
           {renderInput('Return Policy', 'return_policy', 'text', 'Return Policy (optional)')}
         </div>
-
-        {/* <div className="form-section">
-          <h3>⚠️ Approval & Status</h3>
-          <div className="input-group">
-            <label>Status</label>
-            <select name="status" onChange={handleChange}>
-              <option>Draft</option>
-              <option>Pending</option>
-              <option>Live</option>
-              <option>Ended</option>
-              <option>Sold</option>
-            </select>
-          </div>
-          <div className="input-group">
-            <label><input type="checkbox" name="is_approved" onChange={handleChange} /> Approved</label>
-          </div>
-        </div> */}
 
         <div className="form-section">
   <h3>🌟 Bonus</h3>
