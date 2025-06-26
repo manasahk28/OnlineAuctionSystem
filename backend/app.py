@@ -210,7 +210,7 @@ def get_all_items():
 
     return jsonify({'status': 'success', 'items': items}), 200
 
-@app.route('/api/item/<item_id>', methods=['GET'])
+@app.route('/api/items/<item_id>', methods=['GET'])
 def get_single_item(item_id):
     try:
         item = items_collection.find_one({'_id': ObjectId(item_id)})
@@ -222,6 +222,68 @@ def get_single_item(item_id):
 
     except Exception as e:
         return jsonify({'status': 'fail', 'message': 'Invalid item ID'}), 400
+
+@app.route('/api/items/<string:item_id>', methods=['PUT'])
+def update_item(item_id):
+    try:
+        form_data = request.form
+        files = request.files
+
+        update_data = {}
+
+        # Extract form fields
+        update_data['title'] = form_data.get('title')
+        update_data['description'] = form_data.get('description')
+        update_data['category'] = form_data.get('category')
+        update_data['tags'] = form_data.get('tags')
+        update_data['starting_price'] = form_data.get('starting_price')
+        update_data['minimum_increment'] = form_data.get('minimum_increment')
+        update_data['buy_now_price'] = form_data.get('buy_now_price')
+        update_data['start_date_time'] = form_data.get('start_date_time')
+        update_data['end_date_time'] = form_data.get('end_date_time')
+        update_data['duration'] = form_data.get('duration')
+        update_data['seller_id'] = form_data.get('seller_id')
+        update_data['contact_email'] = form_data.get('contact_email')
+        update_data['location'] = form_data.get('location')
+        update_data['pickup_method'] = form_data.get('pickup_method')
+        update_data['delivery_charge'] = form_data.get('delivery_charge')
+        update_data['return_policy'] = form_data.get('return_policy')
+        update_data['is_approved'] = form_data.get('is_approved') == 'true'
+        update_data['status'] = form_data.get('status')
+        update_data['terms_accepted'] = form_data.get('terms_accepted') == 'true'
+        update_data['report_reason'] = form_data.get('report_reason')
+        update_data['highlights'] = form_data.get('highlights')
+        update_data['item_condition'] = form_data.get('item_condition')
+        update_data['warranty'] = form_data.get('warranty')
+        update_data['warranty_duration'] = form_data.get('warranty_duration')
+        update_data['damage_description'] = form_data.get('damage_description')
+        update_data['limitedCollection'] = form_data.get('limitedCollection') == 'true'
+
+        # Handle uploaded images
+        images = request.files.getlist('images')
+        image_urls = []
+        for image in images:
+            if image and image.filename:
+                image_urls.append(image.filename)  # Replace with your file saving logic
+
+        if image_urls:
+            update_data['images'] = image_urls
+
+        # Handle video upload
+        video = request.files.get('video')
+        if video and video.filename:
+            update_data['video'] = video.filename  # Replace with saving logic
+
+        result = items_collection.update_one({'_id': ObjectId(item_id)}, {'$set': update_data})
+
+        if result.modified_count > 0:
+            return jsonify({'status': 'success', 'message': 'Item updated successfully'})
+        else:
+            return jsonify({'status': 'error', 'message': 'No changes made'}), 400
+
+    except Exception as e:
+        print("❌ Error in update_item:", e)
+        return jsonify({'status': 'error', 'message': str(e)}), 500
 
 @app.route('/api/items/user/<email>', methods=['GET'])
 def get_user_items(email):

@@ -8,6 +8,7 @@ import Payments from './Payments';
 import MyBids from './MyBids';
 import RecentActivity from './RecentActivity';
 import Notifications from './Notifications';
+import EditItem from './EditItem';
 
 import { useNavigate } from 'react-router-dom';
 import {
@@ -30,13 +31,16 @@ import {
 const UserDashboard = () => {
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem('user'));
-
+  const [editingItemId, setEditingItemId] = useState(null);
+  const [editItemId, setEditItemId] = useState(null);
   const [showWelcome, setShowWelcome] = useState(true);
   const [profileImage, setProfileImage] = useState(null);
   const fileInputRef = useRef(null); // for triggering file input
   const [showImageModal, setShowImageModal] = useState(false);
   const [profile, setProfile] = useState({});
   const [activeSection, setActiveSection] = useState('Profile');
+  // const [activeSection, setActiveSection] = useState('My Listings');
+
   const [now, setNow] = useState(Date.now());
 
   // useEffect(() => {
@@ -186,7 +190,7 @@ const handleImageUpload = async (e) => {
 
  {/* Welcome */}
       {showWelcome ? (
-        <div className="dashboard-wrapper">
+        <div className="dashboard-container">
           <div className="dashboard-card">
             <h1 className="dashboard-heading">👋 Welcome!</h1>
             <p className="dashboard-user">
@@ -332,7 +336,16 @@ const handleImageUpload = async (e) => {
               )}
                {activeSection === 'My Bids' && <MyBids />}
                {activeSection === 'Payments' && <Payments />}
-               {activeSection === 'My Listings' && <MyListings />}
+               {activeSection === 'My Listings' && <MyListings
+                 setActiveSection={setActiveSection}
+
+  setEditingItemId={setEditingItemId}
+/>}
+      {activeSection === 'Edit Item' && (
+  <EditItem itemId={editingItemId} setActiveSection={setActiveSection} />
+
+)}
+
                {activeSection === 'Notifications' && <Notifications />}
                {activeSection === 'RecentActivity' && <RecentActivity/>}
                {/* {activeSection === 'ProfilePage' && (

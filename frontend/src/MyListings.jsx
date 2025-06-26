@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import './MyListings.css';
 
-const MyListings = () => {
+const MyListings = ({ setEditingItemId, setActiveSection }) => {
   const [listings, setListings] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const user = JSON.parse(localStorage.getItem('user'));
 
+  // 📦 Fetch all items listed by the user
   useEffect(() => {
     const fetchListings = async () => {
       if (!user?.email) {
@@ -45,26 +46,39 @@ const MyListings = () => {
 
   return (
     <div className="my-listings-wrapper">
+      <div className="profile-header">
+      <h2 style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        🧾 My Listings
+      </h2>
+    </div>
       {loading ? (
-        <p className="loading-text">Loading your listings...</p>
+        <p className="loading-text">⏳ Loading your listings...</p>
       ) : listings.length === 0 ? (
-        <p className="no-listings-text">You haven't posted anything yet.</p>
+        <p className="no-listings-text">😢 You haven't posted anything yet.</p>
       ) : (
         <div className="listings-grid">
           {listings.map(item => (
             <div className="listing-card" key={item._id}>
-              {item.imageUrl && (
+              {item.imageUrl ? (
                 <img src={item.imageUrl} alt={item.title} className="listing-image" />
+              ) : (
+                <div className="no-image">No Image</div>
               )}
+
               <div className="listing-content">
                 <h3 className="listing-title">{item.title}</h3>
                 <p className="listing-description">{item.description}</p>
+
                 <div className="listing-meta">
-                  <span className="price-tag"> ₹{item.startingPrice}</span>
+                  <span className="price-tag">₹{item.startingPrice}</span>
                 </div>
-                {/* ✅ View More button added here */}
+
                 <div className="listing-actions">
-                  <button className="view-more-btn">View More</button>
+                  <button
+                    className="view-more-btn"
+                    onClick={() => {  setEditingItemId(item._id);     // <-- Set which item to edit
+                                      setActiveSection('Edit Item');  // <-- Switch to Edit Item view
+                        }} >✏️ Edit </button>
                 </div>
               </div>
             </div>

@@ -7,6 +7,8 @@ import UserDashboard from './UserDashboard';
 import ExploreItems from './ExploreItems';
 import PostItems from './PostItems';
 import ItemDetail from './ItemDetail';
+import EditItem from './EditItem';
+
 
 function App() {
   return (
@@ -19,6 +21,8 @@ function App() {
         <Route path="/explore" element={<ExploreItems />} />
         <Route path="/post-item" element={<PostItems />} />
         <Route path="/item/:id" element={<ItemDetail />} />
+        <Route path="/edit-item/:id" element={<EditItem />} />
+
       </Routes>
     </Router>
   );

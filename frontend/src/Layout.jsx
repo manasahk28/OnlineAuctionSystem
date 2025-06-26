@@ -4,7 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faInstagram, faLinkedin, faTwitter } from '@fortawesome/free-brands-svg-icons';
 
-import './Layout.css'; // Assuming you have a CSS file for styles
+import './Layout.css';
+
 const Layout = ({ children }) => {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
@@ -51,14 +52,13 @@ const Layout = ({ children }) => {
   };
 
   return (
-    <>
+    <div className="layout-container">
       {/* Navbar */}
       <nav className="navbar">
         <div className="navbar-left">
           <h2>Online Auction</h2>
         </div>
         <div className="navbar-right">
-          
           {user ? (
             <>
               <a href="/">Home</a>
@@ -121,7 +121,7 @@ const Layout = ({ children }) => {
           </a>
         </div>
       </footer>
-    </>
+    </div>
   );
 };
 

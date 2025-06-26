@@ -1,0 +1,255 @@
+.edit-item-wrapper {
+  padding: 1rem;
+  border-radius: 12px;
+max-width: 900px;
+}
+
+.edit-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.3rem;
+}
+
+.edit-item-header h2 {
+  font-size: 1.6rem;
+  color: #333;
+}
+
+.back-btn {
+  background-color: #ff8000;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.edit-item-form .form-group {
+  margin-bottom: 1rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 4px;
+  font-weight: 500;
+  color: #444;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+  width: 100%;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+}
+
+.form-actions {
+  text-align: right;
+  margin-top: 1rem;
+}
+
+.save-btn {
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+/* .checkbox-group {
+  margin-top: 1rem;
+} */
+
+/* .edit-item-wrapper {
+  padding: 2rem;
+  max-width: 800px;
+  margin: 0 auto;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+} */
+
+.edit-item-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.edit-form-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.edit-form-row label {
+  flex: 0 0 180px;
+  font-weight: 600;
+  color: #333;
+  text-align: right;
+}
+
+.edit-form-row input,
+.edit-form-row textarea,
+.edit-form-row select {
+  flex: 1;
+  padding: 0.6rem 1rem;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  outline: none;
+  background-color: #f9f9f9;
+}
+
+.edit-form-row textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.edit-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.save-btn, .cancel-btn {
+  padding: 0.6rem 1.5rem;
+  font-size: 1rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.save-btn {
+  background-color: #4CAF50;
+  color: white;
+}
+
+.cancel-btn {
+  background-color: #f58a0f;
+  color: white;
+}
+
+.save-btn:hover {
+  background-color: #45a049;
+}
+
+.cancel-btn:hover {
+  background-color: #d32f2f;
+}
+
+
+.edit-item-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-width: 800px;
+  margin: auto;
+  padding: 2rem;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.1);
+}
+
+.edit-form-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.edit-form-row label {
+  flex: 0 0 110px;
+  font-weight: 600;
+  text-align: left;
+  color: #333;
+}
+
+
+
+
+.edit-form-row input,
+.edit-form-row textarea {
+  flex: 1;
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  background-color: #f9f9f9;
+  font-size: 1rem;
+}
+
+.edit-form-row textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+
+
+.edit-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 2rem;
+}
+
+.checkbox-row {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+}
+
+.checkbox-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 12px;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+
+.checkbox-row label {
+  margin: 0;
+  font-weight: 600;
+  color: #222;
+  white-space: nowrap;
+}
+
+.checkbox-row input[type="checkbox"] {
+  margin-left: 0px;
+  transform: scale(1.2);
+  cursor: pointer;
+}
+
+.inline-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 600;
+  color: #222;
+}
+
+.inline-checkbox input[type="checkbox"] {
+  transform: scale(1.2);
+  cursor: pointer;
+}
+
+.save-btn {
+  background-color: #4CAF50;
+  color: white;
+  padding: 0.6rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background 0.3s ease;
+}
+
+.save-btn:hover {
+  background-color: #388e3c;
+}
