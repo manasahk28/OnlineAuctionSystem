@@ -5,62 +5,66 @@ const MyListings = () => {
   const [listings, setListings] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Get logged-in user info from localStorage
   const user = JSON.parse(localStorage.getItem('user'));
 
   useEffect(() => {
     const fetchListings = async () => {
+      if (!user?.email) {
+        console.error("No user email found. Cannot fetch listings.");
+        setLoading(false);
+        return;
+      }
+
       try {
-        const response = await fetch(`http://localhost:5000/api/items/user/${user.email}`);
-        const data = await response.json();
+        const res = await fetch(`http://localhost:5000/api/items/user/${user.email}`);
+        const data = await res.json();
 
         if (data.status === 'success') {
-          // Format only required fields
-          const formatted = data.items.map((item) => ({
+          const formatted = data.items.map(item => ({
             _id: item._id,
-            title: item.title,
-            description: item.description,
-            startingPrice: item.startingPrice,
-            endTime: item.auctionEnd,
-            imageUrl: item.images?.[0] || 'https://via.placeholder.com/200', // default image fallback
+            title: item.title || 'No Title',
+            description: item.description || 'No description provided.',
+            startingPrice: item.starting_price || 'N/A',
+            endTime: item.end_date_time || '',
+            imageUrl: item.images?.[0] || null,
+            status: item.status || 'Draft',
           }));
           setListings(formatted);
         } else {
-          console.error('Failed to fetch user listings:', data.message);
+          console.error("API error:", data.message);
         }
-      } catch (error) {
-        console.error('Error fetching listings:', error);
+      } catch (err) {
+        console.error("Fetch failed:", err);
       } finally {
         setLoading(false);
       }
     };
 
-    if (user?.email) {
-      fetchListings();
-    }
+    fetchListings();
   }, [user]);
 
   return (
     <div className="my-listings-wrapper">
-      <h2 style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#333' }}>
-        <span role="img" aria-label="box">📦</span>My Listings
-      </h2>
-
       {loading ? (
-        <p className="loading-text">Loading listings...</p>
+        <p className="loading-text">Loading your listings...</p>
       ) : listings.length === 0 ? (
-        <p className="no-listings-text">You haven't posted any listings yet.</p>
+        <p className="no-listings-text">You haven't posted anything yet.</p>
       ) : (
         <div className="listings-grid">
-          {listings.map((item) => (
+          {listings.map(item => (
             <div className="listing-card" key={item._id}>
-              <img src={item.imageUrl} alt={item.title} className="listing-image" />
+              {item.imageUrl && (
+                <img src={item.imageUrl} alt={item.title} className="listing-image" />
+              )}
               <div className="listing-content">
                 <h3 className="listing-title">{item.title}</h3>
                 <p className="listing-description">{item.description}</p>
                 <div className="listing-meta">
-                  <span className="price-tag">₹{item.startingPrice}</span>
-                  <span className="end-time">⏳ Ends: {new Date(item.endTime).toLocaleString()}</span>
+                  <span className="price-tag"> ₹{item.startingPrice}</span>
+                </div>
+                {/* ✅ View More button added here */}
+                <div className="listing-actions">
+                  <button className="view-more-btn">View More</button>
                 </div>
               </div>
             </div>
