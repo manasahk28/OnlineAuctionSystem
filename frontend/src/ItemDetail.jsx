@@ -10,6 +10,9 @@ const ItemDetail = () => {
   const [item, setItem] = useState(null);
   const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
   const [mediaList, setMediaList] = useState([]);
+  const [showModal, setShowModal] = useState(false);
+  const [bidAmount, setBidAmount] = useState('');
+  const [error, setError] = useState('');
 
   useEffect(() => {
     const fetchItem = async () => {
@@ -19,12 +22,9 @@ const ItemDetail = () => {
           const fetchedItem = res.data.item;
           setItem(fetchedItem);
 
-          // Combine images and video into one list for carousel
           const images = fetchedItem.images || [];
           const media = [...images];
-          if (fetchedItem.video) {
-            media.push(fetchedItem.video);
-          }
+          if (fetchedItem.video) media.push(fetchedItem.video);
           setMediaList(media);
         }
       } catch (err) {
@@ -51,6 +51,37 @@ const ItemDetail = () => {
 
   const currentMedia = mediaList[currentMediaIndex];
   const isVideo = currentMedia?.startsWith('data:video');
+
+  const handleBid = async () => {
+    const minAllowed = Number(item.starting_price) + Number(item.minimum_increment);
+    if (!bidAmount || bidAmount < minAllowed) {
+      setError(`Bid must be at least ₹${minAllowed}`);
+      return;
+    }
+
+    try {
+      const user = JSON.parse(localStorage.getItem('user'));
+      const res = await axios.post('http://localhost:5000/api/place-bid', {
+        item_id: item._id,
+        bid_amount: bidAmount,
+        bidder_email: user?.email || '',
+        bidder_id: user?.collegeId || ''
+      });
+
+      if (res.data.status === 'success') {
+        alert('Bid placed successfully!');
+        setShowModal(false);
+        setBidAmount('');
+        setError('');
+      } else {
+        setError(res.data.message || 'Failed to place bid');
+      }
+    } catch (err) {
+      console.error('Bid error:', err);
+      setError('Something went wrong while placing the bid');
+    }
+  };
+
   return (
     <Layout>
       <div className="item-detail-container">
@@ -80,14 +111,12 @@ const ItemDetail = () => {
               🚨 Exclusive Limited Collection Item
             </p>
           )}
-
           <p className="item-price"><strong>Base Price:</strong> ₹{item.starting_price}</p>
           <p className="item-price"><strong>Min Increment:</strong> ₹{item.minimum_increment}</p>
           {item.buy_now_price && (
             <p className="item-price"><strong>Buy Now Price:</strong> ₹{item.buy_now_price}</p>
           )}
-          {/* <p className="item-desc"><strong>Description:</strong> {item.description}</p> */}
-          <p className="item-user"><strong>Posted By:</strong> {item.seller_id} ({item.contact_email})</p>
+          <p className="item-user"><strong>Posted By:</strong> {item.seller_id}</p>
           <p className="item-date"><strong>Auction Starts:</strong> {new Date(item.start_date_time).toLocaleString()}</p>
           <p className="item-date"><strong>Auction Ends:</strong> {new Date(item.end_date_time).toLocaleString()}</p>
           {item.category && <p><strong>Category:</strong> {item.category}</p>}
@@ -104,12 +133,48 @@ const ItemDetail = () => {
             <button className="back-button" onClick={() => navigate('/explore')}>
               ← Back
             </button>
-            <button className="bid-button">
-               Bid for Auction
+            <button className="bid-button" onClick={() => setShowModal(true)}>
+              Bid for Auction
             </button>
           </div>
         </div>
       </div>
+
+      {showModal && (
+        <div className="modal-overlay" onClick={() => setShowModal(false)}>
+          <div className="modal-box" onClick={(e) => e.stopPropagation()}>
+            <h2>Place Your Bid</h2>
+            <p><strong>Title:</strong> {item.title}</p>
+            <p><strong>Seller Email:</strong> {item.seller_id}</p>
+            <p><strong>Base Price:</strong> ₹{item.starting_price}</p>
+            <p><strong>Min Increment:</strong> ₹{item.minimum_increment}</p>
+
+            <input
+              type="number"
+              placeholder={`Enter bid ≥ ₹${Number(item.starting_price) + Number(item.minimum_increment)}`}
+              value={bidAmount}
+              onChange={(e) => setBidAmount(Number(e.target.value))}
+              className="bid-input"
+            />
+
+            {error && <p className="error-text">{error}</p>}
+
+            <div className="modal-actions">
+              <button className="cancel-button" onClick={() => {
+                setShowModal(false);
+                setError('');
+                setBidAmount('');
+              }}>
+                Cancel
+              </button>
+
+              <button className="confirm-bid-button" onClick={handleBid}>
+                Place Bid
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </Layout>
   );
 };
