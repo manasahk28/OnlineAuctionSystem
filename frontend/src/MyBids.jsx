@@ -38,7 +38,7 @@ const MyBids = () => {
     try {
       const res = await axios.post('http://localhost:5000/api/place-bid', {
         item_id: itemId,
-        bid_amount: newBid,
+        bid_amount: Number(newBid), // 👈 Ensure this is a number
         bidder_email: user?.email || '',
         bidder_id: user?.collegeId || ''
       });
@@ -111,26 +111,35 @@ const MyBids = () => {
                     <div className="outbid-notification">⚠️ You have been outbid!</div>
                   )}
 
-                  <form
-                    onSubmit={(e) => {
-                      e.preventDefault();
-                      const newBid = Number(e.target.elements.newBid.value);
-                      if (newBid > bid.highest_bid) {
-                        handleIncreaseBid(bid._id, newBid);
-                        e.target.reset();
-                      }
-                    }}
-                    className="increase-bid-form"
-                  >
-                    <input
-                      type="number"
-                      name="newBid"
-                      min={bid.highest_bid + 1}
-                      placeholder={`Bid more than ₹${bid.highest_bid}`}
-                      required
-                    />
-                    <button className="increaseBid" type="submit">Increase Bid</button>
-                  </form>
+                  {timeLeft > 0 ? (
+                    <form
+                      onSubmit={(e) => {
+                        e.preventDefault();
+                        const newBid = Number(e.target.elements.newBid.value);
+                        if (newBid >= bid.highest_bid + 1) {
+                          handleIncreaseBid(bid._id, newBid);
+                          e.target.reset();
+                        } else {
+                          alert(`Your bid must be at least ₹${bid.highest_bid + 1}`);
+                        }
+                      }}
+                      className="increase-bid-form"
+                    >
+                      <input
+                        type="number"
+                        name="newBid"
+                        min={bid.highest_bid + 1}
+                        placeholder={`Bid more than ₹${bid.highest_bid}`}
+                        required
+                      />
+                      <button className="increaseBid" type="submit">Increase Bid</button>
+                    </form>
+                  ) : (
+                    <p style={{ fontStyle: 'italic', color: '#999' }}>
+                      Bidding closed – auction has ended.
+                    </p>
+                  )}
+
                 </div>
               </div>
             );
