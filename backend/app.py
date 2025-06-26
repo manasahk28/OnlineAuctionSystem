@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from pymongo import MongoClient
 import datetime
-import bcrypt  
+import bcrypt
 from dotenv import load_dotenv
 import os
 from bson import ObjectId
@@ -19,6 +19,7 @@ db = client["auction_db"]
 users_collection = db["users"]
 profiles_collection = db["profiles"]
 items_collection = db["items"]
+bids_collection = db["bids"]  # NEW: for storing bids
 
 @app.route('/api/register', methods=['POST'])
 def register():
@@ -91,7 +92,6 @@ def post_item():
         if field not in data or data[field] in [None, '', [], False]:
             return jsonify({'status': 'fail', 'message': f'Missing required field: {field}'}), 400
 
-
     images = data.get('images', [])
     if not isinstance(images, list):
         return jsonify({'status': 'fail', 'message': 'Images must be a list'}), 400
@@ -103,12 +103,10 @@ def post_item():
         if not isinstance(img, str) or not img.startswith('data:image'):
             return jsonify({'status': 'fail', 'message': 'Invalid image format'}), 400
 
-    # Validate optional video
     video = data.get('video')
     if video and (not isinstance(video, str) or not video.startswith('data:video')):
         return jsonify({'status': 'fail', 'message': 'Invalid video format'}), 400
 
-    # Construct item object with all fields
     item = {
         'title': data.get('title', ''),
         'description': data.get('description', ''),
@@ -140,6 +138,52 @@ def post_item():
 
     items_collection.insert_one(item)
     return jsonify({'status': 'success', 'message': 'Item posted successfully!'}), 201
+
+@app.route('/api/place-bid', methods=['POST'])
+def place_bid():
+    data = request.get_json()
+    item_id = data.get('item_id')
+    bid_amount = data.get('bid_amount')
+    bidder_email = data.get('bidder_email')
+    bidder_id = data.get('bidder_id')
+
+    if not all([item_id, bid_amount, bidder_email, bidder_id]):
+        return jsonify({'status': 'fail', 'message': 'Missing bid details'}), 400
+
+    try:
+        item = items_collection.find_one({'_id': ObjectId(item_id)})
+        if not item:
+            return jsonify({'status': 'fail', 'message': 'Item not found'}), 404
+
+        # Store bid in `bids` collection
+        bids_collection.insert_one({
+            'item_id': item_id,
+            'item_title': item.get('title', ''),
+            'bid_amount': bid_amount,
+            'bidder_email': bidder_email,
+            'bidder_id': bidder_id,
+            'seller_email': item.get('contact_email', ''),
+            'timestamp': datetime.datetime.utcnow().isoformat(),
+            'outbid': False
+        })
+
+        # Mark all other bids on the same item as outbid
+        bids_collection.update_many(
+            {'item_id': item_id, 'bidder_id': {'$ne': bidder_id}},
+            {'$set': {'outbid': True}}
+        )
+
+        # Update highest bid in the item document
+        items_collection.update_one(
+            {'_id': ObjectId(item_id)},
+            {'$set': {'highest_bid': bid_amount}}
+        )
+
+        return jsonify({'status': 'success', 'message': 'Bid placed successfully'}), 200
+
+    except Exception as e:
+        print("Error placing bid:", e)
+        return jsonify({'status': 'fail', 'message': 'Internal server error'}), 500
 
 @app.route('/api/get-profile', methods=['GET'])
 def get_profile():
@@ -202,12 +246,11 @@ def update_profile():
 def get_all_items():
     items = list(items_collection.find())
     for item in items:
-        item['_id'] = str(item['_id'])  # Convert ObjectId to string
+        item['_id'] = str(item['_id'])
         if 'images' in item and isinstance(item['images'], list) and item['images']:
-            item['thumbnail'] = item['images'][0]  # Use first image as thumbnail
+            item['thumbnail'] = item['images'][0]
         else:
-            item['thumbnail'] = ''  # Default if no image
-
+            item['thumbnail'] = ''
     return jsonify({'status': 'success', 'items': items}), 200
 
 @app.route('/api/items/<item_id>', methods=['GET'])
@@ -216,11 +259,9 @@ def get_single_item(item_id):
         item = items_collection.find_one({'_id': ObjectId(item_id)})
         if not item:
             return jsonify({'status': 'fail', 'message': 'Item not found'}), 404
-
-        item['_id'] = str(item['_id'])  # Convert ObjectId to string
+        item['_id'] = str(item['_id'])
         return jsonify({'status': 'success', 'item': item}), 200
-
-    except Exception as e:
+    except Exception:
         return jsonify({'status': 'fail', 'message': 'Invalid item ID'}), 400
 
 @app.route('/api/items/<string:item_id>', methods=['PUT'])
@@ -287,11 +328,40 @@ def update_item(item_id):
 
 @app.route('/api/items/user/<email>', methods=['GET'])
 def get_user_items(email):
-    user_items = list(items_collection.find({'seller_id': email}))  # ✅ correct
+    user_items = list(items_collection.find({'seller_id': email}))
     for item in user_items:
         item['_id'] = str(item['_id'])
     return jsonify({'status': 'success', 'items': user_items}), 200
 
+@app.route('/my-bids/<bidder_id>', methods=['GET'])
+def get_my_bids(bidder_id):
+    try:
+        bids = list(db.bids.find({'bidder_id': bidder_id}))
+
+        # Get item IDs
+        item_ids = list(set(bid['item_id'] for bid in bids))
+        items_map = {
+            str(item['_id']): item
+            for item in db.items.find({'_id': {'$in': [ObjectId(i) for i in item_ids]}})
+        }
+
+        result = []
+        for bid in bids:
+            item = items_map.get(bid['item_id'])
+            if item:
+                result.append({
+                    '_id': str(item['_id']),
+                    'title': item.get('title'),
+                    'images': item.get('images', []),
+                    'highest_bid': item.get('highest_bid', item.get('base_price', 0)),
+                    'your_bid': bid.get('bid_amount'),
+                    'end_time': item.get('end_date_time'),  
+                    'outbid': bid.get('outbid', False)
+                })
+
+        return jsonify(result), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/')
 def home():
