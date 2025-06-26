@@ -8,6 +8,7 @@ import ExploreItems from './ExploreItems';
 import PostItems from './PostItems';
 import ItemDetail from './ItemDetail';
 import EditItem from './EditItem';
+import Layout, { About, Contact, Help } from './Layout';
 
 
 function App() {
@@ -22,7 +23,9 @@ function App() {
         <Route path="/post-item" element={<PostItems />} />
         <Route path="/item/:id" element={<ItemDetail />} />
         <Route path="/edit-item/:id" element={<EditItem />} />
-
+        <Route path="/about" element={<About />} />
+        <Route path="/contact" element={<Contact />} />
+        <Route path="/help" element={<Help />} />
       </Routes>
     </Router>
   );
