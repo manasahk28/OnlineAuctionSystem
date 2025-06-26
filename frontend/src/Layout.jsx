@@ -132,7 +132,7 @@ const Layout = ({ children, hideFooter }) => {
     </>
   );
 };
-
+}
 export default Layout;
 
 // About, Contact, and Help pages in one file
