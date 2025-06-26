@@ -188,11 +188,16 @@ const handleSubmit = async (e) => {
   };
 
 useEffect(() => {
-  const user = JSON.parse(localStorage.getItem('user')); // or sessionStorage
-  if (user && user.collegeId) {
-    setForm(prev => ({ ...prev, seller_id: user.collegeId }));
+  const user = JSON.parse(localStorage.getItem('user'));
+  if (user && user.email) {
+    setForm(prev => ({
+      ...prev,
+      seller_id: user.email,         // ✅ Use email here!
+      contact_email: user.email      // Optional: also use email for contact
+    }));
   }
 }, []);
+
 
    const renderInput = (label, name, type = 'text', placeholder = '', isTextarea = false) => {
     const isRequired = requiredFields.includes(name);
@@ -439,7 +444,7 @@ const handleRemoveImage = (index) => {
         <div className="form-section">
   <h3>👤 Seller Info</h3>
   <div className="input-row">
-    <label htmlFor="seller_id">Seller ID</label>
+    <label htmlFor="seller_id">Seller Email</label>
     <input
       type="text"
       name="seller_id"
@@ -450,7 +455,6 @@ const handleRemoveImage = (index) => {
       title='Auto-filled. You cannot edit this..'
     />
   </div>
-  {renderInput('Contact Email', 'contact_email', 'text', 'Email (optional)')}
   {renderInput('Location', 'location', 'text', 'Location (optional)')}
 </div>
 
