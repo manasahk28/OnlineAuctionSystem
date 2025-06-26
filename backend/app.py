@@ -123,13 +123,10 @@ def post_item():
         'end_date_time': data.get('end_date_time', ''),
         'duration': data.get('duration', ''),
         'seller_id': data.get('seller_id', ''),
-        'contact_email': data.get('contact_email', ''),
         'location': data.get('location', ''),
         'pickup_method': data.get('pickup_method', ''),
         'delivery_charge': data.get('delivery_charge', ''),
         'return_policy': data.get('return_policy', ''),
-        'is_approved': data.get('is_approved', False),
-        'status': data.get('status', 'Draft'),
         'terms_accepted': data.get('terms_accepted', False),
         'report_reason': data.get('report_reason', ''),
         'highlights': data.get('highlights', ''),
@@ -228,14 +225,10 @@ def get_single_item(item_id):
 
 @app.route('/api/items/user/<email>', methods=['GET'])
 def get_user_items(email):
-    try:
-        user_items = list(items_collection.find({'userEmail': email}))
-        for item in user_items:
-            item['_id'] = str(item['_id'])  # Convert ObjectId to string
-            item['thumbnail'] = item['images'][0] if item.get('images') else ''
-        return jsonify({'status': 'success', 'items': user_items}), 200
-    except Exception as e:
-        return jsonify({'status': 'fail', 'message': str(e)}), 500
+    user_items = list(items_collection.find({'seller_id': email}))  # ✅ correct
+    for item in user_items:
+        item['_id'] = str(item['_id'])
+    return jsonify({'status': 'success', 'items': user_items}), 200
 
 
 @app.route('/')
