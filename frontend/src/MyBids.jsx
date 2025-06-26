@@ -9,15 +9,17 @@ const MyBids = () => {
 
   const user = JSON.parse(localStorage.getItem('user'));
 
+  // Timer for live countdown
   useEffect(() => {
     const interval = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(interval);
   }, []);
 
+  // Fetch user's bids using their email
   useEffect(() => {
     const fetchBids = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/my-bids/${user.collegeId}`);
+        const response = await axios.get(`http://localhost:5000/my-bids/email/${user.email}`);
         setBids(response.data);
       } catch (error) {
         console.error('Failed to fetch bids:', error);
@@ -26,25 +28,42 @@ const MyBids = () => {
       }
     };
 
-    if (user?.collegeId) {
+    if (user?.email) {
       fetchBids();
     }
-  }, [user?.collegeId]);
+  }, [user?.email]);
 
-  const handleIncreaseBid = (itemId, newBid) => {
-    setBids((prev) =>
-      prev.map((bid) =>
-        bid._id === itemId && newBid > bid.highest_bid
-          ? {
-              ...bid,
-              your_bid: newBid,
-              highest_bid: newBid,
-              outbid: false,
-            }
-          : bid
-      )
-    );
-    // Optionally send new bid to backend here using axios.post(...)
+  // Handle increasing the bid and send it to backend
+  const handleIncreaseBid = async (itemId, newBid) => {
+    try {
+      const res = await axios.post('http://localhost:5000/api/place-bid', {
+        item_id: itemId,
+        bid_amount: newBid,
+        bidder_email: user?.email || '',
+        bidder_id: user?.collegeId || ''
+      });
+
+      if (res.data.status === 'success') {
+        setBids((prev) =>
+          prev.map((bid) =>
+            bid._id === itemId
+              ? {
+                  ...bid,
+                  your_bid: newBid,
+                  highest_bid: newBid,
+                  outbid: false
+                }
+              : bid
+          )
+        );
+        alert("Bid updated successfully!");
+      } else {
+        alert(res.data.message || "Failed to update bid");
+      }
+    } catch (error) {
+      console.error('Error updating bid:', error);
+      alert("Error updating bid. Please try again.");
+    }
   };
 
   if (loading) return <div className="charts-section">Loading your bids...</div>;
@@ -66,7 +85,6 @@ const MyBids = () => {
             const hours = Math.floor(timeLeft / (1000 * 60 * 60));
             const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
             const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
-
             const image = Array.isArray(bid.images) ? bid.images[0] : bid.image;
 
             return (
@@ -76,8 +94,9 @@ const MyBids = () => {
                 </div>
                 <div className="my-bid-info">
                   <h4>{bid.title}</h4>
-                  <p>Your current bid: <b>₹{bid.your_bid}</b></p>
-                  <p>Highest bid placed: <b>₹{bid.highest_bid}</b></p>
+                  <p>Your current bid: <b>₹{Number(bid.your_bid).toLocaleString()}</b></p>
+                  <p>Highest bid placed: <b>₹{Number(bid.highest_bid).toLocaleString()}</b></p>
+                  {bid.seller_email && <p>Seller: <b>{bid.seller_email}</b></p>}
                   {timeLeft > 0 ? (
                     <p>
                       Auction ends in:{' '}
@@ -91,6 +110,7 @@ const MyBids = () => {
                   {bid.outbid && (
                     <div className="outbid-notification">⚠️ You have been outbid!</div>
                   )}
+
                   <form
                     onSubmit={(e) => {
                       e.preventDefault();
@@ -98,7 +118,6 @@ const MyBids = () => {
                       if (newBid > bid.highest_bid) {
                         handleIncreaseBid(bid._id, newBid);
                         e.target.reset();
-                        // Optional: send POST to backend to update bid
                       }
                     }}
                     className="increase-bid-form"
@@ -110,7 +129,7 @@ const MyBids = () => {
                       placeholder={`Bid more than ₹${bid.highest_bid}`}
                       required
                     />
-                    <button className='increaseBid' type='submit'>Increase Bid</button>
+                    <button className="increaseBid" type="submit">Increase Bid</button>
                   </form>
                 </div>
               </div>
