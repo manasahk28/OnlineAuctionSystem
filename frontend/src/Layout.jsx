@@ -4,12 +4,10 @@ import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faInstagram, faLinkedin, faTwitter } from '@fortawesome/free-brands-svg-icons';
 import { FaInfoCircle, FaEnvelopeOpenText, FaQuestionCircle, FaArrowLeft } from 'react-icons/fa';
-import { FaInfoCircle, FaEnvelopeOpenText, FaQuestionCircle, FaArrowLeft } from 'react-icons/fa';
 
 import './Layout.css'; // Assuming you have a CSS file for styles
 import './Layout.css'; // Assuming you have a CSS file for styles
 
-const Layout = ({ children, hideFooter }) => {
 const Layout = ({ children, hideFooter }) => {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
@@ -105,31 +103,6 @@ const Layout = ({ children, hideFooter }) => {
       {/* Main content */}
       <main>{children}</main>
 
-      {/* Footer (conditionally rendered) */}
-      {!hideFooter && (
-        <footer className="footer">
-          <div className="footer-content">
-            <h3>Online Auction</h3>
-            <p>© 2025 Campus Auction System · All rights reserved</p>
-            <div className="footer-links">
-              <a href="/about">About</a>
-              <a href="/contact">Contact</a>
-              <a href="/help">Help</a>
-            </div>
-          </div>
-          <div className="social-icons">
-            <a href="https://www.instagram.com" target="_blank" rel="noreferrer">
-              <FontAwesomeIcon icon={faInstagram} />
-            </a>
-            <a href="https://www.linkedin.com" target="_blank" rel="noreferrer">
-              <FontAwesomeIcon icon={faLinkedin} />
-            </a>
-            <a href="https://www.twitter.com" target="_blank" rel="noreferrer">
-              <FontAwesomeIcon icon={faTwitter} />
-            </a>
-          </div>
-        </footer>
-      )}
     </>
       {/* Footer (conditionally rendered) */}
       {!hideFooter && (
@@ -199,7 +172,7 @@ export const Contact = () => {
   return (
     <Layout hideFooter>
       <div className="contact-card">
-        <button onClick={() => navigate(-1)} className="back-btn">
+        <button onClick={() => navigate(-1)} className="backk-btn">
           <FaArrowLeft />
         </button>
         <div className="contact-header">
@@ -231,7 +204,7 @@ export const Help = () => {
   return (
     <Layout hideFooter>
       <div className="help-card">
-        <button onClick={() => navigate(-1)} className="back-btn">
+        <button onClick={() => navigate(-1)} className="backk-btn">
           <FaArrowLeft />
         </button>
         <div className="help-header">
