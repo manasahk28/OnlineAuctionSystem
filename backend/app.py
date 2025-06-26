@@ -363,6 +363,39 @@ def get_my_bids(bidder_id):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+@app.route('/my-bids/email/<bidder_email>', methods=['GET'])
+def get_my_bids_by_email(bidder_email):
+    try:
+        bids = list(db.bids.find({'bidder_email': bidder_email}))
+
+        # Get item IDs from bids
+        item_ids = list(set(bid['item_id'] for bid in bids))
+        items_map = {
+            str(item['_id']): item
+            for item in db.items.find({'_id': {'$in': [ObjectId(i) for i in item_ids]}})
+        }
+
+        result = []
+        for bid in bids:
+            item = items_map.get(bid['item_id'])
+            if item:
+                result.append({
+                    '_id': str(item['_id']),
+                    'title': item.get('title'),
+                    'images': item.get('images', []),
+                    'highest_bid': item.get('highest_bid', item.get('base_price', 0)),
+                    'your_bid': bid.get('bid_amount'),
+                    'end_time': item.get('end_date_time'),
+                    'outbid': bid.get('outbid', False),
+                    'seller_email': bid.get('seller_email', '')
+                })
+
+        return jsonify(result), 200
+
+    except Exception as e:
+        print("❌ Error in get_my_bids_by_email:", e)
+        return jsonify({'error': str(e)}), 500
+
 @app.route('/')
 def home():
     return "Flask with MongoDB backend is live!"
