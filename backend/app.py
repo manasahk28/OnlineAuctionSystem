@@ -142,6 +142,8 @@ def post_item():
 @app.route('/api/place-bid', methods=['POST'])
 def place_bid():
     data = request.get_json()
+    print("Incoming Bid Data:", data)
+
     item_id = data.get('item_id')
     bid_amount = data.get('bid_amount')
     bidder_email = data.get('bidder_email')
@@ -155,7 +157,36 @@ def place_bid():
         if not item:
             return jsonify({'status': 'fail', 'message': 'Item not found'}), 404
 
-        # Store bid in `bids` collection
+        current_highest = item.get('highest_bid', item.get('starting_price', 0))
+        min_increment = int(item.get('minimum_increment', 1))
+
+        # Check if the user has already placed a bid
+        existing_bid = bids_collection.find_one({
+            'item_id': item_id,
+            'bidder_id': bidder_id
+        })
+
+        if existing_bid:
+            previous_amount = existing_bid.get('bid_amount', 0)
+            if bid_amount <= previous_amount:
+                return jsonify({
+                    'status': 'fail',
+                    'message': f'Your new bid must be higher than your previous bid (₹{previous_amount})'
+                }), 400
+        else:
+            if bid_amount <= current_highest or (bid_amount - current_highest) < min_increment:
+                return jsonify({
+                    'status': 'fail',
+                    'message': f'Bid must be at least ₹{current_highest + min_increment}'
+                }), 400
+
+        # Remove old bid from the same user (if any)
+        bids_collection.delete_many({
+            'item_id': item_id,
+            'bidder_id': bidder_id
+        })
+
+        # Insert the new bid
         bids_collection.insert_one({
             'item_id': item_id,
             'item_title': item.get('title', ''),
@@ -167,13 +198,13 @@ def place_bid():
             'outbid': False
         })
 
-        # Mark all other bids on the same item as outbid
+        # Mark other bids as outbid
         bids_collection.update_many(
             {'item_id': item_id, 'bidder_id': {'$ne': bidder_id}},
             {'$set': {'outbid': True}}
         )
 
-        # Update highest bid in the item document
+        # Update item's highest bid
         items_collection.update_one(
             {'_id': ObjectId(item_id)},
             {'$set': {'highest_bid': bid_amount}}
@@ -182,7 +213,7 @@ def place_bid():
         return jsonify({'status': 'success', 'message': 'Bid placed successfully'}), 200
 
     except Exception as e:
-        print("Error placing bid:", e)
+        print("❌ Error placing bid:", e)
         return jsonify({'status': 'fail', 'message': 'Internal server error'}), 500
 
 @app.route('/api/get-profile', methods=['GET'])
@@ -368,22 +399,27 @@ def get_my_bids_by_email(bidder_email):
     try:
         bids = list(db.bids.find({'bidder_email': bidder_email}))
 
-        # Get item IDs from bids
-        item_ids = list(set(bid['item_id'] for bid in bids))
+        # Keep only latest bid per item_id
+        latest_bids = {}
+        for bid in sorted(bids, key=lambda x: x.get('timestamp', ''), reverse=True):
+            if bid['item_id'] not in latest_bids:
+                latest_bids[bid['item_id']] = bid
+
+        item_ids = list(latest_bids.keys())
         items_map = {
             str(item['_id']): item
             for item in db.items.find({'_id': {'$in': [ObjectId(i) for i in item_ids]}})
         }
 
         result = []
-        for bid in bids:
-            item = items_map.get(bid['item_id'])
+        for item_id, bid in latest_bids.items():
+            item = items_map.get(item_id)
             if item:
                 result.append({
                     '_id': str(item['_id']),
                     'title': item.get('title'),
                     'images': item.get('images', []),
-                    'highest_bid': item.get('highest_bid', item.get('base_price', 0)),
+                    'highest_bid': item.get('highest_bid', item.get('starting_price', 0)),
                     'your_bid': bid.get('bid_amount'),
                     'end_time': item.get('end_date_time'),
                     'outbid': bid.get('outbid', False),
