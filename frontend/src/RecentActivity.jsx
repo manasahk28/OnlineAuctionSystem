@@ -24,7 +24,7 @@ const RecentActivity = () => {
             type: 'post',
             amount: parseInt(item.starting_price) || 0,
             item: item.title,
-            time: new Date(item.timestamp || item.end_date_time).toLocaleString(),
+            time: item.timestamp || item.end_date_time || null,
           }));
           combinedActivities = [...combinedActivities, ...postActivities];
         }
@@ -35,13 +35,18 @@ const RecentActivity = () => {
             type: 'bid',
             amount: parseInt(bid.your_bid) || 0,
             item: bid.title,
-            time: new Date(bid.end_time).toLocaleString(), // or use bid.timestamp if preferred
+            time: bid.timestamp || null,
           }));
           combinedActivities = [...combinedActivities, ...bidActivities];
         }
 
         // Sort by newest first
-        combinedActivities.sort((a, b) => new Date(b.time) - new Date(a.time));
+        combinedActivities.sort((a, b) => {
+          const timeA = new Date(a.time).getTime();
+          const timeB = new Date(b.time).getTime();
+          return timeB - timeA;
+        });
+
         setActivities(combinedActivities);
       } catch (error) {
         console.error('Error fetching activity:', error);
@@ -66,6 +71,13 @@ const RecentActivity = () => {
     }
   };
 
+  const formatTime = (timestamp) => {
+    if (!timestamp) return 'Unknown time';
+    const date = new Date(timestamp);
+    if (isNaN(date.getTime())) return 'Unknown time';
+    return date.toLocaleString(); // IST is handled automatically by browser's timezone
+  };
+
   return (
     <div className="recent-activity-wrapper">
       <div className="profile-header">
@@ -79,7 +91,7 @@ const RecentActivity = () => {
         <ul className="activity-list">
           {activities.map((activity, index) => (
             <li key={index} className={`activity-card ${activity.type}`}>
-              <span className="activity-time">{activity.time}</span>
+              <span className="activity-time">{formatTime(activity.time)}</span>
               <p className="activity-message">{getActivityMessage(activity)}</p>
             </li>
           ))}
