@@ -139,11 +139,11 @@ def post_item():
     items_collection.insert_one(item)
     return jsonify({'status': 'success', 'message': 'Item posted successfully!'}), 201
 
+from bson.errors import InvalidId
+
 @app.route('/api/place-bid', methods=['POST'])
 def place_bid():
     data = request.get_json()
-    print("Incoming Bid Data:", data)
-
     item_id = data.get('item_id')
     bid_amount = data.get('bid_amount')
     bidder_email = data.get('bidder_email')
@@ -157,63 +157,27 @@ def place_bid():
         if not item:
             return jsonify({'status': 'fail', 'message': 'Item not found'}), 404
 
-        current_highest = item.get('highest_bid', item.get('starting_price', 0))
-        min_increment = int(item.get('minimum_increment', 1))
+        bids = item.get('bids', [])
 
-        # Check if the user has already placed a bid
-        existing_bid = bids_collection.find_one({
-            'item_id': item_id,
-            'bidder_id': bidder_id
-        })
-
-        if existing_bid:
-            previous_amount = existing_bid.get('bid_amount', 0)
-            if bid_amount <= previous_amount:
-                return jsonify({
-                    'status': 'fail',
-                    'message': f'Your new bid must be higher than your previous bid (₹{previous_amount})'
-                }), 400
-        else:
-            if bid_amount <= current_highest or (bid_amount - current_highest) < min_increment:
-                return jsonify({
-                    'status': 'fail',
-                    'message': f'Bid must be at least ₹{current_highest + min_increment}'
-                }), 400
-
-        # Remove old bid from the same user (if any)
-        bids_collection.delete_many({
-            'item_id': item_id,
-            'bidder_id': bidder_id
-        })
-
-        # Insert the new bid
-        bids_collection.insert_one({
-            'item_id': item_id,
-            'item_title': item.get('title', ''),
+        bids.append({
             'bid_amount': bid_amount,
             'bidder_email': bidder_email,
             'bidder_id': bidder_id,
-            'seller_email': item.get('contact_email', ''),
             'timestamp': datetime.datetime.utcnow().isoformat(),
-            'outbid': False
+            'item_id': item_id,
+            'item_title': item.get('title', ''),
+            'seller_email': item.get('contact_email', '')
         })
 
-        # Mark other bids as outbid
-        bids_collection.update_many(
-            {'item_id': item_id, 'bidder_id': {'$ne': bidder_id}},
-            {'$set': {'outbid': True}}
-        )
-
-        # Update item's highest bid
         items_collection.update_one(
             {'_id': ObjectId(item_id)},
-            {'$set': {'highest_bid': bid_amount}}
+            {'$set': {'bids': bids}}
         )
 
         return jsonify({'status': 'success', 'message': 'Bid placed successfully'}), 200
 
     except Exception as e:
-        print("❌ Error placing bid:", e)
+        print("Error placing bid:", e)
         return jsonify({'status': 'fail', 'message': 'Internal server error'}), 500
 
 @app.route('/api/get-profile', methods=['GET'])
