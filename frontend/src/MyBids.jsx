@@ -38,7 +38,7 @@ const MyBids = () => {
     try {
       const res = await axios.post('http://localhost:5000/api/place-bid', {
         item_id: itemId,
-        bid_amount: Number(newBid), // 👈 Ensure this is a number
+        bid_amount: Number(newBid),
         bidder_email: user?.email || '',
         bidder_id: user?.collegeId || ''
       });
@@ -82,10 +82,15 @@ const MyBids = () => {
           {bids.map((bid) => {
             const endTime = new Date(bid.end_time).getTime();
             const timeLeft = endTime - now;
-            const hours = Math.floor(timeLeft / (1000 * 60 * 60));
+
+            const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
             const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
             const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
             const image = Array.isArray(bid.images) ? bid.images[0] : bid.image;
+
+            const hasEnded = timeLeft <= 0;
+            const isWinner = hasEnded && Number(bid.your_bid) === Number(bid.highest_bid);
 
             return (
               <div key={bid._id} className="my-bid-card">
@@ -97,21 +102,30 @@ const MyBids = () => {
                   <p>Your current bid: <b>₹{Number(bid.your_bid).toLocaleString()}</b></p>
                   <p>Highest bid placed: <b>₹{Number(bid.highest_bid).toLocaleString()}</b></p>
                   {bid.seller_email && <p>Seller: <b>{bid.seller_email}</b></p>}
-                  {timeLeft > 0 ? (
+
+                  {hasEnded ? (
+                    <>
+                      <p><span style={{ color: 'red', fontWeight: 'bold' }}>Auction ended</span></p>
+                      {isWinner ? (
+                        <p style={{ color: 'green', fontWeight: 'bold' }}>🎉 You won this auction!</p>
+                      ) : (
+                        <p style={{ color: 'gray', fontStyle: 'italic' }}>You did not win this auction.</p>
+                      )}
+                    </>
+                  ) : (
                     <p>
                       Auction ends in:{' '}
                       <span style={{ color: timeLeft < 60000 ? 'red' : '#f57c00' }}>
-                        {hours}h {minutes}m {seconds}s
+                        {days}d {hours}h {minutes}m {seconds}s
                       </span>
                     </p>
-                  ) : (
-                    <p><span style={{ color: 'red', fontWeight: 'bold' }}>Auction ended</span></p>
                   )}
-                  {bid.outbid && (
+
+                  {bid.outbid && !hasEnded && (
                     <div className="outbid-notification">⚠️ You have been outbid!</div>
                   )}
 
-                  {timeLeft > 0 ? (
+                  {!hasEnded ? (
                     <form
                       onSubmit={(e) => {
                         e.preventDefault();
@@ -139,7 +153,6 @@ const MyBids = () => {
                       Bidding closed – auction has ended.
                     </p>
                   )}
-
                 </div>
               </div>
             );
