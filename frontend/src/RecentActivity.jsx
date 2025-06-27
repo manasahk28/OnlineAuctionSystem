@@ -6,40 +6,61 @@ const RecentActivity = () => {
   const user = JSON.parse(localStorage.getItem('user'));
 
   useEffect(() => {
-    const fetchPostedItems = async () => {
+    const fetchActivities = async () => {
       try {
-        const response = await fetch(`http://localhost:5000/api/items/user/${user.email}`);
-        const data = await response.json();
+        const [postedRes, bidsRes] = await Promise.all([
+          fetch(`http://localhost:5000/api/items/user/${user.email}`),
+          fetch(`http://localhost:5000/my-bids/email/${user.email}`),
+        ]);
 
-        if (data.status === 'success') {
-          const postActivities = data.items.map((item) => ({
+        const postedData = await postedRes.json();
+        const bidData = await bidsRes.json();
+
+        let combinedActivities = [];
+
+        // Handle posted items
+        if (postedData.status === 'success') {
+          const postActivities = postedData.items.map((item) => ({
             type: 'post',
-            amount: item.startingPrice,
+            amount: parseInt(item.starting_price) || 0,
             item: item.title,
-            time: new Date(item.timestamp || item.auctionEnd).toLocaleString(), // fallback to endTime if timestamp is missing
+            time: new Date(item.timestamp || item.end_date_time).toLocaleString(),
           }));
-          setActivities(postActivities);
-        } else {
-          console.error('Failed to fetch activities:', data.message);
+          combinedActivities = [...combinedActivities, ...postActivities];
         }
+
+        // Handle bid activities
+        if (Array.isArray(bidData)) {
+          const bidActivities = bidData.map((bid) => ({
+            type: 'bid',
+            amount: parseInt(bid.your_bid) || 0,
+            item: bid.title,
+            time: new Date(bid.end_time).toLocaleString(), // or use bid.timestamp if preferred
+          }));
+          combinedActivities = [...combinedActivities, ...bidActivities];
+        }
+
+        // Sort by newest first
+        combinedActivities.sort((a, b) => new Date(b.time) - new Date(a.time));
+        setActivities(combinedActivities);
       } catch (error) {
-        console.error('Error fetching user listings:', error);
+        console.error('Error fetching activity:', error);
       }
     };
 
     if (user?.email) {
-      fetchPostedItems();
+      fetchActivities();
     }
   }, [user]);
 
   const getActivityMessage = (activity) => {
     switch (activity.type) {
       case 'bid':
-        return `💸 You placed a bid of ₹${activity.amount} on "${activity.item}"`;
+        return `💸 You placed a bid of ₹${activity.amount.toLocaleString()} on "${activity.item}"`;
       case 'post':
-        return `📦 You posted "${activity.item}" for ₹${activity.amount}`;
+        return `📦 You posted "${activity.item}" for ₹${activity.amount.toLocaleString()}`;
       case 'win':
-        return `🏆 You won "${activity.item}" for ₹${activity.amount}`;
+        return `🏆 You won "${activity.item}" for ₹${activity.amount.toLocaleString()}`;
       default:
         return '❔ Unknown activity';
     }
