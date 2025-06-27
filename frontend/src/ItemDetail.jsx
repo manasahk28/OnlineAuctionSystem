@@ -17,7 +17,7 @@ const ItemDetail = () => {
   useEffect(() => {
     const fetchItem = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/api/item/${id}`);
+        const res = await axios.get(`http://localhost:5000/api/items/${id}`);
         if (res.data.status === 'success') {
           const fetchedItem = res.data.item;
           setItem(fetchedItem);
