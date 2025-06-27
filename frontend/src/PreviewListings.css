@@ -1,20 +1,33 @@
 .preview-grid {
   display: flex;
+  flex-wrap: nowrap; /* ✅ Prevent wrapping */
   gap: 20px;
-  flex-wrap: wrap;
   justify-content: flex-start;
   padding: 20px;
+  overflow-x: auto; /* ✅ Enables horizontal scroll if screen is small */
 }
 
 .listing-card {
-    position: relative;
+  flex: 0 0 220px; /* 5 cards in a row on desktop */
+  position: relative;
   background-color: white;
   border: 1px solid #eee;
   border-radius: 12px;
-  width: 200px;
   padding: 12px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   transition: transform 0.3s ease;
+}
+
+@media (max-width: 1200px) {
+  .listing-card {
+    flex: 0 0 180px;
+  }
+}
+
+@media (max-width: 800px) {
+  .listing-card {
+    flex: 0 0 150px;
+  }
 }
 
 .listing-card:hover {
@@ -54,8 +67,7 @@
 .price {
   font-weight: bold;
   color: #f57c00;
-    margin-bottom: 8px;
-
+  margin-bottom: 8px;
 }
 
 .view-button {

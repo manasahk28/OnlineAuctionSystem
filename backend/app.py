@@ -1,11 +1,18 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 from pymongo import MongoClient
-import datetime
 import bcrypt
 from dotenv import load_dotenv
+import re
 import os
 from bson import ObjectId
+from App.routes.listings import listings_bp
+from dotenv import load_dotenv
+from datetime import datetime
+from zoneinfo import ZoneInfo
+from bson.errors import InvalidId
+
 
 app = Flask(__name__)
 CORS(app)
@@ -13,6 +20,12 @@ CORS(app)
 load_dotenv()
 MONGO_URI = os.getenv("MONGO_URI")
 print("MONGO_URI Loaded:", MONGO_URI)
+JWT_SECRET = os.getenv("JWT_SECRET", "super-secret")
+
+
+app.config["JWT_SECRET_KEY"] = JWT_SECRET
+jwt = JWTManager(app)
+
 
 client = MongoClient(MONGO_URI)
 db = client["auction_db"]
@@ -31,7 +44,8 @@ def register():
     hashed_password = bcrypt.hashpw(data['password'].encode('utf-8'), bcrypt.gensalt())
     data['password'] = hashed_password.decode('utf-8')
     data.pop('confirmPassword', None)
-    data['timestamp'] = datetime.datetime.now().isoformat()
+    data['timestamp'] = datetime.now().isoformat()
+
 
     users_collection.insert_one({
         'email': data['email'],
@@ -133,17 +147,12 @@ def post_item():
         'warranty_duration': data.get('warranty_duration', ''),
         'damage_description': data.get('damage_description', ''),
         'limitedCollection': data.get('limitedCollection', False),
-        'timestamp': datetime.datetime.now().isoformat()
-    }
+        'timestamp': datetime.now().isoformat()
 
+    }
     items_collection.insert_one(item)
     return jsonify({'status': 'success', 'message': 'Item posted successfully!'}), 201
 
-from bson.errors import InvalidId
-
-from datetime import datetime
-from zoneinfo import ZoneInfo
-from bson.errors import InvalidId
 
 @app.route('/api/place-bid', methods=['POST'])
 def place_bid():
@@ -248,18 +257,48 @@ def update_profile():
 
     return jsonify({'status': 'success', 'message': 'Profile updated'}), 200
 
+
 @app.route('/api/items', methods=['GET'])
 def get_all_items():
-    items = list(items_collection.find())
+    search = request.args.get('search', '').strip()
+    categories = request.args.getlist('category')
+    pickup_methods = request.args.getlist('pickup_method')
+    item_condition = request.args.getlist('item_condition')
+
+    query = {}
+
+    if search:
+        search_base = re.escape(search.rstrip('s'))
+        query['title'] = {'$regex': f'{search_base}s?', '$options': 'i'}
+
+    if categories:
+        query['category'] = {'$in': categories}
+
+    if pickup_methods:
+        query['delivery_method'] = {'$in': pickup_methods}
+
+    if item_condition:
+        query['item_condition'] = {'$in': item_condition}
+
+    items = list(items_collection.find(query))
+    
     for item in items:
-        item['_id'] = str(item['_id'])
+        item['_id'] = str(item['_id'])  # ✅ Convert _id to string
         if 'images' in item and isinstance(item['images'], list) and item['images']:
             item['thumbnail'] = item['images'][0]
         else:
             item['thumbnail'] = ''
+        # 👇 Also check if item contains any embedded `ObjectId` in other fields (like nested bids)
+        if 'bids' in item:
+            for bid in item['bids']:
+                bid['timestamp'] = bid.get('timestamp', '')
+                if '_id' in bid:
+                    bid['_id'] = str(bid['_id'])  # Just in case
     return jsonify({'status': 'success', 'items': items}), 200
 
-@app.route('/api/items/<item_id>', methods=['GET'])
+
+
+@app.route('/api/item/<item_id>', methods=['GET'])
 def get_single_item(item_id):
     try:
         item = items_collection.find_one({'_id': ObjectId(item_id)})
@@ -406,10 +445,24 @@ def get_my_bids_by_email(bidder_email):
     except Exception as e:
         print("❌ Error in get_my_bids_by_email:", e)
         return jsonify({'error': str(e)}), 500
+    
+# ------------------ ✅ PROTECTED ROUTE ------------------
+@app.route('/api/protected/dashboard', methods=['GET'])
+@jwt_required()
+def dashboard():
+    user_email = get_jwt_identity()
+    return jsonify({'message': f'Welcome {user_email}, this is a protected route!'}), 200
+
+
 
 @app.route('/')
 def home():
-    return "Flask with MongoDB backend is live!"
+    return "✅ Flask backend with MongoDB, JWT Auth, and Auction APIs is live!"
+
+
+app.config["DB"] = db  # ✅ Important to set this before registering blueprint
+app.register_blueprint(listings_bp, url_prefix="/api")
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, use_reloader=True, extra_files=[], reloader_type='watchdog')
+

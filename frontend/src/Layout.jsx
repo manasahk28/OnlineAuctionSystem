@@ -6,7 +6,6 @@ import { faInstagram, faLinkedin, faTwitter } from '@fortawesome/free-brands-svg
 import { FaInfoCircle, FaEnvelopeOpenText, FaQuestionCircle, FaArrowLeft } from 'react-icons/fa';
 
 import './Layout.css'; // Assuming you have a CSS file for styles
-import './Layout.css'; // Assuming you have a CSS file for styles
 
 const Layout = ({ children, hideFooter }) => {
   const navigate = useNavigate();
@@ -55,14 +54,12 @@ const Layout = ({ children, hideFooter }) => {
 
   return (
     <>
-    <>
       {/* Navbar */}
       <nav className="navbar">
         <div className="navbar-left">
           <h2>Online Auction</h2>
         </div>
         <div className="navbar-right">
-          
           
           {user ? (
             <>
@@ -103,7 +100,6 @@ const Layout = ({ children, hideFooter }) => {
       {/* Main content */}
       <main>{children}</main>
 
-    </>
       {/* Footer (conditionally rendered) */}
       {!hideFooter && (
         <footer className="footer">
@@ -141,7 +137,7 @@ export const About = () => {
   return (
     <Layout hideFooter>
       <div className="about-card">
-        <button onClick={() => navigate(-1)} className="backk-btn">
+        <button onClick={() => navigate(-1)} className="back-btn">
           <FaArrowLeft />
         </button>
         <div className="about-header">
@@ -172,7 +168,7 @@ export const Contact = () => {
   return (
     <Layout hideFooter>
       <div className="contact-card">
-        <button onClick={() => navigate(-1)} className="backk-btn">
+        <button onClick={() => navigate(-1)} className="back-btn">
           <FaArrowLeft />
         </button>
         <div className="contact-header">
@@ -204,7 +200,7 @@ export const Help = () => {
   return (
     <Layout hideFooter>
       <div className="help-card">
-        <button onClick={() => navigate(-1)} className="backk-btn">
+        <button onClick={() => navigate(-1)} className="back-btn">
           <FaArrowLeft />
         </button>
         <div className="help-header">
