@@ -27,7 +27,6 @@ const ItemDetail = () => {
           if (fetchedItem.video) media.push(fetchedItem.video);
           setMediaList(media);
 
-          // Fetch seller name using seller_id (collegeId)
           const profileRes = await axios.get(
             `http://localhost:5000/api/get-profile?email=${fetchedItem.contact_email}`
           );
@@ -52,41 +51,46 @@ const ItemDetail = () => {
   };
 
   const handleBid = async () => {
-  const minAllowed = Number(item.starting_price) + Number(item.minimum_increment);
+    const minAllowed = Number(item.starting_price) + Number(item.minimum_increment);
 
-  if (!Number.isFinite(bidAmount) || bidAmount <= 0) {
-    setError('Please enter a valid positive number for your bid');
-    return;
-  }
-
-  if (bidAmount < minAllowed) {
-    setError(`Your bid must be at least ₹${minAllowed}`);
-    return;
-  }
-
-  try {
-    const user = JSON.parse(localStorage.getItem('user'));
-    const res = await axios.post('http://localhost:5000/api/place-bid', {
-      item_id: item._id,
-      bid_amount: bidAmount,
-      bidder_email: user?.email || '',
-      bidder_id: user?.collegeId || ''
-    });
-
-    if (res.data.status === 'success') {
-      alert('🎉 Bid placed successfully!');
-      setShowModal(false);
-      setBidAmount('');
-      setError('');
-    } else {
-      setError(res.data.message || 'Failed to place bid');
+    if (!Number.isFinite(Number(bidAmount)) || Number(bidAmount) <= 0) {
+      setError('Please enter a valid positive number for your bid');
+      return;
     }
-  } catch (err) {
-    console.error('Bid error:', err);
-    setError('Something went wrong while placing the bid');
-  }
-};
 
+    if (Number(bidAmount) < minAllowed) {
+      setError(`Your bid must be at least ₹${minAllowed}`);
+      return;
+    }
+
+    try {
+      const user = JSON.parse(localStorage.getItem('user'));
+      const res = await axios.post('http://localhost:5000/api/place-bid', {
+        item_id: item._id,
+        bid_amount: bidAmount,
+        bidder_email: user?.email || '',
+        bidder_id: user?.collegeId || ''
+      });
+
+      if (res.data.status === 'success') {
+        alert('🎉 Bid placed successfully!');
+        setShowModal(false);
+        setBidAmount('');
+        setError('');
+      } else {
+        setError(res.data.message || 'Failed to place bid');
+      }
+    } catch (err) {
+      console.error('Bid error:', err);
+      setError('Something went wrong while placing the bid');
+    }
+  };
+
+  // ✅ Fix for undefined variables
+  const currentMedia = mediaList[currentMediaIndex];
+  const isVideo = item?.video && currentMedia === item.video;
+
+  if (!item) return <Layout><div className="loading">Loading...</div></Layout>;
 
   return (
     <Layout>
@@ -125,7 +129,7 @@ const ItemDetail = () => {
           {item.tags && <p><strong>Tags:</strong> {item.tags}</p>}
           {item.location && <p><strong>Location:</strong> {item.location}</p>}
           {item.pickup_method && <p><strong>Pickup Method:</strong> {item.pickup_method}</p>}
-          {item.delivery_charge && <p><strong>Delivery Charge:</strong> {item.delivery_charge}</p>}
+          {item.delivery_charge && <p><strong>Delivery Charge:</strong> ₹{item.delivery_charge}</p>}
           {item.return_policy && <p><strong>Return Policy:</strong> {item.return_policy}</p>}
           {item.highlights && <p><strong>Highlights:</strong> {item.highlights}</p>}
           {item.item_condition && <p><strong>Condition:</strong> {item.item_condition}</p>}
@@ -150,7 +154,6 @@ const ItemDetail = () => {
             <input
               type="number"
               min={Number(item.starting_price) + Number(item.minimum_increment)}
-              placeholder={`Enter bid ≥ ₹${Number(item.starting_price) + Number(item.minimum_increment)}`}
               value={bidAmount}
               onChange={(e) => setBidAmount(e.target.value)}
               placeholder={`Enter ≥ ₹${Number(item.starting_price) + Number(item.minimum_increment)}`}
