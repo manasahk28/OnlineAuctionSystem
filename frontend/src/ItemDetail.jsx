@@ -168,7 +168,6 @@ const ItemDetail = () => {
           {item.return_policy && <p><strong>Return Policy:</strong> {item.return_policy}</p>}
           {item.highlights && <p><strong>Highlights:</strong> {item.highlights}</p>}
           {item.item_condition && <p><strong>Condition:</strong> {item.item_condition}</p>}
-          {item.warranty && <p><strong>Warranty:</strong> {item.warranty}</p>}
           {item.warranty && (
             <>
               <p><strong>Warranty:</strong> {item.warranty}</p>
