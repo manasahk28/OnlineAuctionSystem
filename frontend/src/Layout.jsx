@@ -67,7 +67,7 @@ const Layout = ({ children, hideFooter }) => {
           {user ? (
             <>
               <a href="/">Home</a>
-              <a href="/explore">Explore</a>
+              <a href="/explore">Bid Quest</a>
               <a href="/post-item">Post Item</a>
               <a href="/dashboard">Profile</a>
               <button className="logout-btn" onClick={handleLogout}>Logout</button>

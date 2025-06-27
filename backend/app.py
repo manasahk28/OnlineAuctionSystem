@@ -5,6 +5,7 @@ import datetime
 import bcrypt
 from dotenv import load_dotenv
 import os
+import re
 from bson import ObjectId
 
 app = Flask(__name__)
@@ -275,14 +276,49 @@ def update_profile():
 
 @app.route('/api/items', methods=['GET'])
 def get_all_items():
-    items = list(items_collection.find())
+    search = request.args.get('search', '').strip()
+    categories = request.args.getlist('category')
+    pickup_methods = request.args.getlist('pickup_method')
+    item_condition = request.args.getlist('item_condition')
+
+    query = {}
+
+    # 🎯 Handle search (smart plural match)
+    if search:
+        search_base = re.escape(search.rstrip('s'))
+        query['title'] = {'$regex': f'{search_base}s?', '$options': 'i'}
+
+    # 🧩 Apply filters if provided
+    if categories:
+        query['category'] = {'$in': categories}
+    if pickup_methods:
+        query['delivery_method'] = {'$in': pickup_methods}
+    if item_condition:
+        query['item_condition'] = {'$in': item_condition}
+
+    # 🧲 Fetch items from DB based on query
+    items = list(items_collection.find(query))
+
+    # 🖼️ Convert IDs and prepare thumbnail
     for item in items:
         item['_id'] = str(item['_id'])
         if 'images' in item and isinstance(item['images'], list) and item['images']:
             item['thumbnail'] = item['images'][0]
         else:
             item['thumbnail'] = ''
+
     return jsonify({'status': 'success', 'items': items}), 200
+
+# @app.route('/api/items', methods=['GET'])
+# def get_all_items():
+#     items = list(items_collection.find())
+#     for item in items:
+#         item['_id'] = str(item['_id'])
+#         if 'images' in item and isinstance(item['images'], list) and item['images']:
+#             item['thumbnail'] = item['images'][0]
+#         else:
+#             item['thumbnail'] = ''
+#     return jsonify({'status': 'success', 'items': items}), 200
 
 @app.route('/api/items/<item_id>', methods=['GET'])
 def get_single_item(item_id):
