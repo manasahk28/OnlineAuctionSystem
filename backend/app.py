@@ -5,7 +5,6 @@ import datetime
 import bcrypt
 from dotenv import load_dotenv
 import os
-import re
 from bson import ObjectId
 
 app = Flask(__name__)
@@ -142,6 +141,10 @@ def post_item():
 
 from bson.errors import InvalidId
 
+from datetime import datetime
+from zoneinfo import ZoneInfo
+from bson.errors import InvalidId
+
 @app.route('/api/place-bid', methods=['POST'])
 def place_bid():
     data = request.get_json()
@@ -158,11 +161,14 @@ def place_bid():
         if not item:
             return jsonify({'status': 'fail', 'message': 'Item not found'}), 404
 
+        # Get current IST time
+        ist_time = datetime.now(ZoneInfo("Asia/Kolkata")).isoformat()
+
         bid_data = {
             'bid_amount': bid_amount,
             'bidder_email': bidder_email,
             'bidder_id': bidder_id,
-            'timestamp': datetime.datetime.utcnow().isoformat(),
+            'timestamp': ist_time,
             'item_id': item_id,
             'item_title': item.get('title', ''),
             'seller_email': item.get('contact_email', '')
@@ -176,7 +182,7 @@ def place_bid():
             {'$set': {'bids': bids}}
         )
 
-        # ✅ ADD THIS: Save bid in global bids collection
+        # Save bid in global bids collection
         bids_collection.insert_one(bid_data)
 
         return jsonify({'status': 'success', 'message': 'Bid placed successfully'}), 200
@@ -244,49 +250,14 @@ def update_profile():
 
 @app.route('/api/items', methods=['GET'])
 def get_all_items():
-    search = request.args.get('search', '').strip()
-    categories = request.args.getlist('category')
-    pickup_methods = request.args.getlist('pickup_method')
-    item_condition = request.args.getlist('item_condition')
-
-    query = {}
-
-    # 🎯 Handle search (smart plural match)
-    if search:
-        search_base = re.escape(search.rstrip('s'))
-        query['title'] = {'$regex': f'{search_base}s?', '$options': 'i'}
-
-    # 🧩 Apply filters if provided
-    if categories:
-        query['category'] = {'$in': categories}
-    if pickup_methods:
-        query['delivery_method'] = {'$in': pickup_methods}
-    if item_condition:
-        query['item_condition'] = {'$in': item_condition}
-
-    # 🧲 Fetch items from DB based on query
-    items = list(items_collection.find(query))
-
-    # 🖼️ Convert IDs and prepare thumbnail
+    items = list(items_collection.find())
     for item in items:
         item['_id'] = str(item['_id'])
         if 'images' in item and isinstance(item['images'], list) and item['images']:
             item['thumbnail'] = item['images'][0]
         else:
             item['thumbnail'] = ''
-
     return jsonify({'status': 'success', 'items': items}), 200
-
-# @app.route('/api/items', methods=['GET'])
-# def get_all_items():
-#     items = list(items_collection.find())
-#     for item in items:
-#         item['_id'] = str(item['_id'])
-#         if 'images' in item and isinstance(item['images'], list) and item['images']:
-#             item['thumbnail'] = item['images'][0]
-#         else:
-#             item['thumbnail'] = ''
-#     return jsonify({'status': 'success', 'items': items}), 200
 
 @app.route('/api/items/<item_id>', methods=['GET'])
 def get_single_item(item_id):
@@ -427,9 +398,9 @@ def get_my_bids_by_email(bidder_email):
                     'your_bid': bid.get('bid_amount'),
                     'end_time': item.get('end_date_time'),
                     'outbid': bid.get('outbid', False),
-                    'seller_email': bid.get('seller_email', '')
+                    'seller_email': bid.get('seller_email', ''),
+                    'timestamp': bid.get('timestamp', '')  # ✅ Fix: include timestamp here
                 })
-
         return jsonify(result), 200
 
     except Exception as e:
