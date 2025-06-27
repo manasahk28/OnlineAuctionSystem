@@ -157,9 +157,7 @@ def place_bid():
         if not item:
             return jsonify({'status': 'fail', 'message': 'Item not found'}), 404
 
-        bids = item.get('bids', [])
-
-        bids.append({
+        bid_data = {
             'bid_amount': bid_amount,
             'bidder_email': bidder_email,
             'bidder_id': bidder_id,
@@ -167,12 +165,18 @@ def place_bid():
             'item_id': item_id,
             'item_title': item.get('title', ''),
             'seller_email': item.get('contact_email', '')
-        })
+        }
 
+        # Add bid to the item document (embedded)
+        bids = item.get('bids', [])
+        bids.append(bid_data)
         items_collection.update_one(
             {'_id': ObjectId(item_id)},
             {'$set': {'bids': bids}}
         )
+
+        # ✅ ADD THIS: Save bid in global bids collection
+        bids_collection.insert_one(bid_data)
 
         return jsonify({'status': 'success', 'message': 'Bid placed successfully'}), 200
 
