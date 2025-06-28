@@ -153,7 +153,6 @@ def post_item():
     items_collection.insert_one(item)
     return jsonify({'status': 'success', 'message': 'Item posted successfully!'}), 201
 
-
 @app.route('/api/place-bid', methods=['POST'])
 def place_bid():
     data = request.get_json()
@@ -173,6 +172,13 @@ def place_bid():
         # Get current IST time
         ist_time = datetime.now(ZoneInfo("Asia/Kolkata")).isoformat()
 
+        bid_amount = float(bid_amount)
+        current_highest = float(item.get('highest_bid', item.get('starting_price', 0)))
+
+        if bid_amount <= current_highest:
+            return jsonify({'status': 'fail', 'message': 'Bid must be higher than current highest bid'}), 400
+
+        # Prepare bid data
         bid_data = {
             'bid_amount': bid_amount,
             'bidder_email': bidder_email,
@@ -180,24 +186,38 @@ def place_bid():
             'timestamp': ist_time,
             'item_id': item_id,
             'item_title': item.get('title', ''),
-            'seller_email': item.get('contact_email', '')
+            'seller_email': item.get('contact_email', ''),
+            'outbid': False  # This is the new highest bid
         }
 
-        # Add bid to the item document (embedded)
-        bids = item.get('bids', [])
-        bids.append(bid_data)
-        items_collection.update_one(
-            {'_id': ObjectId(item_id)},
-            {'$set': {'bids': bids}}
+        # Mark all previous bids on this item as outbid
+        bids_collection.update_many(
+            {'item_id': item_id, 'bidder_email': {'$ne': bidder_email}},
+            {'$set': {'outbid': True}}
         )
 
-        # Save bid in global bids collection
+        # Save bid globally
         bids_collection.insert_one(bid_data)
+
+        # Append to embedded bids array
+        bids = item.get('bids', [])
+        bids.append(bid_data)
+
+        # Update item with new highest bid and bids
+        items_collection.update_one(
+            {'_id': ObjectId(item_id)},
+            {
+                '$set': {
+                    'bids': bids,
+                    'highest_bid': bid_amount
+                }
+            }
+        )
 
         return jsonify({'status': 'success', 'message': 'Bid placed successfully'}), 200
 
     except Exception as e:
-        print("Error placing bid:", e)
+        print("❌ Error placing bid:", e)
         return jsonify({'status': 'fail', 'message': 'Internal server error'}), 500
 
 @app.route('/api/get-profile', methods=['GET'])
@@ -408,9 +428,13 @@ def get_my_bids(bidder_id):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+from datetime import datetime
+from zoneinfo import ZoneInfo
+
 @app.route('/my-bids/email/<bidder_email>', methods=['GET'])
 def get_my_bids_by_email(bidder_email):
     try:
+        # Get all bids by user
         bids = list(db.bids.find({'bidder_email': bidder_email}))
 
         # Keep only latest bid per item_id
@@ -429,6 +453,30 @@ def get_my_bids_by_email(bidder_email):
         for item_id, bid in latest_bids.items():
             item = items_map.get(item_id)
             if item:
+                end_time_str = item.get('end_date_time')
+                auction_result = 'ongoing'  # default state
+
+                try:
+                    # Parse item end time to datetime
+                    end_time = datetime.fromisoformat(end_time_str).astimezone(ZoneInfo("Asia/Kolkata"))
+                    now = datetime.now(ZoneInfo("Asia/Kolkata"))
+
+                    if now > end_time:
+                        # Auction has ended
+                        highest_bid = float(item.get('highest_bid', item.get('starting_price', 0)))
+                        user_bid = float(bid.get('bid_amount', 0))
+
+                        if user_bid >= highest_bid and not bid.get('outbid', False):
+                            auction_result = 'won'
+                        else:
+                            auction_result = 'lost'
+                    else:
+                        auction_result = 'ongoing'
+
+                except Exception as e:
+                    print("❌ Date parsing error:", e)
+                    auction_result = 'unknown'
+
                 result.append({
                     '_id': str(item['_id']),
                     'title': item.get('title'),
@@ -438,22 +486,22 @@ def get_my_bids_by_email(bidder_email):
                     'end_time': item.get('end_date_time'),
                     'outbid': bid.get('outbid', False),
                     'seller_email': bid.get('seller_email', ''),
-                    'timestamp': bid.get('timestamp', '')  # ✅ Fix: include timestamp here
+                    'timestamp': bid.get('timestamp', ''),
+                    'auction_result': auction_result  # ✅ NEW field
                 })
+
         return jsonify(result), 200
 
     except Exception as e:
         print("❌ Error in get_my_bids_by_email:", e)
         return jsonify({'error': str(e)}), 500
-    
+
 # ------------------ ✅ PROTECTED ROUTE ------------------
 @app.route('/api/protected/dashboard', methods=['GET'])
 @jwt_required()
 def dashboard():
     user_email = get_jwt_identity()
     return jsonify({'message': f'Welcome {user_email}, this is a protected route!'}), 200
-
-
 
 @app.route('/')
 def home():
