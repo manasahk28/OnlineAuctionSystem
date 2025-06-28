@@ -4,8 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faInstagram, faLinkedin, faTwitter } from '@fortawesome/free-brands-svg-icons';
 import { FaInfoCircle, FaEnvelopeOpenText, FaQuestionCircle, FaArrowLeft } from 'react-icons/fa';
-
-import './Layout.css'; // Assuming you have a CSS file for styles
+import './Layout.css';
 
 const Layout = ({ children, hideFooter }) => {
   const navigate = useNavigate();
@@ -24,18 +23,14 @@ const Layout = ({ children, hideFooter }) => {
     }
   }, []);
 
-  const handleLogout = () => {
-    setShowLogoutPopup(true);
-  };
+  const handleLogout = () => setShowLogoutPopup(true);
 
   const confirmLogout = () => {
     localStorage.removeItem('user');
     sessionStorage.removeItem('loggedIn');
     setShowFarewell(true);
 
-    setTimeout(() => {
-      setFadePopup(true);
-    }, 4000);
+    setTimeout(() => setFadePopup(true), 4000);
 
     setTimeout(() => {
       setShowLogoutPopup(false);
@@ -60,7 +55,6 @@ const Layout = ({ children, hideFooter }) => {
           <h2>Online Auction</h2>
         </div>
         <div className="navbar-right">
-          
           {user ? (
             <>
               <a href="/">Home</a>
@@ -100,7 +94,7 @@ const Layout = ({ children, hideFooter }) => {
       {/* Main content */}
       <main>{children}</main>
 
-      {/* Footer (conditionally rendered) */}
+      {/* Footer */}
       {!hideFooter && (
         <footer className="footer">
           <div className="footer-content">
@@ -131,7 +125,9 @@ const Layout = ({ children, hideFooter }) => {
 
 export default Layout;
 
-// About, Contact, and Help pages in one file
+// ---------------------------
+// About Page Component
+// ---------------------------
 export const About = () => {
   const navigate = useNavigate();
   return (
@@ -154,16 +150,38 @@ export const About = () => {
   );
 };
 
+// ---------------------------
+// Contact Page Component
+// ---------------------------
 export const Contact = () => {
-  const [form, setForm] = React.useState({ name: '', email: '', message: '' });
-  const [sent, setSent] = React.useState(false);
-  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    setSent(true);
-    setTimeout(() => setSent(false), 4000);
-  };
+  const [form, setForm] = useState({ name: '', email: '', message: '' });
+  const [sent, setSent] = useState(false);
   const navigate = useNavigate();
+
+  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await fetch('http://localhost:5000/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      });
+
+      const result = await response.json();
+      if (response.ok) {
+        setSent(true);
+        setForm({ name: '', email: '', message: '' });
+        setTimeout(() => setSent(false), 4000);
+      } else {
+        alert(result.message || 'Something went wrong. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error submitting contact form:', error);
+      alert('Failed to send message. Please try again later.');
+    }
+  };
 
   return (
     <Layout hideFooter>
@@ -180,9 +198,30 @@ export const Contact = () => {
           <div className="contact-divider" />
         </div>
         <form onSubmit={handleSubmit} className="contact-form">
-          <input name="name" type="text" placeholder="Your Name" value={form.name} onChange={handleChange} required />
-          <input name="email" type="email" placeholder="Your Email" value={form.email} onChange={handleChange} required />
-          <textarea name="message" placeholder="Your Message" value={form.message} onChange={handleChange} required rows={5} />
+          <input
+            name="name"
+            type="text"
+            placeholder="Your Name"
+            value={form.name}
+            onChange={handleChange}
+            required
+          />
+          <input
+            name="email"
+            type="email"
+            placeholder="Your Email"
+            value={form.email}
+            onChange={handleChange}
+            required
+          />
+          <textarea
+            name="message"
+            placeholder="Your Message"
+            value={form.message}
+            onChange={handleChange}
+            required
+            rows={5}
+          />
           <button type="submit">Send Message</button>
           {sent && (
             <div className="contact-success">
@@ -195,6 +234,9 @@ export const Contact = () => {
   );
 };
 
+// ---------------------------
+// Help Page Component
+// ---------------------------
 export const Help = () => {
   const navigate = useNavigate();
   return (
