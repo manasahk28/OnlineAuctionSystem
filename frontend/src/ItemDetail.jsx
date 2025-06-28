@@ -74,34 +74,41 @@ const ItemDetail = () => {
   const isVideo = currentMedia?.startsWith('data:video');
 
   const handleBid = async () => {
-    const minAllowed = Number(item.starting_price) + Number(item.minimum_increment);
-    if (!bidAmount || bidAmount < minAllowed) {
-      setError(`Bid must be at least ₹${minAllowed}`);
-      return;
-    }
+  const minAllowed = Number(item.starting_price) + Number(item.minimum_increment);
 
-    try {
-      const user = JSON.parse(localStorage.getItem('user'));
-      const res = await axios.post('http://localhost:5000/api/place-bid', {
-        item_id: item._id,
-        bid_amount: bidAmount,
-        bidder_email: user?.email || '',
-        bidder_id: user?.collegeId || ''
-      });
+  if (!Number.isFinite(bidAmount) || bidAmount <= 0) {
+    setError('Please enter a valid positive number for your bid');
+    return;
+  }
 
-      if (res.data.status === 'success') {
-        alert('Bid placed successfully!');
-        setShowModal(false);
-        setBidAmount('');
-        setError('');
-      } else {
-        setError(res.data.message || 'Failed to place bid');
-      }
-    } catch (err) {
-      console.error('Bid error:', err);
-      setError('Something went wrong while placing the bid');
+  if (bidAmount < minAllowed) {
+    setError(`Your bid must be at least ₹${minAllowed}`);
+    return;
+  }
+
+  try {
+    const user = JSON.parse(localStorage.getItem('user'));
+    const res = await axios.post('http://localhost:5000/api/place-bid', {
+      item_id: item._id,
+      bid_amount: bidAmount,
+      bidder_email: user?.email || '',
+      bidder_id: user?.collegeId || ''
+    });
+
+    if (res.data.status === 'success') {
+      alert('🎉 Bid placed successfully!');
+      setShowModal(false);
+      setBidAmount('');
+      setError('');
+    } else {
+      setError(res.data.message || 'Failed to place bid');
     }
-  };
+  } catch (err) {
+    console.error('Bid error:', err);
+    setError('Something went wrong while placing the bid');
+  }
+};
+
 
   return (
     <Layout>
@@ -199,6 +206,7 @@ const ItemDetail = () => {
 
             <input
               type="number"
+              min={Number(item.starting_price) + Number(item.minimum_increment)}
               placeholder={`Enter bid ≥ ₹${Number(item.starting_price) + Number(item.minimum_increment)}`}
               value={bidAmount}
               onChange={(e) => setBidAmount(Number(e.target.value))}

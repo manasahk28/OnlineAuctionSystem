@@ -142,7 +142,7 @@ const handleSubmit = async (e) => {
     <div className="edit-item-wrapper">
       <div className="edit-item-header">
         <h2>📝 Edit Item Details</h2>
-        <button className="back-btn" onClick={() => setActiveSection('My Listings')}>⬅️ Back</button>
+        <button className="backk-btn" onClick={() => setActiveSection('My Listings')}>⬅️ Back</button>
       </div>
       <form className="edit-item-form" onSubmit={handleSubmit} encType="multipart/form-data">
 

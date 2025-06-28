@@ -4,7 +4,7 @@ import './PostItem.css';
 import Layout from './Layout';
 
 const PostItems = () => {
-    // const navigate = useNavigate();
+    const navigate = useNavigate();
     const [customCategory, setCustomCategory] = useState('');
     const [fileInputKey, setFileInputKey] = useState(Date.now()); // unique key for input refresh
     const [showTerms, setShowTerms] = useState(false);
@@ -146,6 +146,7 @@ const handleSubmit = async (e) => {
 
     const result = await response.json();
     alert(result.message || 'Item posted successfully!');
+    navigate('/dashboard');
   } catch (err) {
     alert('❌ Failed to post item');
     console.error(err);

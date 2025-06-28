@@ -15,7 +15,7 @@ function getRandomItems(arr, n) {
 
 const FEATURED_KEY = 'featured_items_ids_v1';
 
-function PreviewListings() {
+const PreviewListings = () => {
   const navigate = useNavigate();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -26,26 +26,29 @@ function PreviewListings() {
         const response = await axios.get('http://localhost:5000/api/items');
         if (response.data.status === 'success') {
           const allItems = response.data.items;
+          const maxCount = 4;
+
           let featuredIds = JSON.parse(localStorage.getItem(FEATURED_KEY) || 'null');
-          let featured;
-          if (featuredIds && Array.isArray(featuredIds)) {
-            // Use stored featured ids
+          let featured = [];
+
+          if (featuredIds?.length) {
+            // Rebuild from saved IDs
             featured = featuredIds
               .map(id => allItems.find(item => item._id === id))
               .filter(Boolean);
-            // If some ids are missing (item deleted), refill
-            if (featured.length < 5 && allItems.length >= 5) {
-              const missing = 5 - featured.length;
-              const remaining = allItems.filter(item => !featuredIds.includes(item._id));
-              const fill = getRandomItems(remaining, missing);
-              featured = [...featured, ...fill];
-              localStorage.setItem(FEATURED_KEY, JSON.stringify(featured.map(i => i._id)));
-            }
-          } else {
-            // Pick new random featured items
-            featured = getRandomItems(allItems, 5);
-            localStorage.setItem(FEATURED_KEY, JSON.stringify(featured.map(i => i._id)));
           }
+
+          // Fill if needed
+          const missingCount = maxCount - featured.length;
+          if (missingCount > 0) {
+            const remaining = allItems.filter(item => !featured.find(f => f._id === item._id));
+            const fill = getRandomItems(remaining, missingCount);
+            featured = [...featured, ...fill];
+          }
+
+          // Finalize list
+          featured = getRandomItems(featured, maxCount); // just in case more than 4 snuck in
+          localStorage.setItem(FEATURED_KEY, JSON.stringify(featured.map(i => i._id)));
           setItems(featured);
         }
       } catch (error) {
@@ -54,6 +57,7 @@ function PreviewListings() {
         setLoading(false);
       }
     };
+
     fetchItems();
   }, []);
 
@@ -63,13 +67,17 @@ function PreviewListings() {
 
   return (
     <div className="preview-grid">
-      {items.map((item) => (
+      {items.slice(0, 4).map(item => (
         <div key={item._id} className="listing-card">
-          <img src={item.thumbnail || 'https://via.placeholder.com/200'} alt={item.title} className="listing-img" />
+          <img
+            src={item.thumbnail || 'https://via.placeholder.com/200'}
+            alt={item.title}
+            className="listing-img"
+          />
           <span className="live-badge">🟢 Auction Live</span>
           <div className="listing-details">
             <h4>{item.title}</h4>
-            <p className="price">Base price: ₹{item.startingPrice}</p>
+            <p className="price">Base price: ₹{item.starting_price}</p>
             <button className="view-button" onClick={() => navigate(`/item/${item._id}`)}>
               View Details
             </button>
@@ -78,6 +86,6 @@ function PreviewListings() {
       ))}
     </div>
   );
-}
+};
 
 export default PreviewListings;

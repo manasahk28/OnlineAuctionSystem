@@ -132,13 +132,13 @@ const [filters, setFilters] = useState({
     const filteredItems = applyFilters();
   
 
-  if (loading) {
-    return (
-      <div className="explore-container">
-        <div className="loading-spinner"></div>
-      </div>
-    );
-  }
+  // if (loading) {
+  //   return (
+  //     <div className="explore-container">
+  //       <div className="loading-spinner"></div>
+  //     </div>
+  //   );
+  // }
 
   return (
       <Layout>
@@ -254,8 +254,8 @@ const [filters, setFilters] = useState({
   
           <div className={`items-grid ${sidebarOpen ? 'shrink' : ''}`}>
             {loading ? (
-              <div className="loading-spinner"></div>
-            ) : filteredItems.length === 0 ? (
+              <div class="loader-wrapper"><div class="loading-spinner"></div></div>
+           ) : filteredItems.length === 0 ? (
               <p className="no-items">No items found. Try different filters.</p>
             ) : (
               filteredItems.map((item, index) => (
