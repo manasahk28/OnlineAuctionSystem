@@ -496,6 +496,26 @@ def get_my_bids_by_email(bidder_email):
         print("❌ Error in get_my_bids_by_email:", e)
         return jsonify({'error': str(e)}), 500
 
+@app.route('/api/contact', methods=['POST'])
+def contact():
+    data = request.get_json()
+    name = data.get('name')
+    email = data.get('email')
+    message = data.get('message')
+
+    if not all([name, email, message]):
+        return jsonify({'message': 'All fields are required'}), 400
+
+    # Save to contact collection ✅
+    db.contact.insert_one({
+        'name': name,
+        'email': email,
+        'message': message,
+        'timestamp': datetime.now().isoformat()
+    })
+
+    return jsonify({'message': 'Message received'}), 200
+
 # ------------------ ✅ PROTECTED ROUTE ------------------
 @app.route('/api/protected/dashboard', methods=['GET'])
 @jwt_required()
