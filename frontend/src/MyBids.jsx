@@ -106,10 +106,12 @@ const MyBids = () => {
                   {hasEnded ? (
                     <>
                       <p><span style={{ color: 'red', fontWeight: 'bold' }}>Auction ended</span></p>
-                      {isWinner ? (
+                      {bid.auction_result === 'won' ? (
                         <p style={{ color: 'green', fontWeight: 'bold' }}>🎉 You won this auction!</p>
-                      ) : (
+                      ) : bid.auction_result === 'lost' ? (
                         <p style={{ color: 'gray', fontStyle: 'italic' }}>You did not win this auction.</p>
+                      ) : (
+                        <p style={{ color: '#999', fontStyle: 'italic' }}>Result not available.</p>
                       )}
                     </>
                   ) : (
