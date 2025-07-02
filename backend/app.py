@@ -562,6 +562,131 @@ def get_user_category_stats(email):
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)})
 
+@app.route('/api/handle-auction-win', methods=['POST'])
+def handle_auction_win():
+    try:
+        data = request.get_json()
+        item_id = data.get("item_id")
+        bidder_email = data.get("bidder_email")
+
+        if not item_id or not bidder_email:
+            return jsonify({"status": "fail", "message": "Missing item_id or bidder_email"}), 400
+
+        item = db.items.find_one({"_id": ObjectId(item_id)})
+        if not item:
+            return jsonify({"status": "fail", "message": "Item not found"}), 404
+
+        end_time_str = item.get("end_date_time")
+        if not end_time_str:
+            return jsonify({"status": "fail", "message": "Missing auction end time"}), 400
+
+        now = datetime.now(ZoneInfo("Asia/Kolkata"))
+        end_time = datetime.fromisoformat(end_time_str).astimezone(ZoneInfo("Asia/Kolkata"))
+
+        if now <= end_time:
+            return jsonify({"status": "fail", "message": "Auction still ongoing"}), 400
+
+        # Get the latest bid from the bidder for this item
+        bid = db.bids.find_one(
+            {"item_id": item_id, "bidder_email": bidder_email},
+            sort=[("timestamp", -1)]
+        )
+
+        if not bid:
+            return jsonify({"status": "fail", "message": "No bid found for this user"}), 404
+
+        highest_bid = float(item.get("highest_bid", item.get("starting_price", 0)))
+        user_bid = float(bid.get("bid_amount", 0))
+
+        if user_bid < highest_bid or bid.get("outbid", False):
+            return jsonify({"status": "fail", "message": "User did not win the auction"}), 403
+
+        # Check if payment already exists
+        existing = db.payments.find_one({
+            "item_id": item_id,
+            "buyer_email": bidder_email
+        })
+
+        if not existing:
+            db.payments.insert_one({
+                "buyer_email": bidder_email,
+                "seller_email": item.get("contact_email", ""),
+                "item_title": item.get("title", ""),
+                "item_id": item_id,
+                "amount": user_bid,
+                "status": "Pending",
+                "timestamp": now.isoformat()
+            })
+
+            db.notifications.insert_one({
+                "email": item.get("contact_email", ""),
+                "type": "payment_pending",
+                "message": f"{bidder_email} won your item '{item.get('title')}' and payment is pending.",
+                "item_id": item_id,
+                "read": False,
+                "timestamp": now.isoformat(),
+                "actionable": True  # ✅ For tick icon
+            })
+
+        return jsonify({"status": "success", "message": "Payment created and seller notified"}), 200
+
+    except Exception as e:
+        print("❌ Error in handle_auction_win:", e)
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+@app.route('/api/payments/<buyer_email>', methods=['GET'])
+def get_user_payments(buyer_email):
+    try:
+        payments = list(db.payments.find({'buyer_email': buyer_email}))
+        for p in payments:
+            p['_id'] = str(p['_id'])
+        return jsonify({'status': 'success', 'payments': payments}), 200
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+@app.route('/api/confirm-payment', methods=['POST'])
+def confirm_payment():
+    try:
+        data = request.get_json()
+        item_id = data.get("item_id")
+        seller_email = data.get("seller_email")
+
+        if not item_id or not seller_email:
+            return jsonify({"status": "fail", "message": "Missing item_id or seller_email"}), 400
+
+        # Find the pending payment record
+        payment = db.payments.find_one({
+            "item_id": item_id,
+            "seller_email": seller_email,
+            "status": "Pending"
+        })
+
+        if not payment:
+            return jsonify({"status": "fail", "message": "No pending payment found"}), 404
+
+        # Mark the payment as paid
+        db.payments.update_one(
+            {"_id": payment["_id"]},
+            {"$set": {"status": "Paid", "confirmed_at": datetime.now(ZoneInfo("Asia/Kolkata")).isoformat()}}
+        )
+
+        # Send notification to buyer
+        db.notifications.insert_one({
+            "email": payment["buyer_email"],
+            "type": "payment_confirmed",
+            "message": f"Your payment for '{payment['item_title']}' has been confirmed by the seller.",
+            "item_id": item_id,
+            "read": False,
+            "timestamp": datetime.now(ZoneInfo("Asia/Kolkata")).isoformat(),
+            "actionable": False
+        })
+
+        return jsonify({"status": "success", "message": "Payment confirmed and buyer notified"}), 200
+
+    except Exception as e:
+        print("❌ Error in confirm_payment:", e)
+        return jsonify({"status": "error", "message": str(e)}), 500
+
 # ------------------ ✅ PROTECTED ROUTE ------------------
 @app.route('/api/protected/dashboard', methods=['GET'])
 @jwt_required()
