@@ -12,12 +12,19 @@ const ExploreItems = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sortOrder, setSortOrder] = useState('');
 
-const [filters, setFilters] = useState({
+  const [filters, setFilters] = useState({
     category: [],
     priceRange: [],
     pickupMethod: [],
     item_condition: [],
   });
+  const [pendingFilters, setPendingFilters] = useState({
+    category: [],
+    priceRange: [],
+    pickupMethod: [],
+    item_condition: [],
+  });
+  const [pendingSortOrder, setPendingSortOrder] = useState('');
 
   const categoryOptions = [
     { label: "📚 Books", value: "Books" },
@@ -59,6 +66,8 @@ const [filters, setFilters] = useState({
 
   useEffect(() => {
       fetchItems();
+      setPendingFilters(filters);
+      setPendingSortOrder(sortOrder);
     }, []);
   
     const fetchItems = async () => {
@@ -115,8 +124,8 @@ const [filters, setFilters] = useState({
       return filtered;
     };
   
-    const toggleFilter = (type, value) => {
-      setFilters((prev) => {
+    const togglePendingFilter = (type, value) => {
+      setPendingFilters((prev) => {
         const updated = prev[type].includes(value)
           ? prev[type].filter((item) => item !== value)
           : [...prev[type], value];
@@ -125,8 +134,14 @@ const [filters, setFilters] = useState({
     };
   
     const clearFilters = () => {
-      setFilters({ category: [], priceRange: [], pickupMethod: [], item_condition: [] });
-      setSortOrder('');
+      setPendingFilters({ category: [], priceRange: [], pickupMethod: [], item_condition: [] });
+      setPendingSortOrder('');
+    };
+  
+    const applyPendingFilters = () => {
+      setFilters(pendingFilters);
+      setSortOrder(pendingSortOrder);
+      setSidebarOpen(false);
     };
   
     const filteredItems = applyFilters();
@@ -172,8 +187,8 @@ const [filters, setFilters] = useState({
                 <label key={cat.value}>
                   <input
                     type="checkbox"
-                    checked={filters.category.includes(cat.value)}
-                    onChange={() => toggleFilter('category', cat.value)}
+                    checked={pendingFilters.category.includes(cat.value)}
+                    onChange={() => togglePendingFilter('category', cat.value)}
                   />
                   {cat.label}
                 </label>
@@ -186,8 +201,8 @@ const [filters, setFilters] = useState({
                 <label key={price.label}>
                   <input
                     type="checkbox"
-                    checked={filters.priceRange.includes(price.label)}
-                    onChange={() => toggleFilter('priceRange', price.label)}
+                    checked={pendingFilters.priceRange.includes(price.label)}
+                    onChange={() => togglePendingFilter('priceRange', price.label)}
                   />
                   {price.label}
                 </label>
@@ -200,8 +215,8 @@ const [filters, setFilters] = useState({
                 <label key={method.value}>
                   <input
                     type="checkbox"
-                    checked={filters.pickupMethod.includes(method.value)}
-                    onChange={() => toggleFilter('pickupMethod', method.value)}
+                    checked={pendingFilters.pickupMethod.includes(method.value)}
+                    onChange={() => togglePendingFilter('pickupMethod', method.value)}
                   />
                   {method.label}
                 </label>
@@ -214,8 +229,8 @@ const [filters, setFilters] = useState({
                 <label key={cond.value}>
                   <input
                     type="checkbox"
-                    checked={filters.item_condition.includes(cond.value)}
-                    onChange={() => toggleFilter('item_condition', cond.value)}
+                    checked={pendingFilters.item_condition.includes(cond.value)}
+                    onChange={() => togglePendingFilter('item_condition', cond.value)}
                   />
                   {cond.label}
                 </label>
@@ -229,8 +244,8 @@ const [filters, setFilters] = useState({
                   type="radio"
                   name="sortOrder"
                   value="low-to-high"
-                  checked={sortOrder === 'low-to-high'}
-                  onChange={() => setSortOrder('low-to-high')}
+                  checked={pendingSortOrder === 'low-to-high'}
+                  onChange={() => setPendingSortOrder('low-to-high')}
                 />
                 Low to High
               </label>
@@ -239,8 +254,8 @@ const [filters, setFilters] = useState({
                   type="radio"
                   name="sortOrder"
                   value="high-to-low"
-                  checked={sortOrder === 'high-to-low'}
-                  onChange={() => setSortOrder('high-to-low')}
+                  checked={pendingSortOrder === 'high-to-low'}
+                  onChange={() => setPendingSortOrder('high-to-low')}
                 />
                 High to Low
               </label>
@@ -248,7 +263,7 @@ const [filters, setFilters] = useState({
   
             <div className="filter-actions">
               <button onClick={clearFilters} className="clear-btn">Clear</button>
-              <button onClick={() => setSidebarOpen(false)} className="apply-btn">Apply</button>
+              <button onClick={applyPendingFilters} className="apply-btn">Apply</button>
             </div>
           </div>
   

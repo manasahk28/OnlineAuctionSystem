@@ -1,5 +1,9 @@
 /* Navbar */
 .navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1000;
   width: 94.5%;
   background-color: #fcf8f1;
   padding: 1rem 2rem;
@@ -369,4 +373,8 @@
   align-items: center;
   gap: 8px;
   z-index: 2;
+}
+
+main {
+  padding-top: 80px;
 }

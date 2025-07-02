@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
-import './PreviewListings.css';
-import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import './PreviewListings.css';
 
 function getRandomItems(arr, n) {
   if (arr.length <= n) return arr;
@@ -25,7 +25,14 @@ const PreviewListings = () => {
       try {
         const response = await axios.get('http://localhost:5000/api/items');
         if (response.data.status === 'success') {
-          const allItems = response.data.items;
+          const now = new Date();
+          const allItems = response.data.items.filter(item => {
+            const endDateStr = item.end_date_time || item.auctionEnd;
+            if (!endDateStr) return false;
+            const end = new Date(endDateStr);
+            console.log('Item:', item.title, '| end_date_time:', item.end_date_time, '| auctionEnd:', item.auctionEnd, '| Parsed end:', end, '| Now:', now);
+            return end > now;
+          });
           const maxCount = 4;
 
           let featuredIds = JSON.parse(localStorage.getItem(FEATURED_KEY) || 'null');
@@ -67,18 +74,25 @@ const PreviewListings = () => {
 
   return (
     <div className="preview-grid">
-      {items.slice(0, 4).map(item => (
-        <div key={item._id} className="listing-card">
+      {items.slice(0, 4).map((item, idx) => (
+        <div key={item._id} className="listing-card" style={{ '--card-delay': `${0.2 + idx * 0.15}s` }}>
           <img
             src={item.thumbnail || 'https://via.placeholder.com/200'}
             alt={item.title}
             className="listing-img"
           />
-          <span className="live-badge">🟢 Auction Live</span>
           <div className="listing-details">
             <h4>{item.title}</h4>
             <p className="price">Base price: ₹{item.starting_price}</p>
-            <button className="view-button" onClick={() => navigate(`/item/${item._id}`)}>
+            <button className="view-button" onClick={() => {
+              const user = JSON.parse(localStorage.getItem('user'));
+              const isLoggedIn = sessionStorage.getItem('loggedIn') === 'true';
+              if (!user || !isLoggedIn) {
+                navigate('/register');
+              } else {
+                navigate(`/item/${item._id}`);
+              }
+            }}>
               View Details
             </button>
           </div>

@@ -20,7 +20,7 @@ body, html{
   background: linear-gradient(135deg, #ff7f00, #ff5722);
   border: none;
   padding: 14px 28px;
-  border-radius: 50px;
+  border-radius: 50px; 
   cursor: pointer;
   box-shadow: 0 8px 20px rgba(255, 127, 0, 0.3);
   transition: background 0.3s ease, transform 0.2s ease;
@@ -37,18 +37,24 @@ body, html{
 /* Make sure this is present or added */
 .dashboard-card {
   position: relative;
-  background: rgba(252, 251, 251, 0.06);  /* more transparent */
+  background: linear-gradient(135deg, #fff7e6 0%, #ffe0c3 100%);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  padding: 30px;
+  border: 2px solid #ffb366;
+  box-shadow: 0 12px 36px rgba(255, 107, 0, 0.13), 0 2px 16px #ffd699;
   border-radius: 16px;
   max-width: 600px;
-  margin: 50px auto;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  margin: 0;
+  padding: 30px;
   text-align: center;
-  color: #fff;
+  color: #333;
   height: 45vh;
+  animation: floatCard 3.5s ease-in-out infinite alternate;
+}
+
+@keyframes floatCard {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-12px); }
 }
 
 
@@ -76,11 +82,13 @@ body, html{
 
 
 .dashboard-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  width: 100vw;
   margin: 0;
   padding: 0;
-  height: 100vh;
-  width: 100vw;
-  display: flex;
 }
 
 .dashboard-main {

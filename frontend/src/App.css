@@ -481,6 +481,7 @@ body {
   padding: 60px 20px;
   text-align: center;
   width: 96.5%;
+  margin-bottom: 1.5rem;
 }
 
 .hero-container {
@@ -592,10 +593,16 @@ body {
 }
 
 .how-section {
-  background-color: #fff;
-  margin-left: 0px;
+  background: #fff !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  margin: 40px 0;
   padding: 60px 0px;
-  width: 100%;}
+  margin-top: 0;
+  padding-top: 20px;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
 
 .how-title {
   font-size: 30px;
@@ -650,24 +657,64 @@ body {
 }
 
 .steps-horizontal {
+  background: #fff !important;
+  background-color: #fff !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
   display: flex;
   justify-content: space-around;
-  align-items: flex-start;
+  align-items: stretch;
   gap: 2rem;
   flex-wrap: wrap;
   padding: 2rem 1rem;
-  background-color: #f9f9f9;
-  border-radius: 12px;
+  margin-bottom: 0;
+  padding-bottom: 0;
 }
 
-.how-step {
-  width: 300px;
+.how-step,
+.flip-card {
+  width: 350px;
+  min-height: 420px;
   text-align: center;
-  padding: 1rem;
+  padding: 0;
   background-color: white;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
   border-radius: 10px;
   transition: transform 0.3s ease;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: stretch;
+  position: relative;
+}
+
+.flip-card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 420px;
+  display: flex;
+}
+
+.flip-card-front, .flip-card-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  min-height: 420px;
+  padding: 1.5rem 1rem 1rem 1rem;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.flip-card-front {
+  z-index: 2;
+}
+
+.flip-card-back {
+  z-index: 3;
 }
 
 .how-step:hover {
@@ -702,20 +749,58 @@ body {
 }
 
 .preview-container {
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 8px 32px rgba(255, 107, 0, 0.07);
+  padding: 48px 0 32px 0;
+  margin: 40px 0 0 0;
+  width: 96%;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: 100%;
-  background-color: #fff;
+  margin-bottom: 48px;
 }
-/* Featured Listings */
-h2.preview{
-  font-size: 32px;
-  color: #222;
-  text-align: left;
-  margin-top: 28px;
-  margin-bottom: 10px;
-  font-family: cursive;}
+
+h2.preview {
+  margin-top: 32px;
+  margin-bottom: 40px;
+  font-size: 2.5rem;
+  color: #ff6600;
+  text-align: center;
+  font-family: 'Pacifico', cursive, sans-serif;
+  letter-spacing: 2px;
+  text-shadow: 0 2px 12px #ffd699;
+  animation: slideDownFadeIn 1s cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+
+/* Animate each listing card in PreviewListings */
+.listing-card {
+  width: 340px;
+  height: 340px;
+  min-height: 340px;
+  opacity: 0;
+  transform: translateY(40px);
+  animation: previewCardFadeIn 0.9s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+  animation-delay: var(--card-delay, 0s);
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 4px 18px rgba(255, 107, 0, 0.13);
+  transition: transform 0.3s, box-shadow 0.3s;
+  margin: 0 12px 32px 12px;
+  border: 2px solid #ffe0c3;
+}
+.listing-card:hover {
+  transform: scale(1.04) translateY(-8px);
+  box-shadow: 0 8px 32px rgba(255, 107, 0, 0.18), 0 0 16px #ffd699;
+  border-color: #ffd699;
+}
+@keyframes previewCardFadeIn {
+  0% { opacity: 0; transform: translateY(40px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
 
 /* Why Use */
 .why-use {
@@ -766,4 +851,107 @@ h2.preview{
   box-shadow: 0 1px 6px rgba(255, 107, 0, 0.1);
   border-top: 3px solid #ff6b00;
   font-style: italic;
+}
+
+/* --- How it works Animation --- */
+@keyframes slideDownFadeIn {
+  0% { opacity: 0; transform: translateY(-40px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+@keyframes slideUpFadeIn {
+  0% { opacity: 0; transform: translateY(40px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+.how-animate {
+  animation: slideDownFadeIn 1s cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+.how-step-animate {
+  opacity: 0;
+  animation: slideUpFadeIn 1s cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+.steps-horizontal .how-step-animate:nth-child(1) { animation-delay: 0.2s; opacity: 1; }
+.steps-horizontal .how-step-animate:nth-child(2) { animation-delay: 0.5s; opacity: 1; }
+.steps-horizontal .how-step-animate:nth-child(3) { animation-delay: 0.8s; opacity: 1; }
+
+.how-title.how-animate {
+  color: #ff6600;
+  text-shadow: 0 2px 12px #ffd699;
+  font-family: 'Pacifico', cursive, sans-serif;
+  letter-spacing: 2px;
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+
+/* --- Flip Card Animation for How it Works --- */
+.flip-card {
+  perspective: 1200px;
+  cursor: pointer;
+  min-height: 370px;
+  position: relative;
+}
+.flip-card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.7s cubic-bezier(0.23, 1, 0.32, 1);
+  transform-style: preserve-3d;
+}
+.flip-card.flipped .flip-card-inner {
+  transform: rotateY(180deg);
+}
+.flip-card-front, .flip-card-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #fffbe9;
+  box-shadow: 0 4px 18px rgba(255, 107, 0, 0.13);
+  padding: 1rem;
+}
+.flip-card-back {
+  background: linear-gradient(135deg, #ffe0c3 0%, #fff7e6 100%);
+  color: #ff6600;
+  transform: rotateY(180deg);
+  box-shadow: 0 8px 32px rgba(255, 107, 0, 0.18), 0 0 16px #ffd699;
+}
+.flip-hint {
+  display: block;
+  margin-top: 1.2rem;
+  font-size: 0.95rem;
+  color: #ff9900;
+  font-style: italic;
+  opacity: 0.7;
+}
+
+.preview-grid {
+  overflow: hidden;
+  width: 100%;
+  position: relative;
+  margin-top: 24px;
+}
+
+.carousel-track {
+  display: flex;
+  width: max-content;
+  animation: carouselMove 18s linear infinite;
+}
+
+.carousel-card {
+  margin: 0 24px 0 0 !important;
+  flex: 0 0 auto;
+  border-right: none;
+}
+
+.carousel-card:last-child {
+  margin-right: 0 !important;
+}
+
+@keyframes carouselMove {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
 }
