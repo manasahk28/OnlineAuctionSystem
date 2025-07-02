@@ -516,6 +516,52 @@ def contact():
 
     return jsonify({'message': 'Message received'}), 200
 
+@listings_bp.route('/user-category-stats/<email>', methods=['GET'])
+def get_user_category_stats(email):
+    try:
+        from bson import ObjectId
+
+        # =====================
+        # 1. PIE CHART DATA: Category distribution of ALL posted items
+        # =====================
+        pipeline = [
+            {"$group": {"_id": "$category", "count": {"$sum": 1}}},
+            {"$sort": {"count": -1}}
+        ]
+        posted_stats = list(db.items.aggregate(pipeline))
+
+        pie_chart_data = [
+            {"category": doc["_id"], "count": doc["count"]}
+            for doc in posted_stats if doc["_id"] is not None
+        ]
+
+        # =====================
+        # 2. BAR CHART DATA: Category distribution of items user has bid on
+        # =====================
+        user_bids = list(db.bids.find({"bidder_email": email}))
+        item_ids = list({bid["item_id"] for bid in user_bids})
+
+        object_ids = [ObjectId(id) for id in item_ids]
+        items = list(db.items.find({"_id": {"$in": object_ids}}))
+
+        bidded_category_count = {}
+        for item in items:
+            category = item.get("category", "Uncategorized")
+            bidded_category_count[category] = bidded_category_count.get(category, 0) + 1
+
+        bar_chart_data = [
+            {"category": k, "count": v} for k, v in bidded_category_count.items()
+        ]
+
+        return jsonify({
+            "status": "success",
+            "pie_data": pie_chart_data,
+            "bar_data": bar_chart_data
+        })
+
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)})
+
 # ------------------ ✅ PROTECTED ROUTE ------------------
 @app.route('/api/protected/dashboard', methods=['GET'])
 @jwt_required()
