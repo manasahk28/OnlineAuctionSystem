@@ -5,6 +5,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faInstagram, faLinkedin, faTwitter } from '@fortawesome/free-brands-svg-icons';
 import { FaInfoCircle, FaEnvelopeOpenText, FaQuestionCircle, FaArrowLeft } from 'react-icons/fa';
 import './Layout.css';
+import ChatBot from './ChatBot';
+
 
 const Layout = ({ children, hideFooter }) => {
   const navigate = useNavigate();
@@ -71,6 +73,8 @@ const Layout = ({ children, hideFooter }) => {
           )}
         </div>
       </nav>
+
+      <ChatBot /> {/* 🌟 Always floating in the corner */}
 
       {/* Logout Confirmation Popup */}
       {showLogoutPopup && (
