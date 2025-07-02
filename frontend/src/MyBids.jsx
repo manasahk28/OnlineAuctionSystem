@@ -33,6 +33,28 @@ const MyBids = () => {
     }
   }, [user?.email]);
 
+  // ✅ Trigger handle-auction-win if the user won
+  useEffect(() => {
+    const handleAuctionWins = async () => {
+      for (const bid of bids) {
+        if (bid.auction_result === 'won') {
+          try {
+            await axios.post('http://localhost:5000/api/handle-auction-win', {
+              item_id: bid._id,
+              bidder_email: user.email
+            });
+          } catch (error) {
+            console.error("❌ Error triggering payment/notification:", error);
+          }
+        }
+      }
+    };
+
+    if (bids.length > 0 && user?.email) {
+      handleAuctionWins();
+    }
+  }, [bids, user?.email]);
+
   // Handle increasing the bid and send it to backend
   const handleIncreaseBid = async (itemId, newBid) => {
     try {
@@ -90,7 +112,7 @@ const MyBids = () => {
             const image = Array.isArray(bid.images) ? bid.images[0] : bid.image;
 
             const hasEnded = timeLeft <= 0;
-            const isWinner = hasEnded && Number(bid.your_bid) === Number(bid.highest_bid);
+            const isWinner = bid.auction_result === 'won';
 
             return (
               <div key={bid._id} className="my-bid-card">
@@ -106,7 +128,7 @@ const MyBids = () => {
                   {hasEnded ? (
                     <>
                       <p><span style={{ color: 'red', fontWeight: 'bold' }}>Auction ended</span></p>
-                      {bid.auction_result === 'won' ? (
+                      {isWinner ? (
                         <>
                           <p style={{ color: 'green', fontWeight: 'bold' }}>🎉 You won this auction!</p>
                           {bid.seller_email && (
@@ -120,7 +142,6 @@ const MyBids = () => {
                       ) : (
                         <p style={{ color: '#999', fontStyle: 'italic' }}>Result not available.</p>
                       )}
-
                     </>
                   ) : (
                     <p>
