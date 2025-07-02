@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import './Userdashboard.css';
 import Layout from './Layout';
 
-import ProfilePage from './Profile'; 
+import ProfilePage from './Profile';
 import MyListings from './MyListings';
 import Payments from './Payments';
 import MyBids from './MyBids';
@@ -17,120 +17,42 @@ import {
   ResponsiveContainer
 } from 'recharts';
 
-
-// function App() {
-//   const [profileImage, setProfileImage] = useState(
-//     JSON.parse(localStorage.getItem('user'))?.profileImage || ''
-//   );
-
-//   return (
-//     <ProfilePage profileImage={profileImage} setProfileImage={setProfileImage} />
-//   );
-// }
-
 const UserDashboard = () => {
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem('user'));
   const [editingItemId, setEditingItemId] = useState(null);
-  const [editItemId, setEditItemId] = useState(null);
   const [showWelcome, setShowWelcome] = useState(true);
   const [profileImage, setProfileImage] = useState(null);
-  const fileInputRef = useRef(null); // for triggering file input
+  const fileInputRef = useRef(null);
   const [showImageModal, setShowImageModal] = useState(false);
   const [profile, setProfile] = useState({});
   const [activeSection, setActiveSection] = useState('Profile');
-  // const [activeSection, setActiveSection] = useState('My Listings');
-
   const [now, setNow] = useState(Date.now());
 
-  // useEffect(() => {
-  //   const user = sessionStorage.getItem("user"); // or token/login key
-  //   if (!user) {
-  //     navigate("/"); // 👈 redirect to landing page
-  //   }
-  // }, []);
-
-  // Dummy stats and spending
-  const statsData = [
-  { name: 'Listings', value: 12 },
-  { name: 'Bids', value: 5 },
-  { name: 'Wins', value: 3 },
-];
-
-const spendingData = [
-  { month: 'Jan', amount: 3000 },
-  { month: 'Feb', amount: 4500 },
-  { month: 'Mar', amount: 7000 },
-];
-
-
-// Dummy bid data
-  const [bids, setBids] = useState([
-    {
-      id: 1,
-      itemName: 'DSA Book',
-      itemImage: '/assets/dsa-book.png',
-      currentBid: 1200,
-      highestBid: 1500,
-      endTime: Date.now() + 1000 * 60 * 60 * 2,
-      outbid: true,
-    },
-    {
-      id: 2,
-      itemName: 'Wireless Headphones',
-      itemImage: '/assets/headphones.png',
-      currentBid: 2500,
-      highestBid: 2500,
-      endTime: Date.now() + 1000 * 60 * 30,
-      outbid: false,
-    },
-    {
-      id: 3,
-      itemName: 'Hoodie',
-      itemImage: '/assets/hoodie.png',
-      currentBid: 800,
-      highestBid: 900,
-      endTime: Date.now() + 1000 * 60 * 10,
-      outbid: true,
-    },
-  ]);
-
-
-  // useEffect(() => {
-  // if (showImageModal) {
-  //   document.body.style.overflow = 'hidden';
-  // } else {
-  //   document.body.style.overflow = 'auto';
-  // }
-
-//   return () => {
-//     document.body.style.overflow = 'auto';
-//   };
-// }, [showImageModal]);
-
+  // Dynamic chart states
+  const [categoryData, setCategoryData] = useState([]);       // For pie chart
+  const [biddedCategoryData, setBiddedCategoryData] = useState([]); // For bar chart
 
   useEffect(() => {
-      const userData = JSON.parse(localStorage.getItem("user") || '{}');
-      if (!userData.email) return;
-    
-      fetch(`http://localhost:5000/api/get-profile?email=${userData.email}`)
-        .then(res => res.json())
-        .then(data => {
-          if (data.status === 'success') {
-            setProfile(data.profile);
-            setProfileImage(data.profile.profileImage || null);
-            localStorage.setItem("user", JSON.stringify({ ...userData, ...data.profile }));
-          }
-        });
-    }, [activeSection]); // <-- this makes sure it refreshes when you return from profile
-  
-  
-    useEffect(() => {
-      const interval = setInterval(() => setNow(Date.now()), 1000);
-      return () => clearInterval(interval);
-    }, []);
+    const userData = JSON.parse(localStorage.getItem("user") || '{}');
+    if (!userData.email) return;
 
-    // Modal scroll freeze
+    fetch(`http://localhost:5000/api/get-profile?email=${userData.email}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.status === 'success') {
+          setProfile(data.profile);
+          setProfileImage(data.profile.profileImage || null);
+          localStorage.setItem("user", JSON.stringify({ ...userData, ...data.profile }));
+        }
+      });
+  }, [activeSection]);
+
+  useEffect(() => {
+    const interval = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(interval);
+  }, []);
+
   useEffect(() => {
     document.body.style.overflow = showImageModal ? 'hidden' : 'auto';
     return () => {
@@ -138,57 +60,65 @@ const spendingData = [
     };
   }, [showImageModal]);
 
-const handleImageUpload = async (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
-
-  const reader = new FileReader();
-  reader.onloadend = async () => {
-    const updatedImage = reader.result;
-    setProfileImage(updatedImage);
-
-    try {
-      // Fetch existing profile
-      const res1 = await fetch(`http://localhost:5000/api/get-profile?email=${user.email}`);
-      const data1 = await res1.json();
-      const existingProfile = data1.profile;
-
-      // Merge with existing fields
-      const updatedProfile = {
-        ...existingProfile,
-        email: user.email,
-        profileImage: updatedImage
-      };
-
-      const res = await fetch('http://localhost:5000/api/update-profile', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updatedProfile)
+  useEffect(() => {
+    if (!user?.email) return;
+    fetch(`http://localhost:5000/api/user-category-stats/${user.email}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.status === 'success') {
+          const pieFormatted = data.pie_data.map(d => ({ name: d.category, value: d.count }));
+          const barFormatted = data.bar_data.map(d => ({ category: d.category, count: d.count }));
+          setCategoryData(pieFormatted);
+          setBiddedCategoryData(barFormatted);
+        }
       });
+  }, [user?.email]);
 
-      const result = await res.json();
-      if (result.status === 'success') {
-        localStorage.setItem('user', JSON.stringify({ ...user, profileImage: updatedImage }));
-        setProfile(updatedProfile);
-      } else {
-        alert('Failed to update profile image');
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onloadend = async () => {
+      const updatedImage = reader.result;
+      setProfileImage(updatedImage);
+
+      try {
+        const res1 = await fetch(`http://localhost:5000/api/get-profile?email=${user.email}`);
+        const data1 = await res1.json();
+        const existingProfile = data1.profile;
+
+        const updatedProfile = {
+          ...existingProfile,
+          email: user.email,
+          profileImage: updatedImage
+        };
+
+        const res = await fetch('http://localhost:5000/api/update-profile', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(updatedProfile)
+        });
+
+        const result = await res.json();
+        if (result.status === 'success') {
+          localStorage.setItem('user', JSON.stringify({ ...user, profileImage: updatedImage }));
+          setProfile(updatedProfile);
+        } else {
+          alert('Failed to update profile image');
+        }
+      } catch (err) {
+        console.error('Error saving profile image:', err);
       }
-    } catch (err) {
-      console.error('Error saving profile image:', err);
-    }
+    };
+
+    reader.readAsDataURL(file);
   };
-
-  reader.readAsDataURL(file);
-};
-
-
 
   if (!user) return null;
 
   return (
     <Layout>
-
- {/* Welcome */}
       {showWelcome ? (
         <div className="dashboard-container">
           <div className="dashboard-card">
@@ -198,13 +128,13 @@ const handleImageUpload = async (e) => {
             </p>
             <p className="dashboard-message">
               This is your personalized Auction Dashboard. Explore listings, track bids, or post something of your own!
-            </p><button className="close-btn" onClick={() => setShowWelcome(false)}>→</button>
+            </p>
+            <button className="close-btn" onClick={() => setShowWelcome(false)}>→</button>
           </div>
         </div>
       ) : (
         <div className="dashboard-main">
           <div className="sidebar-left">
-
             <div className="profile-image">
               {profileImage ? (
                 <img src={profileImage} alt="Profile" className="preview-image" />
@@ -212,42 +142,28 @@ const handleImageUpload = async (e) => {
                 <div className="image-placeholder">📷</div>
               )}
 
-              {/* Hover Menu */}
               <div className="hover-options">
                 {profileImage && (
-                  <button
-                    className="hover-btn"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setShowImageModal(true);
-                    }}
-                  >
-                    View
-                  </button>
-                )}
-                <button
-                  className="hover-btn"
-                  onClick={(e) => {
+                  <button className="hover-btn" onClick={(e) => {
                     e.stopPropagation();
-                    fileInputRef.current.click();
-                  }}
-                >
-                  {profileImage ? 'Change' : 'Add Image'}
-                </button>
+                    setShowImageModal(true);
+                  }}>View</button>
+                )}
+                <button className="hover-btn" onClick={(e) => {
+                  e.stopPropagation();
+                  fileInputRef.current.click();
+                }}>{profileImage ? 'Change' : 'Add Image'}</button>
               </div>
 
-              {/* Hidden file input */}
               <input
                 type="file"
                 accept="image/*"
                 ref={fileInputRef}
-                onChange={handleImageUpload}  // ✅ This sends to backend
+                onChange={handleImageUpload}
                 style={{ display: 'none' }}
               />
-
             </div>
 
-            {/* Image Preview Modal */}
             {showImageModal && (
               <div className="image-modal">
                 <div className="image-modal-content">
@@ -257,10 +173,9 @@ const handleImageUpload = async (e) => {
               </div>
             )}
 
-
             <h3 className="username">{profile.UserName || user.UserName || 'Your Name'}</h3>
 
-          <div className="sidebar-buttons">
+            <div className="sidebar-buttons">
               <button onClick={() => setActiveSection('ProfilePage')}>Profile</button>
               <button onClick={() => setActiveSection('My Listings')}>My Listings</button>
               <button onClick={() => setActiveSection('My Bids')}>My Bids</button>
@@ -270,94 +185,72 @@ const handleImageUpload = async (e) => {
             </div>
           </div>
 
-
-          {/* Right-side content will go here next */}
-        <div className="sidebar-right">
-         {activeSection === 'ProfilePage' ? (
-          <div className="scroll-container">
-                          <ProfilePage
-                            profileImage={profileImage}
-                            setProfileImage={setProfileImage}
-                          />
-                        </div>
-                      ) : (
-                        <>
-                          {activeSection === 'Profile' && (
-          <div className="charts-section">
-              <h2>📊 Quick Stats</h2>
-              <div className="charts-container">
-                
-                {/* Pie Chart */}
-                <div className="chart-card">
-                  <h4>Activity Breakdown</h4>
-                  <ResponsiveContainer width="100%" height={250}>
-                    <PieChart>
-                      <Pie data={statsData} dataKey="value" nameKey="name" outerRadius={80} label>
-                        <Cell fill="#FFA500" />
-                        <Cell fill="#FF7F50" />
-                        <Cell fill="#FF4500" />
-                      </Pie>
-                      <Tooltip />
-                    </PieChart>
-                  </ResponsiveContainer>
-                </div>
-
-                {/* Bar Chart */}
-                <div className="chart-card">
-  <h4>Total Spent (per month)</h4>
-  <p style={{ fontWeight: 'bold', marginBottom: '10px', color: '#FF6B00' }}>
-    💸 Total Spent: ₹{spendingData.reduce((acc, item) => acc + item.amount, 0)}
-  </p>
-
-  <ResponsiveContainer width="100%" height={250}>
-    <BarChart data={spendingData}>
-      <defs>
-        <linearGradient id="orangeGradient" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#FFA500" stopOpacity={1} />
-          <stop offset="100%" stopColor="#FF6B00" stopOpacity={1} />
-        </linearGradient>
-      </defs>
-
-      <XAxis dataKey="month" />
-      <YAxis />
-      <Tooltip contentStyle={{ backgroundColor: '#fff8f0', borderRadius: 8, border: '1px solid #ffa500' }}
-      labelStyle={{ color: '#ff7f00' }}
-      itemStyle={{ color: '#333', fontWeight: 'bold' }}
- />
-      <Legend />
-
-      <Bar dataKey="amount" fill="url(#orangeGradient)" radius={[8, 8, 0, 0]}/>
-    </BarChart>
-  </ResponsiveContainer>
-</div>
+          <div className="sidebar-right">
+            {activeSection === 'ProfilePage' ? (
+              <div className="scroll-container">
+                <ProfilePage profileImage={profileImage} setProfileImage={setProfileImage} />
               </div>
-              </div>
-        
-              )}
-               {activeSection === 'My Bids' && <MyBids />}
-               {activeSection === 'Payments' && <Payments />}
-               {activeSection === 'My Listings' && <MyListings
-                 setActiveSection={setActiveSection}
+            ) : (
+              <>
+                {activeSection === 'Profile' && (
+                  <div className="charts-section">
+                    <h2>📊 Quick Stats</h2>
+                    <div className="charts-container">
+                      {/* Pie Chart: Posted items by category */}
+                      <div className="chart-card">
+                        <h4>Posted Items by Category</h4>
+                        <ResponsiveContainer width="100%" height={250}>
+                          <PieChart>
+                            <Pie data={categoryData} dataKey="value" nameKey="name" outerRadius={80} label>
+                              {categoryData.map((entry, index) => (
+                                <Cell key={`cell-${index}`} fill={['#FFA500', '#FF7F50', '#FF4500', '#FF6B00', '#FFC300'][index % 5]} />
+                              ))}
+                            </Pie>
+                            <Tooltip />
+                          </PieChart>
+                        </ResponsiveContainer>
+                        {categoryData.length > 0 && (
+                          <p style={{ fontWeight: 'bold', color: '#FF6B00', marginTop: '10px' }}>
+                            🔝 Most Auctioned Category: {categoryData[0].name} ({categoryData[0].value} items)
+                          </p>
+                        )}
+                      </div>
 
-  setEditingItemId={setEditingItemId}
-/>}
-      {activeSection === 'Edit Item' && (
-  <EditItem itemId={editingItemId} setActiveSection={setActiveSection} />
+                      {/* Bar Chart: Bidded items per category */}
+                      <div className="chart-card">
+                        <h4>Bids Placed by Category</h4>
+                        <ResponsiveContainer width="100%" height={250}>
+                          <BarChart data={biddedCategoryData}>
+                            <XAxis dataKey="category" />
+                            <YAxis allowDecimals={false} />
+                            <Tooltip />
+                            <Legend />
+                            <Bar dataKey="count" fill="#FF6B00" radius={[8, 8, 0, 0]} />
+                          </BarChart>
+                        </ResponsiveContainer>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
-)}
-
-               {activeSection === 'Notifications' && <Notifications />}
-               {activeSection === 'RecentActivity' && <RecentActivity/>}
-               {/* {activeSection === 'ProfilePage' && (
-                <profile
-                profileImage={profileImage}
-                setProfileImage={setProfileImage} */}
-                </>
-               )}
+                {activeSection === 'My Bids' && <MyBids />}
+                {activeSection === 'Payments' && <Payments />}
+                {activeSection === 'My Listings' && (
+                  <MyListings
+                    setActiveSection={setActiveSection}
+                    setEditingItemId={setEditingItemId}
+                  />
+                )}
+                {activeSection === 'Edit Item' && (
+                  <EditItem itemId={editingItemId} setActiveSection={setActiveSection} />
+                )}
+                {activeSection === 'Notifications' && <Notifications />}
+                {activeSection === 'RecentActivity' && <RecentActivity />}
+              </>
+            )}
+          </div>
         </div>
-        </div>
-              )}
-
+      )}
     </Layout>
   );
 };
