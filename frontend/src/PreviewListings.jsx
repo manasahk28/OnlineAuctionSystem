@@ -88,13 +88,12 @@ const PreviewListings = () => {
               const user = JSON.parse(localStorage.getItem('user'));
               const isLoggedIn = sessionStorage.getItem('loggedIn') === 'true';
               if (!user || !isLoggedIn) {
+                alert('You need to log in or sign up to view item details. Redirecting to registration page.');
                 navigate('/register');
               } else {
                 navigate(`/item/${item._id}`);
               }
-            }}>
-              View Details
-            </button>
+            }}>View Details</button>
           </div>
         </div>
       ))}

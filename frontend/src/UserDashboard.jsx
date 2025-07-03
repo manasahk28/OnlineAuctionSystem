@@ -167,7 +167,9 @@ const UserDashboard = () => {
             {showImageModal && (
               <div className="image-modal">
                 <div className="image-modal-content">
-                  <span className="close-modal" onClick={() => setShowImageModal(false)}>✖</span>
+                  <button className="close-modal go-back-btn" onClick={() => setShowImageModal(false)}>
+                    ✖
+                  </button>
                   <img src={profileImage} alt="Full View" />
                 </div>
               </div>
