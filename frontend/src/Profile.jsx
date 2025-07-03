@@ -117,7 +117,7 @@ const Profile = () => {
   return (
     <div className="profile-container">
       <div className="profile-header">
-        <h2 className="profile-title">👤 Profile Details</h2>
+        <h2 className="profile-title">👤 Account Details</h2>
         <button className="edit-top-btn" onClick={() => setEditMode(prev => !prev)}>
           {editMode ? '🔙 Back' : '✏️ Edit'}
         </button>

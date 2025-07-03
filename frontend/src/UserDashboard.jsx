@@ -178,7 +178,7 @@ const UserDashboard = () => {
             <h3 className="username">{profile.UserName || user.UserName || 'Your Name'}</h3>
 
             <div className="sidebar-buttons">
-              <button onClick={() => setActiveSection('ProfilePage')}>Profile</button>
+              <button onClick={() => setActiveSection('ProfilePage')}>Account</button>
               <button onClick={() => setActiveSection('My Listings')}>My Listings</button>
               <button onClick={() => setActiveSection('My Bids')}>My Bids</button>
               <button onClick={() => setActiveSection('Payments')}>Payments</button>
