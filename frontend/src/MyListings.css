@@ -34,12 +34,10 @@
 }
 
 .listing-card {
-  background-color: #fff;
-  border: 1px solid #ffd4b3;
-  border-radius: 16px;
-  box-shadow: 0 4px 12px rgba(255, 107, 0, 0.1);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;  /* ✅ Spread content evenly */
+  height: 100%;
 }
 
 .listing-card:hover {
@@ -62,6 +60,10 @@
 
 .listing-content {
   padding: 15px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
 }
 
 .listing-title {
@@ -69,6 +71,8 @@
   font-weight: 600;
   color: #333;
   margin: 0 0 8px;
+  white-space: normal;         /* ✅ Allows wrapping */
+  word-wrap: break-word;       /* ✅ Wrap long words */
 }
 
 .listing-description {
@@ -113,7 +117,8 @@
 }
 
 .listing-actions {
-  margin-top: 15px;
+  margin-top: auto;              /* ✅ Push to bottom */
+  padding-top: 10px;
   text-align: center;
 }
 
