@@ -35,8 +35,17 @@ const Login = () => {
         sessionStorage.setItem('loggedIn', 'true'); // 👈✨ THIS is the line to add!
         setSuccess('Login successful!');
         setError('');
+
+
+        // ✅ Check if user is admin
+        const isAdmin = data.user?.is_admin === true;
+
         setTimeout(() => {
-          navigate('/dashboard');
+          if (isAdmin) {
+            navigate('/AdminDashboard'); // ✅ Redirect to admin dashboard
+          } else {
+            navigate('/dashboard'); // ✅ Redirect to normal user dashboard
+          }
         }, 500);
       } 
       else {

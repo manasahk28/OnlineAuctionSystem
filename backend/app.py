@@ -34,6 +34,22 @@ profiles_collection = db["profiles"]
 items_collection = db["items"]
 bids_collection = db["bids"]  # NEW: for storing bids
 
+# Insert Admin
+admin_email = "admin@uni.edu.in"
+admin_password = "admin_password"
+if not users_collection.find_one({"email": admin_email}):
+    admin_user = {
+        "email": admin_email,
+        "password": bcrypt.hashpw(admin_password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8'),
+        "UserName": "Admin",
+        "is_admin": True
+    }
+    users_collection.insert_one(admin_user)
+    print("✅ Admin user inserted")
+else:
+    print("ℹ️ Admin user already exists")
+
+
 @app.route('/api/register', methods=['POST'])
 def register():
     data = request.get_json()
@@ -72,10 +88,12 @@ def register():
 @app.route('/api/login', methods=['POST'])
 def login():
     data = request.get_json()
-    user = users_collection.find_one({'email': data['email']})
+    email = data.get('email')
+    password = data.get('password')
 
-    if user and bcrypt.checkpw(data['password'].encode('utf-8'), user['password'].encode('utf-8')):
-        return jsonify({
+    user = users_collection.find_one({'email': email})
+    if user and bcrypt.checkpw(password.encode('utf-8'), user['password'].encode('utf-8')):
+        response_data = {
             'status': 'success',
             'message': 'Login successful',
             'user': {
@@ -83,11 +101,17 @@ def login():
                 'UserName': user.get('UserName', ''),
                 'collegeId': user.get('collegeId', ''),
                 'collegeName': user.get('collegeName', ''),
-                'timestamp': user.get('timestamp', '')
+                'timestamp': user.get('timestamp', ''),
+                'is_admin': user.get('is_admin', False)
             }
-        }), 200
+        }
+        if user.get('is_admin'):
+            response_data['message'] = 'Admin login successful'
+            response_data['admin_dashboard'] = True
+        return jsonify(response_data), 200
     else:
         return jsonify({'status': 'fail', 'message': 'Invalid email or password'}), 401
+
 
 @app.route('/api/post-item', methods=['POST'])
 def post_item():
@@ -321,13 +345,28 @@ def get_all_items():
 @app.route('/api/item/<item_id>', methods=['GET'])
 def get_single_item(item_id):
     try:
-        item = items_collection.find_one({'_id': ObjectId(item_id)})
-        if not item:
-            return jsonify({'status': 'fail', 'message': 'Item not found'}), 404
-        item['_id'] = str(item['_id'])
-        return jsonify({'status': 'success', 'item': item}), 200
-    except Exception:
+        # 🛡️ Ensure item_id is a valid ObjectId
+        item_id = ObjectId(item_id)
+    except InvalidId:
         return jsonify({'status': 'fail', 'message': 'Invalid item ID'}), 400
+
+    # 🔍 Find the item
+    item = items_collection.find_one({'_id': item_id})
+    if not item:
+        return jsonify({'status': 'fail', 'message': 'Item not found'}), 404
+
+    # 🧹 Convert _id to string
+    item['_id'] = str(item['_id'])
+
+
+    # ✅ Convert nested ObjectIds (like in 'bids' field)
+    if 'bids' in item:
+        for bid in item['bids']:
+            if '_id' in bid:
+                bid['_id'] = str(bid['_id'])
+
+    return jsonify({'status': 'success', 'item': item}), 200
+
 
 @app.route('/api/items/<string:item_id>', methods=['PUT'])
 def update_item(item_id):
@@ -686,6 +725,91 @@ def confirm_payment():
     except Exception as e:
         print("❌ Error in confirm_payment:", e)
         return jsonify({"status": "error", "message": str(e)}), 500
+
+
+@app.route('/api/items/approve/<item_id>', methods=['PUT'])
+def approve_reject_item(item_id):
+    try:
+        status = request.args.get('status')  # "Approved" or "Rejected"
+        is_approved = request.args.get('is_approved')  # "true" or "false"
+
+        if not status or is_approved is None:
+            return jsonify({'message': 'Missing status or is_approved param'}), 400
+
+        update_fields = {
+            "status": status,
+            "is_approved": is_approved.lower() == "true"
+        }
+
+        result = items_collection.update_one(
+            {"_id": ObjectId(item_id)},
+            {"$set": update_fields}
+        )
+
+        if result.matched_count == 0:
+            return jsonify({'message': 'Item not found'}), 404
+
+        return jsonify({'message': f'Item {status} successfully'}), 200
+
+    except Exception as e:
+        print("❌ Error in approval route:", e)
+        return jsonify({'message': 'Internal server error'}), 500
+
+@app.route('/api/admin/comment', methods=['POST'])
+def send_admin_comment():
+    data = request.get_json()
+    item_id = data.get("itemId")
+    seller_email = data.get("sellerId")
+    comment = data.get("comment")
+
+    if not item_id or not seller_email or not comment:
+        return jsonify({"status": "fail", "message": "Missing fields"}), 400
+
+    db.notifications.insert_one({
+        "email": seller_email,
+        "type": "admin_comment",
+        "message": f"Admin comment on your item: {comment}",
+        "item_id": item_id,
+        "read": False,
+        "timestamp": datetime.now().isoformat()
+    })
+
+    return jsonify({"status": "success", "message": "Comment sent to seller"}), 200
+
+@app.route('/api/notifications', methods=['GET'])
+def get_notifications():
+    try:
+        email = request.args.get('email')
+        if not email:
+            return jsonify({'status': 'fail', 'message': 'Missing email parameter'}), 400
+
+        # Fetch both personalized and general (null/empty email) notifications
+        notifications_cursor = db.notifications.find({
+            '$or': [
+                {'email': email},
+                {'email': None},
+                {'email': ''}
+            ]
+        }).sort("timestamp", -1)
+
+        notifications = []
+        for notif in notifications_cursor:
+            notif['_id'] = str(notif['_id'])
+            if 'timestamp' in notif and notif['timestamp']:
+                notif['timestamp'] = notif['timestamp'].isoformat()
+            else:
+                notif['timestamp'] = ''
+            notifications.append(notif)
+
+        return jsonify({
+            'status': 'success',
+            'notifications': notifications
+        }), 200
+
+    except Exception as e:
+        print("❌ Error fetching notifications:", e)
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
 
 # ------------------ ✅ PROTECTED ROUTE ------------------
 @app.route('/api/protected/dashboard', methods=['GET'])

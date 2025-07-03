@@ -4,11 +4,13 @@ import Home from './HomePage';
 import Login from './login';
 import Register from './registration';
 import UserDashboard from './UserDashboard';
+import AdminDashboard from './AdminDashboard';
 import ExploreItems from './ExploreItems';
 import PostItems from './PostItems';
 import ItemDetail from './ItemDetail';
 import EditItem from './EditItem';
-import Layout, { About, Contact, Help } from './Layout';
+import ReviewedList from './ReviewedList';
+import { About, Contact, Help } from './Layout';
 
 
 function App() {
@@ -19,6 +21,8 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/dashboard" element={<UserDashboard />} />
+        <Route path="/AdminDashboard" element={<AdminDashboard />} />
+        <Route path="/reviewed/:type" element={<ReviewedList />} />        
         <Route path="/explore" element={<ExploreItems />} />
         <Route path="/post-item" element={<PostItems />} />
         <Route path="/item/:id" element={<ItemDetail />} />

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './ChatBot.css';
+import noaPic from './assets/girl-avatar.png';
 
 const ChatBot = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -274,7 +275,7 @@ const ChatBot = () => {
       {/* Floating Button */}
       <button className="chat-button" onClick={() => setIsOpen(!isOpen)}>
         <div className="avatar-circle">
-          <img src='assets/girl-avatar.png' alt="Noa" />
+          <img src={noaPic} alt="Noa" />
         </div>
         Any queries? <br /> <strong>Talk to Noa</strong>
       </button>

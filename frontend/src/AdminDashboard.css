@@ -1,0 +1,339 @@
+/* General Layout */
+.admin-dashboard {
+  background-color: #f4f6f9;
+  min-height: 100vh;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  padding-bottom: 4rem;
+}
+
+/* Navbar */
+.admin-navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #ee9937;
+  padding: 1rem 2rem;
+  color: white;
+  border-radius: 0 0 12px 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  font-family: 'Times New Roman', Times, serif;
+}
+
+.admin-navbar-centre {
+  font-size: 25px;
+  font-family: 'Times New Roman', Times, serif;
+}
+
+.admin-navbar-left h2 {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: bold;
+  margin-left: 55px;
+}
+
+/* Buttons */
+.logt-button {
+  background-color: #f29109;
+  color: white;
+  padding: 0.6rem 1.1rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 500;
+  transition: background 0.3s ease;
+}
+
+.logt-button:hover {
+  background-color: #e8ba74;
+}
+
+.dropdown {
+  position: relative;
+  display: inline-block;
+  margin-right: 1rem;
+}
+
+.dropdown-button {
+  background-color: #f29109;
+  color: white;
+  padding: 0.6rem 1.1rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: white;
+  min-width: 160px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  border-radius: 6px;
+  z-index: 1;
+}
+
+.dropdown-content div {
+  padding: 0.8rem 1rem;
+  cursor: pointer;
+  color: #333;
+}
+
+.dropdown-content div:hover {
+  background-color: #f1f1f1;
+}
+
+.dropdown:hover .dropdown-content {
+  display: block;
+}
+
+/* Loader Spinner */
+.loader-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 3rem;
+}
+
+.loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 5px solid #ccc;
+  border-top: 5px solid #f29109;
+  border-radius: 50%;
+  animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Empty message */
+.empty-msg {
+  text-align: center;
+  font-size: 1.2rem;
+  color: #7f8c8d;
+  margin-top: 3rem;
+}
+
+/* Item list container */
+.item-list {
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Custom card layout */
+.custom-item-card {
+  width: 1232px;
+  height: 201px;
+  display: flex;
+  align-items: center;
+  background-color: #fff;
+  border-radius: 12px;
+  padding: 1rem 2rem;
+  margin: 0 auto;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+  border-left: 5px solid #f29109;
+  position: relative;
+}
+
+/* Left: Image */
+.custom-left img {
+  width: 120px;
+  height: 130px;
+  object-fit: contain;
+}
+
+/* Middle: Title, Price, View Link, Approve/Reject */
+.custom-middle {
+  flex: 1;
+  margin-left: 2rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.custom-title {
+  font-size: 1.4rem;
+  font-weight: bold;
+  color: #c65e03;
+  margin-bottom: 0.3rem;
+}
+
+.custom-price {
+  font-size: 1.1rem;
+  color: #333;
+  display: flex;
+  align-items: center;
+}
+
+.custom-details-link {
+  font-weight: 500;
+  color: #444;
+  margin-left: 0.8rem;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* Approve & Reject aligned with middle */
+.middle-right {
+  margin-top: 0.8rem;
+  display: grid;
+  gap: 1rem;
+}
+
+.middle-right .approve,
+.middle-right .reject {
+  padding: 0.4rem 1.2rem;
+  font-size: 1.6rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  text-align: center;
+}
+
+.middle-right .approve {
+  background-color: #2ecc71;
+  color: white;
+  margin-right: 300px;
+}
+
+.middle-right .reject {
+  background-color: #e74c3c;
+  color: white;
+  margin-right: 300px;
+}
+
+/* Comment aligned to far right */
+.custom-right {
+  position: absolute;
+  right: 2rem;
+  top: 50%;
+  margin-right: 30px;
+  transform: translateY(-50%);
+}
+
+.comment-button {
+  background: none;
+  border: none;
+  font-size: 1.6rem;
+  color: #333;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.comment-popup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(30, 30, 30, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.popup-content {
+  background: #ffffff;
+  padding: 2rem;
+  border-radius: 16px;
+  width: 420px;
+  max-width: 90%;
+  box-shadow: 0 20px 48px rgba(232, 175, 132, 0.2);
+  animation: slideIn 0.3s ease-out;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.popup-content h3 {
+  margin-top: 0;
+  font-size: 1.4rem;
+  color: #ec9243;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.popup-content p {
+  font-size: 0.95rem;
+  color: #444;
+  margin: 0.5rem 0;
+}
+
+.popup-content textarea {
+  width: 100%;
+  height: 120px;
+  margin-top: 12px;
+  border-radius: 10px;
+  padding: 12px;
+  font-size: 1rem;
+  border: 1px solid #ddd;
+  background: #f9f9f9;
+  box-sizing: border-box;
+  resize: none;
+  outline: none;
+  transition: border 0.2s ease;
+}
+
+.popup-content textarea:focus {
+  border: 1.5px solid #f1a432;
+  background: #fff;
+}
+
+.popup-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.popup-actions button {
+  padding: 0.6rem 1.2rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.popup-actions button:first-child {
+  background-color: #f1a432;
+  color: #fff;
+}
+
+.popup-actions button:first-child:hover {
+  background-color: #e1a448;
+}
+
+.popup-actions button:last-child {
+  background-color: #f43c3c;
+  color: #333;
+}
+
+.popup-actions button:last-child:hover {
+  background-color: #efa8a8;
+}

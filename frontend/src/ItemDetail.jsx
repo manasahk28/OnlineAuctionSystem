@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import './ItemDetail.css';
 import Layout from './Layout';
@@ -15,26 +15,39 @@ const ItemDetail = () => {
   const [error, setError] = useState('');
   const [showMediaFullscreen, setShowMediaFullscreen] = useState(false);
 
-  useEffect(() => {
-    const fetchItem = async () => {
-      try {
-        const res = await axios.get(`http://localhost:5000/api/item/${id}`);
-        if (res.data.status === 'success') {
-          const fetchedItem = res.data.item;
-          setItem(fetchedItem);
+  const user = JSON.parse(localStorage.getItem('user'));
+  const isAdmin = user?.is_admin === true;
 
-          const images = fetchedItem.images || [];
-          const media = [...images];
-          if (fetchedItem.video) media.push(fetchedItem.video);
-          setMediaList(media);
+useEffect(() => {
+  const fetchItem = async () => {
+    if (!id) return;
+
+    try {
+      const response = await axios.get(`http://localhost:5000/api/item/${id}`);
+
+      if (response.data.status === 'success') {
+        const fetchedItem = response.data.item;
+        setItem(fetchedItem);
+
+        // 🖼️ Prepare image and video list
+        const images = Array.isArray(fetchedItem.images) ? fetchedItem.images : [];
+        const media = [...images];
+
+        if (fetchedItem.video) {
+          media.push(fetchedItem.video);
         }
-      } catch (err) {
-        console.error('Error fetching item details:', err);
-      }
-    };
 
-    fetchItem();
-  }, [id]);
+        setMediaList(media);
+      } else {
+        console.warn('Item fetch failed:', response.data.message);
+      }
+    } catch (err) {
+      console.error('🔥 Error fetching item details:', err.response?.data?.message || err.message);
+    }
+  };
+
+  fetchItem();
+}, [id]);
 
   const handlePrev = () => {
     setCurrentMediaIndex((prev) => (prev === 0 ? mediaList.length - 1 : prev - 1));
@@ -68,18 +81,19 @@ const ItemDetail = () => {
     setShowMediaFullscreen(!showMediaFullscreen);
   };
 
-  if (!item) return <p>Loading...</p>;
-
-  const currentMedia = mediaList[currentMediaIndex];
-  const isVideo = currentMedia?.startsWith('data:video');
 
   const handleBid = async () => {
+     if (isAdmin) {
+      setError("Admins are not allowed to place bids.");
+      return;
+    }
+
   const minAllowed = Number(item.starting_price) + Number(item.minimum_increment);
 
-  if (!Number.isFinite(bidAmount) || bidAmount <= 0) {
-    setError('Please enter a valid positive number for your bid');
-    return;
-  }
+if (!bidAmount || isNaN(bidAmount) || bidAmount <= 0) {
+  setError('Please enter a valid positive number for your bid');
+  return;
+}
 
   if (bidAmount < minAllowed) {
     setError(`Your bid must be at least ₹${minAllowed}`);
@@ -109,9 +123,19 @@ const ItemDetail = () => {
   }
 };
 
-
+if (!item) {
   return (
-    <Layout>
+    <div className="loader-wrapper">
+      <div className="loading-spinner"></div>
+    </div>
+  );
+}
+
+  const currentMedia = mediaList[currentMediaIndex];
+  const isVideo = currentMedia?.startsWith('data:video');
+
+
+  const content = (
       <div className="item-detail-container">
         <div className="left-panel">
 
@@ -142,7 +166,7 @@ const ItemDetail = () => {
                     onClick={() => setCurrentMediaIndex(index)}
                   >
                     {isVideo ? (
-                      <video src={media} />
+                        <video key={index} src={media} />
                     ) : (
                       <img src={media} alt={`Preview ${index}`} />
                     )}
@@ -184,18 +208,33 @@ const ItemDetail = () => {
             </>
           )}
 
-          <div className="action-buttons">
+          {/* <div className="action-buttons">
             <button className="back-button" onClick={() => navigate('/explore')}>
               ← Back
             </button>
             <button className="bid-button" onClick={() => setShowModal(true)}>
               Bid for Auction
             </button>
+          </div> 
           </div>
-        </div>
-      </div>
+          </div>        */}
 
-      {showModal && (
+<div className="action-buttons">
+          <button
+            className="back-button"
+            onClick={() => navigate(isAdmin ? '/AdminDashboard' : '/explore')}
+          >
+            ← Back
+          </button>
+          {!isAdmin && (
+            <button className="bid-button" onClick={() => setShowModal(true)}>
+              Bid for Auction
+            </button>
+          )}
+        </div>
+        </div>
+
+      {!isAdmin && showModal && (
         <div className="modal-overlay" onClick={() => setShowModal(false)}>
           <div className="modal-box" onClick={(e) => e.stopPropagation()}>
             <h2>Place Your Bid</h2>
@@ -231,6 +270,7 @@ const ItemDetail = () => {
         </div>
       )}
 
+
       {showMediaFullscreen && (
         <div className="fullscreen-overlay" onClick={toggleMediaFullscreen}>
           <div className="fullscreen-media">
@@ -244,8 +284,10 @@ const ItemDetail = () => {
           </div>
         </div>
       )}
-    </Layout>
+      </div>
   );
+    return isAdmin ? content : <Layout>{content}</Layout>;
+
 };
 
 export default ItemDetail;
