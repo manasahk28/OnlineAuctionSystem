@@ -433,8 +433,11 @@ def update_item(item_id):
 @app.route('/api/items/user/<email>', methods=['GET'])
 def get_user_items(email):
     user_items = list(items_collection.find({'seller_id': email}))
+
     for item in user_items:
+        # Convert _id and any nested ObjectId if needed
         item['_id'] = str(item['_id'])
+        
     return jsonify({'status': 'success', 'items': user_items}), 200
 
 @app.route('/my-bids/<bidder_id>', methods=['GET'])
