@@ -12,7 +12,7 @@ from dotenv import load_dotenv
 from datetime import datetime
 from zoneinfo import ZoneInfo
 from bson.errors import InvalidId
-
+from flask import request, jsonify
 
 app = Flask(__name__)
 CORS(app)
@@ -813,6 +813,52 @@ def get_notifications():
         print("❌ Error fetching notifications:", e)
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
+@app.route('/api/chatbot', methods=['POST'])
+def chatbot():
+    data = request.get_json()
+    message = data.get('message', '').strip().lower()
+    user_email = data.get('email', '').strip().lower()
+
+    # 🔧 Simple typo corrections
+    message = message.replace("preent", "present").replace("staionary", "stationery").replace("art supllies", "art supplies")
+
+    # 📌 Category/item keywords
+    item_keywords = ["stationery", "art supplies", "books", "television", "laptop", "bag", "furniture", "phone", "sketch book"]
+
+    for keyword in item_keywords:
+        if keyword in message:
+            found = db.items.count_documents({
+                "$or": [
+                    {"category": {"$regex": keyword, "$options": "i"}},
+                    {"title": {"$regex": keyword, "$options": "i"}},
+                    {"tags": {"$regex": keyword, "$options": "i"}},
+                    {"description": {"$regex": keyword, "$options": "i"}}
+                ]
+            })
+            if found > 0:
+                return jsonify({"response": f"Yes! We have {found} item(s) related to '{keyword}'. 🔍"})
+            else:
+                return jsonify({"response": f"Sorry, no items found for '{keyword}' at the moment. 🙁"})
+
+    # 📊 Total item count
+    if re.search(r"(total items|how many items.*total|how many products)", message):
+        total = db.items.count_documents({})
+        return jsonify({"response": f"We currently have {total} item(s) listed in total. 🛒"})
+
+    # 📈 Bidding stats
+    if re.search(r"how many items.*(bid|bidded|bidding)", message) and user_email:
+        bid_count = db.bids.count_documents({"bidder_email": user_email})
+        return jsonify({"response": f"You have placed bids on {bid_count} item(s) so far. 🔥"})
+
+    # 📤 Posted item stats
+    if re.search(r"how many items.*(posted|listed)", message) and user_email:
+        post_count = db.items.count_documents({"seller_email": user_email})
+        return jsonify({"response": f"You have posted {post_count} item(s) for auction. 📦"})
+
+    # ❓ Default fallback
+    return jsonify({
+        "response": "Hmm... I’m still learning. Try asking about items, bidding, or listings! 🧠"
+    })
 
 # ------------------ ✅ PROTECTED ROUTE ------------------
 @app.route('/api/protected/dashboard', methods=['GET'])
