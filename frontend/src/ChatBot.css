@@ -178,3 +178,29 @@
   text-align: left;
   padding: 0 10px;
 }
+
+.chat-input {
+  display: flex;
+  padding: 10px;
+  border-top: 1px solid #ccc;
+  background-color: white;
+}
+
+.chat-input input {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  margin-right: 8px;
+  font-size: 14px;
+}
+
+.chat-input button {
+  padding: 10px 16px;
+  background-color: #ff8800;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+}
