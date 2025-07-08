@@ -13,6 +13,7 @@ from datetime import datetime
 from zoneinfo import ZoneInfo
 from bson.errors import InvalidId
 from flask import request, jsonify
+import secrets   
 
 app = Flask(__name__)
 CORS(app)
@@ -32,7 +33,32 @@ db = client["auction_db"]
 users_collection = db["users"]
 profiles_collection = db["profiles"]
 items_collection = db["items"]
-bids_collection = db["bids"]  # NEW: for storing bids
+bids_collection = db["bids"]  
+notifications_collection = db["notifications"]
+notifications_collection.create_index('email') 
+reset_tokens_collection = db["reset_tokens"]
+preferences_collection = db["preferences"]
+
+category_codes = {
+    'Electronics': 'ELEC',
+    'Books': 'BOOK',
+    'Clothing': 'CLOTH',
+    'Stationery': 'STAT',
+    'Lab Equipment': 'LAB',
+    'Sports Gear': 'SPORT',
+    'Hostel Essentials': 'HOST',
+    'Cycle/Bike Accessories': 'BIKE',
+    'Art Supplies': 'ART',
+    'Other': 'MISC'
+}
+
+# Loop through all items missing a custom_item_id
+for item in items_collection.find({'custom_item_id': {'$exists': True}}):
+    if not item['custom_item_id'].startswith('AUC'):
+        updated_id = f"AUC{item['custom_item_id']}"
+        items_collection.update_one({'_id': item['_id']}, {'$set': {'custom_item_id': updated_id}})
+        print(f"Updated: {item['title']} -> {updated_id}")
+
 
 # Insert Admin
 admin_email = "admin@uni.edu.in"
@@ -145,6 +171,28 @@ def post_item():
     if video and (not isinstance(video, str) or not video.startswith('data:video')):
         return jsonify({'status': 'fail', 'message': 'Invalid video format'}), 400
 
+    #new
+    category_codes = {
+        'Electronics': 'ELEC',
+        'Books': 'BOOK',
+        'Clothing': 'CLOTH',
+        'Stationery': 'STAT',
+        'Lab Equipment': 'LAB',
+        'Sports Gear': 'SPORT',
+        'Hostel Essentials': 'HOST',
+        'Cycle/Bike Accessories': 'BIKE',
+        'Art Supplies': 'ART',
+        'Other': 'MISC'
+    }
+
+    category = data.get('category', 'Other')
+    code_prefix = category_codes.get(category, 'GEN')
+    
+    # Count items already in that category
+    item_count = items_collection.count_documents({'category': category})
+    custom_id = f"AUC{code_prefix}-{item_count + 1:03d}"  # e.g. ELEC-001
+    #here
+
     item = {
         'title': data.get('title', ''),
         'description': data.get('description', ''),
@@ -171,8 +219,8 @@ def post_item():
         'warranty_duration': data.get('warranty_duration', ''),
         'damage_description': data.get('damage_description', ''),
         'limitedCollection': data.get('limitedCollection', False),
-        'timestamp': datetime.now().isoformat()
-
+        'timestamp': datetime.now().isoformat(),
+        'custom_item_id': custom_id
     }
     items_collection.insert_one(item)
     return jsonify({'status': 'success', 'message': 'Item posted successfully!'}), 201
@@ -341,7 +389,6 @@ def get_all_items():
     return jsonify({'status': 'success', 'items': items}), 200
 
 
-
 @app.route('/api/item/<item_id>', methods=['GET'])
 def get_single_item(item_id):
     try:
@@ -433,13 +480,18 @@ def update_item(item_id):
 @app.route('/api/items/user/<email>', methods=['GET'])
 def get_user_items(email):
     user_items = list(items_collection.find({'seller_id': email}))
-
+    # new
     for item in user_items:
-        # Convert _id and any nested ObjectId if needed
         item['_id'] = str(item['_id'])
-        
-    return jsonify({'status': 'success', 'items': user_items}), 200
-
+        if 'custom_item_id' not in item:
+            category = item.get('category', 'Other')
+            prefix = category_codes.get(category, 'GEN')
+            count = items_collection.count_documents({'category': category, 'custom_item_id': {'$exists': True}})
+            custom_id = f"AUC       {prefix}-{count + 1:03d}"
+            items_collection.update_one({'_id': ObjectId(item['_id'])}, {'$set': {'custom_item_id': custom_id}})
+            item['custom_item_id'] = custom_id
+        return jsonify({'status': 'success', 'items': user_items}), 200
+    
 @app.route('/my-bids/<bidder_id>', methods=['GET'])
 def get_my_bids(bidder_id):
     try:
@@ -859,6 +911,106 @@ def chatbot():
     return jsonify({
         "response": "Hmm... I’m still learning. Try asking about items, bidding, or listings! 🧠"
     })
+
+# ------------------ Forgot/Reset Password Routes ------------------
+
+@app.route('/api/forgot-password', methods=['POST'])
+def forgot_password():
+    data = request.get_json()
+    email = data.get('email')
+
+    user = users_collection.find_one({'email': email})
+    if not user:
+        return jsonify({'status': 'fail', 'message': 'Email not registered'}), 404
+
+    token = secrets.token_urlsafe(16)
+    expiry = datetime.now(ZoneInfo("Asia/Kolkata")).timestamp() + 600  # 10 mins
+
+    # Clean previous tokens
+    reset_tokens_collection.delete_many({'email': email})
+
+    # Save new reset token
+    reset_tokens_collection.insert_one({
+        'email': email,
+        'token': token,
+        'expires_at': expiry,
+        'used': False,
+        'created_at': datetime.now(ZoneInfo("Asia/Kolkata")).isoformat()
+    })
+
+    # Since no email service is used, return token for manual use
+    return jsonify({
+        'status': 'success',
+        'message': 'Reset token generated. Use it to reset password.',
+        'reset_token': token
+    }), 200
+
+
+@app.route('/api/reset-password', methods=['POST'])
+def reset_password():
+    data = request.get_json() or {}
+    new_password = data.get('new_password')
+    email = data.get('email')
+    token = data.get('reset_token')
+    new_password = data.get('new_password')
+
+
+    # Validate password strength
+    def is_password_strong(password):
+        if len(password) < 8:
+            return False
+        if not re.search(r'[A-Z]', password):
+            return False
+        if not re.search(r'[a-z]', password):
+            return False
+        if not re.search(r'\d', password):
+            return False
+        if not re.search(r'[!@#$%^&*(),.?":{}|<>]', password):
+            return False
+        return True
+
+    if not is_password_strong(new_password):
+        return jsonify({
+            'status': 'fail',
+            'message': 'Password must include uppercase, lowercase, number, special character, and be at least 8 characters'
+        }), 400
+
+    token_doc = reset_tokens_collection.find_one({'email': email, 'token': token})
+    now_ts = datetime.now(ZoneInfo("Asia/Kolkata")).timestamp()
+
+    if not token_doc:
+        return jsonify({'status': 'fail', 'message': 'Invalid token'}), 400
+
+    if token_doc.get('used'):
+        return jsonify({'status': 'fail', 'message': 'Token already used'}), 400
+
+    if now_ts > token_doc['expires_at']:
+        return jsonify({'status': 'fail', 'message': 'Token expired'}), 400
+
+    # Check if same as old password
+    user = users_collection.find_one({'email': email})
+    if bcrypt.checkpw(new_password.encode('utf-8'), user['password'].encode('utf-8')):
+        return jsonify({'status': 'fail', 'message': 'New password cannot be same as old password'}), 400
+
+    hashed = bcrypt.hashpw(new_password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+    users_collection.update_one({'email': email}, {'$set': {'password': hashed}})
+
+    reset_tokens_collection.update_one(
+        {'_id': token_doc['_id']},
+        {'$set': {
+            'used': True,
+            'used_at': datetime.now(ZoneInfo("Asia/Kolkata")).isoformat()
+        }}
+    )
+
+    access_token = create_access_token(identity=email)
+
+    return jsonify({
+        'status': 'success',
+        'message': 'Password reset successful',
+        'access_token': access_token,
+        'email': email
+    }), 200
 
 # ------------------ ✅ PROTECTED ROUTE ------------------
 @app.route('/api/protected/dashboard', methods=['GET'])

@@ -11,7 +11,8 @@ import ItemDetail from './ItemDetail';
 import EditItem from './EditItem';
 import ReviewedList from './ReviewedList';
 import { About, Contact, Help } from './Layout';
-
+import ForgotPassword from './ForgotPassword';
+import ResetPassword from './ResetPassword';
 
 function App() {
   return (
@@ -30,6 +31,8 @@ function App() {
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/help" element={<Help />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
       </Routes>
     </Router>
   );

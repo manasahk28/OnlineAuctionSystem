@@ -327,6 +327,8 @@ const handleRemoveImage = (index) => {
 
        <div className="form-section">
   <h3>📸 Item Media</h3>
+  <p className="media-warning">⚠️ Upload only original images and videos. No internet/media content allowed.</p>
+
   <div className="input-row side-by-side">
   <label htmlFor="images">Images (max 3)</label>
   <input
@@ -462,19 +464,8 @@ const handleRemoveImage = (index) => {
 
         <div className="form-section">
           <h3>🚚 Shipping & Pickup</h3>
-          <div className="input-row">
-            <label htmlFor="pickup_method">Pickup Method</label>
-            <select
-              name="pickup_method"
-              value={form.pickup_method || ''}
-              onChange={handleChange}
-            >
-              <option value="">Select a method</option>
-              <option value="Meet on Campus">Meet on Campus</option>
-              <option value="Home Delivery">Home Delivery</option>
-              <option value="Pickup from Seller">Pickup from Seller</option>
-            </select>
-          </div>
+          {renderSelect('Pickup Method', 'pickup_method', ['Meet on Campus','Home Delivery','Pickup from Seller'])}
+
           <div className="input-row">
   <label htmlFor="delivery_charge">Delivery Charge</label>
   <input

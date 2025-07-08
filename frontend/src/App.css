@@ -955,3 +955,11 @@ h2.preview {
   0% { transform: translateX(0); }
   100% { transform: translateX(-50%); }
 }
+
+.info-message {
+  background-color: #e0f7fa;
+  color: #006064;
+  padding: 10px;
+  border-radius: 5px;
+  margin:10px 0;
+}

@@ -29,6 +29,8 @@ const MyListings = ({ setEditingItemId, setActiveSection }) => {
             endTime: item.end_date_time || '',
             imageUrl: item.images?.[0] || null,
             status: item.status || 'Draft',
+            /*new line below one*/
+            customId: item.custom_item_id || 'Not Assigned'
           }));
           setListings(formatted);
         } else {
@@ -67,6 +69,8 @@ const MyListings = ({ setEditingItemId, setActiveSection }) => {
 
               <div className="listing-content">
                 <h3 className="listing-title">{item.title}</h3>
+                {/*new line below one*/}
+                <p className="item-id"><strong>ID:</strong> {item.customId}</p>
                 <p className="listing-description">{item.description}</p>
 
                 <div className="listing-meta">
@@ -76,10 +80,43 @@ const MyListings = ({ setEditingItemId, setActiveSection }) => {
                 <div className="listing-actions">
                   <button
                     className="view-more-btn"
-                    onClick={() => {  setEditingItemId(item._id);     // <-- Set which item to edit
-                                      setActiveSection('Edit Item');  // <-- Switch to Edit Item view
-                        }} >✏️ Edit </button>
+                    onClick={() => {
+                      setEditingItemId(item._id);
+                      setActiveSection('Edit Item');
+                    }}
+                  >
+                    ✏️ Edit
+                  </button>
+                
+                  <button
+                    className="delete-btn"
+                    onClick={async () => {
+                      const confirmDelete = window.confirm(`Are you sure you want to delete "${item.title}"?`);
+                      if (!confirmDelete) return;
+                
+                      try {
+                        const res = await fetch(`http://localhost:5000/api/items/${item._id}`, {
+                          method: 'DELETE',
+                        });
+                        const data = await res.json();
+                
+                        if (data.status === 'success') {
+                          // Remove from state
+                          setListings(prev => prev.filter(i => i._id !== item._id));
+                          alert('🗑️ Item deleted!');
+                        } else {
+                          alert('❌ Failed to delete item.');
+                        }
+                      } catch (err) {
+                        console.error('Delete failed:', err);
+                        alert('⚠️ Something went wrong.');
+                      }
+                    }}
+                  >
+                    🗑 Delete
+                  </button>
                 </div>
+
               </div>
             </div>
           ))}

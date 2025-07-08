@@ -14,7 +14,7 @@
   background-color: #ee9937;
   padding: 1rem 2rem;
   color: white;
-  border-radius: 0 0 12px 12px;
+  /* border-radius: 0 0 12px 12px; */
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   font-family: 'Times New Roman', Times, serif;
 }
@@ -129,9 +129,11 @@
 
 /* Custom card layout */
 .custom-item-card {
-  width: 1232px;
-  height: 201px;
+  width: 100%;
+  max-width: 1232px;
+  height: auto;
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   background-color: #fff;
   border-radius: 12px;
@@ -144,10 +146,13 @@
 
 /* Left: Image */
 .custom-left img {
-  width: 120px;
-  height: 130px;
+  width: 90px;
+  height: 100px;
   object-fit: contain;
 }
+
+
+
 
 /* Middle: Title, Price, View Link, Approve/Reject */
 .custom-middle {
@@ -187,15 +192,18 @@
   gap: 1rem;
 }
 
+
 .middle-right .approve,
 .middle-right .reject {
   padding: 0.4rem 1.2rem;
-  font-size: 1.6rem;
+  font-size: 1.2rem;
   border: none;
   border-radius: 6px;
   cursor: pointer;
   text-align: center;
 }
+
+
 
 .middle-right .approve {
   background-color: #2ecc71;
@@ -221,7 +229,7 @@
 .comment-button {
   background: none;
   border: none;
-  font-size: 1.6rem;
+  font-size: 1.3rem;
   color: #333;
   text-decoration: underline;
   cursor: pointer;
@@ -336,4 +344,80 @@
 
 .popup-actions button:last-child:hover {
   background-color: #efa8a8;
+}
+
+@media (max-width: 992px) {
+  .custom-item-card {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 1.5rem;
+  }
+
+  .custom-left img {
+    width: 100px;
+    height: auto;
+    margin-bottom: 1rem;
+  }
+
+  .custom-middle {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .middle-right {
+    margin-top: 1rem;
+    margin-right: 0;
+    display: flex;
+    gap: 1rem;
+  }
+
+  .middle-right .approve,
+  .middle-right .reject {
+    font-size: 1rem;
+    margin-right: 0;
+    flex: 1;
+  }
+
+  .custom-right {
+    position: static;
+    transform: none;
+    margin-top: 1rem;
+    align-self: flex-end;
+  }
+}
+
+@media (max-width: 576px) {
+  .admin-navbar {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .admin-navbar-left h2 {
+    font-size: 1.5rem;
+    margin-left: 0;
+  }
+
+  .logt-button,
+  .dropdown-button {
+    width: 100%;
+    text-align: center;
+  }
+
+  .popup-content {
+    width: 90%;
+    padding: 1rem;
+  }
+}
+
+
+@media screen and (max-width: 768px) {
+  body {
+    background-color: lightblue;
+  }
+}
+
+@media print {
+  body {
+    background-color: white;
+  }
 }

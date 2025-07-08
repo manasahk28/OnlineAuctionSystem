@@ -17,37 +17,30 @@ const ItemDetail = () => {
 
   const user = JSON.parse(localStorage.getItem('user'));
   const isAdmin = user?.is_admin === true;
+  const isAuctionEnded = item && new Date(item.end_date_time) < new Date();
 
-useEffect(() => {
-  const fetchItem = async () => {
-    if (!id) return;
 
-    try {
-      const response = await axios.get(`http://localhost:5000/api/item/${id}`);
 
-      if (response.data.status === 'success') {
-        const fetchedItem = response.data.item;
-        setItem(fetchedItem);
+  useEffect(() => {
+    const fetchItem = async () => {
+      try {
+        const res = await axios.get(`http://localhost:5000/api/item/${id}`);
+        if (res.data.status === 'success') {
+          const fetchedItem = res.data.item;
+          setItem(fetchedItem);
 
-        // 🖼️ Prepare image and video list
-        const images = Array.isArray(fetchedItem.images) ? fetchedItem.images : [];
-        const media = [...images];
-
-        if (fetchedItem.video) {
-          media.push(fetchedItem.video);
+          const images = fetchedItem.images || [];
+          const media = [...images];
+          if (fetchedItem.video) media.push(fetchedItem.video);
+          setMediaList(media);
         }
-
-        setMediaList(media);
-      } else {
-        console.warn('Item fetch failed:', response.data.message);
+      } catch (err) {
+        console.error('Error fetching item details:', err);
       }
-    } catch (err) {
-      console.error('🔥 Error fetching item details:', err.response?.data?.message || err.message);
-    }
-  };
+    };
 
-  fetchItem();
-}, [id]);
+    fetchItem();
+  }, [id]);
 
   const handlePrev = () => {
     setCurrentMediaIndex((prev) => (prev === 0 ? mediaList.length - 1 : prev - 1));
@@ -88,12 +81,12 @@ useEffect(() => {
       return;
     }
 
-  const minAllowed = Number(item.starting_price) + Number(item.minimum_increment);
+    const minAllowed = Number(item.starting_price) + Number(item.minimum_increment);
 
-if (!bidAmount || isNaN(bidAmount) || bidAmount <= 0) {
-  setError('Please enter a valid positive number for your bid');
-  return;
-}
+    if (!Number.isFinite(bidAmount) || bidAmount <= 0) {
+      setError('Please enter a valid positive number for your bid');
+      return;
+    }
 
   if (bidAmount < minAllowed) {
     setError(`Your bid must be at least ₹${minAllowed}`);
@@ -139,22 +132,29 @@ if (!item) {
       <div className="item-detail-container">
         <div className="left-panel">
 
-          <div className="carousel-wrapper">
-            <button className="arrow left-arrow" onClick={handlePrev}>
-              &#8592;
-            </button>
-            {isVideo ? (
-              <video controls className="product-image" onClick={toggleMediaFullscreen}>
-                <source src={currentMedia} type="video/mp4" />
-                Your browser does not support the video tag.
-              </video>
-            ) : (
-              <img src={currentMedia} alt="Product" className="product-image" onClick={toggleMediaFullscreen} />
-            )}
-            <button className="arrow right-arrow" onClick={handleNext}>
-              &#8594;
-            </button>
+        <div className="carousel-wrapper">
+        {mediaList.length > 1 && (
+          <button className="arrow left-arrow" onClick={handlePrev}>
+            &#8592;
+          </button>
+        )}
+        
+        {isVideo ? (
+          <video controls className="product-image" onClick={toggleMediaFullscreen}>
+            <source src={currentMedia} type="video/mp4" />
+            Your browser does not support the video tag.
+          </video>
+        ) : (
+          <img src={currentMedia} alt="Product" className="product-image" onClick={toggleMediaFullscreen} />
+        )}
+        
+        {mediaList.length > 1 && (
+          <button className="arrow right-arrow" onClick={handleNext}>
+            &#8594;
+          </button>
+        )}
           </div>
+
           {mediaList.length > 1 && (
             <div className="thumbnail-row">
               {mediaList.map((media, index) => {
@@ -180,6 +180,7 @@ if (!item) {
 
         <div className="right-panel">
           <h1 className="item-title">{item.title}</h1>
+          {item.status && (<p className={`approval-status ${item.status.toLowerCase()}`}><strong>Status:</strong> {item.status}</p>)}
           {item.limitedCollection && (
             <p style={{ color: '#E6521F', fontWeight: 'bold' }}>
               🚨 Exclusive Limited Collection Item
@@ -188,8 +189,8 @@ if (!item) {
           <p className="item-price"><strong>Base Price:</strong> ₹{item.starting_price}</p>
           <p className="item-price"><strong>Min Increment:</strong> ₹{item.minimum_increment}</p>
           {item.buy_now_price && <p className="item-price"><strong>Buy Now Price:</strong> ₹{item.buy_now_price}</p>}
-          <p className="item-user"><strong>Posted By:</strong> {item.seller_id}</p>
-          <p className="item-date"><strong>Auction Starts:</strong> {new Date(item.start_date_time).toLocaleString()}</p>
+          {item.custom_item_id && (<p className="item-id"><strong>Item ID:</strong> {item.custom_item_id}</p>)}
+          <p className="item-user"><strong>Posted By:</strong> {item.seller_id?.replace(/(.{2}).+(@.+)/, '$1****$2')}</p>          <p className="item-date"><strong>Auction Starts:</strong> {new Date(item.start_date_time).toLocaleString()}</p>
           <p className="item-date"><strong>Auction Ends:</strong> {new Date(item.end_date_time).toLocaleString()}</p>
           {item.category && <p><strong>Category:</strong> {item.category}</p>}
           {item.tags && <p><strong>Tags:</strong> {item.tags}</p>}
@@ -219,20 +220,25 @@ if (!item) {
           </div>
           </div>        */}
 
-<div className="action-buttons">
+        <div className="action-buttons">
           <button
             className="back-button"
             onClick={() => navigate(isAdmin ? '/AdminDashboard' : '/explore')}
           >
             ← Back
           </button>
-          {!isAdmin && (
+          {!isAdmin && !isAuctionEnded && (
             <button className="bid-button" onClick={() => setShowModal(true)}>
               Bid for Auction
             </button>
           )}
+          
+          {!isAdmin && isAuctionEnded && (
+            <p className="auction-ended-text">⏳ Auction has ended. Bidding is closed.</p>
+          )}
+
         </div>
-        </div>
+      </div>
 
       {!isAdmin && showModal && (
         <div className="modal-overlay" onClick={() => setShowModal(false)}>

@@ -9,7 +9,7 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState(''); // ✅ new state
+  const [success, setSuccess] = useState('');
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -32,10 +32,9 @@ const Login = () => {
 
       if (data.status === 'success') {
         localStorage.setItem('user', JSON.stringify(data.user || { email }));
-        sessionStorage.setItem('loggedIn', 'true'); // 👈✨ THIS is the line to add!
+        sessionStorage.setItem('loggedIn', 'true');
         setSuccess('Login successful!');
         setError('');
-
 
         // ✅ Check if user is admin
         const isAdmin = data.user?.is_admin === true;
@@ -47,8 +46,7 @@ const Login = () => {
             navigate('/dashboard'); // ✅ Redirect to normal user dashboard
           }
         }, 500);
-      } 
-      else {
+      } else {
         setError(data.message || 'Login failed');
         setSuccess('');
       }
@@ -65,7 +63,6 @@ const Login = () => {
         <h2>Login</h2>
         <p className="tagline">Welcome back!</p>
 
-        {/* ✅ Message boxes */}
         {error && <p className="error-message">{error}</p>}
         {success && <p className="success-message">{success}</p>}
 
@@ -93,15 +90,21 @@ const Login = () => {
               {showPassword ? <FaEyeSlash /> : <FaEye />}
             </span>
           </div>
-
+        <p className="switch-link">
+          <button type="button" onClick={() => navigate('/forgot-password')}>
+            Forgot password?
+          </button>
+        </p>
           <button type="submit">Login</button>
         </form>
 
         <p className="switch-link">
-          Don"t have an account?{' '}
+          Don’t have an account?{' '}
           <button type="button" onClick={() => navigate('/register')}>
             Register here
           </button>
+
+
         </p>
       </div>
     </div>

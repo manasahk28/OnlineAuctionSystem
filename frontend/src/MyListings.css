@@ -172,3 +172,26 @@
   cursor: pointer;
 }
 
+
+.item-id {
+  font-size: 0.95rem;
+  color: #666;
+  margin-bottom: 6px;
+}
+
+.delete-btn {
+  margin-top: 8px;
+  padding: 8px 14px;
+  font-size: 14px;
+  background-color: #e60000;
+  color: white;
+  border: none;
+  margin-left: 25px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.delete-btn:hover {
+  background-color: #c10000;
+}

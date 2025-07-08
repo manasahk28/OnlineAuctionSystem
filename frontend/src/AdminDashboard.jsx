@@ -43,7 +43,7 @@ const AdminDashboard = () => {
     try {
       await axios.post('http://localhost:5000/api/admin/comment', {
         itemId: selectedItem._id,
-        sellerId: selectedItem.contact_email,
+        sellerId: selectedItem.seller_id,
         comment: commentText
       });
       alert('Comment sent to seller.');
