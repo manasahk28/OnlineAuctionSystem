@@ -20,7 +20,7 @@ body, html{
   background: linear-gradient(135deg, #ff7f00, #ff5722);
   border: none;
   padding: 14px 28px;
-  border-radius: 50px; 
+  border-radius: 50px;
   cursor: pointer;
   box-shadow: 0 8px 20px rgba(255, 127, 0, 0.3);
   transition: background 0.3s ease, transform 0.2s ease;
@@ -32,7 +32,6 @@ body, html{
   background: rgb(242, 161, 40);
   transform: scale(1.05);
 }
-
 
 /* Make sure this is present or added */
 .dashboard-card {
@@ -64,12 +63,12 @@ body, html{
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 2rem; 
+  padding: 2rem;
   margin: 0;
   padding: 0;
   height: 100vh;
 }
- 
+
 
 .dashboard-main {
   display: flex;

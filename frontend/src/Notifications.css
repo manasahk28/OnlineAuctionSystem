@@ -1,95 +1,87 @@
-.notifications-container {
-  padding: 0px;
-  padding-left: 25px;
-  overflow-y: hidden;
-  max-height: 600px;
-  border-radius: 8px;
-  display: flex;
-  gap: 10px;
+.notifications-wrapper {
+  padding: 24px;
+  font-family: 'Segoe UI', sans-serif;
+  background: #f0f2f5;
+  min-height: 100vh;
 }
 
-.notifications-wrapper h2 {
-  margin-top: 30px;
-  margin-left: 20px;
-  padding: 20px;
-  color: #444;
-} 
+.profile-header h2 {
+  margin-bottom: 24px;
+  font-size: 1.8rem;
+  color: #333;
+}
 
+.notifications-container {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
 
 .left-section {
-  flex: 2;
-  /* min-width: 600px;
-  padding: 10px; */
+  flex: 3;
 }
 
 .right-section {
-
-  /* margin-top: -10px; */
   flex: 1;
-  /* padding: 10px; */
-}
-
-
-.notification-preferences {
-  /* margin-bottom: 15px; */
-  padding: 10px;
-  background-color: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-  box-sizing: border-box;
-  width: 97%;
-  color: #222;
-}
-.notification-preferences h4 {
-  margin-top: 10px;
-  margin-bottom: 10px;
-  color: #555;
-}
-
-.toggle-item {
-  margin-right: 20px;
-  display: flex;
-  align-items: center;
-  margin-bottom: 10px;
-  /* font-size: 14px; */
-  color: #444;
-}
-
-.toggle-item input[type="checkbox"] {
-  margin-right: 10px;
-  width: 15px;
-  height: 15px;
-  accent-color: #1c05b2;
-  cursor: pointer;
-}
-
-.toggle-item label {
-  display: flex;
-  align-items: center;
-  font-size: 0.9rem;
-  color: #333;
-  gap: 0.3rem;
-  cursor: pointer;
-}
-
-.notification-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+  background: #ffffff;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+  border: 1px solid #ddd;
 }
 
 .notification-card {
-  padding: 12px 15px;
-  background-color: #fff;
-  border-left: 5px solid #ffa500;
-  border-radius: 6px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-  font-size: 14px;
-  color: #222;
-  width: 570px;
+  background: #ffffff;
+  padding: 16px;
+  margin-bottom: 16px;
+  border-radius: 10px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.06);
+  transition: transform 0.2s ease;
+}
+
+.notification-card:hover {
+  transform: scale(1.01);
+}
+
+.admin-comment {
+  border-left: 5px solid #e63946;
+  background: #fff2f2;
+}
+
+.notif-title {
+  font-size: 1rem;
+  color: #333;
+}
+
+.notif-message {
+  margin: 8px 0;
+  color: #444;
+}
+
+.notif-time {
+  font-size: 0.8rem;
+  color: #777;
+}
+
+.toggle-item {
+  margin: 12px 0;
+  font-size: 0.95rem;
+}
+
+.toggle-item input {
+  margin-right: 10px;
+}
+
+.error-message {
+  color: red;
+  font-weight: 500;
 }
 
 .no-alerts {
-  color: #777;
-  font-style: italic;
+  color: #28a745;
+  font-weight: 600;
+  font-size: 1rem;
+  background: #e6f9ec;
+  padding: 10px 16px;
+  border-radius: 8px;
 }

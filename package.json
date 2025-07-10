@@ -1,0 +1,20 @@
+{
+  "name": "onlineauctionsystem",
+  "version": "1.0.0",
+  "description": "Welcome to the **Online Auction System**, a full-stack web app for managing campus-based product auctions.  \r Users can register, log in, list items for auction, and place bids in real-time!",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/manasahk28/OnlineAuctionSystem.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/manasahk28/OnlineAuctionSystem/issues"
+  },
+  "homepage": "https://github.com/manasahk28/OnlineAuctionSystem#readme"
+}

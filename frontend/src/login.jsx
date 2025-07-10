@@ -31,19 +31,30 @@ const Login = () => {
       const data = await response.json();
 
       if (data.status === 'success') {
-        localStorage.setItem('user', JSON.stringify(data.user || { email }));
+        const token = data.access_token;
+        const user = data.user;
+
+        if (!token || !user?.email) {
+          setError('Invalid response from server.');
+          return;
+        }
+
+        // ✅ Save user info and token in localStorage
+        localStorage.setItem('token', token);
+        localStorage.setItem('userEmail', user.email);
+        localStorage.setItem('user', JSON.stringify(user));
+
         sessionStorage.setItem('loggedIn', 'true');
         setSuccess('Login successful!');
         setError('');
 
-        // ✅ Check if user is admin
-        const isAdmin = data.user?.is_admin === true;
+        const isAdmin = user.is_admin === true;
 
         setTimeout(() => {
           if (isAdmin) {
-            navigate('/AdminDashboard'); // ✅ Redirect to admin dashboard
+            navigate('/AdminDashboard');
           } else {
-            navigate('/dashboard'); // ✅ Redirect to normal user dashboard
+            navigate('/dashboard');
           }
         }, 500);
       } else {
@@ -51,6 +62,7 @@ const Login = () => {
         setSuccess('');
       }
     } catch (err) {
+      console.error('Login error:', err);
       setError('Error connecting to server');
       setSuccess('');
     }
@@ -90,11 +102,13 @@ const Login = () => {
               {showPassword ? <FaEyeSlash /> : <FaEye />}
             </span>
           </div>
-        <p className="switch-link">
-          <button type="button" onClick={() => navigate('/forgot-password')}>
-            Forgot password?
-          </button>
-        </p>
+
+          <p className="switch-link">
+            <button type="button" onClick={() => navigate('/forgot-password')}>
+              Forgot password?
+            </button>
+          </p>
+
           <button type="submit">Login</button>
         </form>
 
@@ -103,8 +117,6 @@ const Login = () => {
           <button type="button" onClick={() => navigate('/register')}>
             Register here
           </button>
-
-
         </p>
       </div>
     </div>

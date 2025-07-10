@@ -1,83 +1,132 @@
-import React, { useState } from 'react';
+import axios from 'axios';
+import { useEffect, useState } from 'react';
 import './Notifications.css';
 
 const NotificationsPage = () => {
-  const [preferences, setPreferences] = useState({
-    outbid: true,
-    auctionEnding: true,
-    winLoss: true,
-    newListing: true,
-    payment: true,
-  });
+  const userEmail = localStorage.getItem('userEmail');
+  const token = localStorage.getItem('token');
 
-  const togglePreference = (type) => {
-    setPreferences(prev => ({
-      ...prev,
-      [type]: !prev[type]
-    }));
+  const [preferences, setPreferences] = useState({});
+  const [notifications, setNotifications] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  const authHeader = {
+    headers: { Authorization: `Bearer ${token}` },
   };
 
-  const dummyNotifications = [
-    { id: 1, text: "You've been outbid on Canon DSLR 📸!", type: 'outbid' },
-    { id: 2, text: "Your item Bluetooth Speaker has received 5 bids!", type: 'newListing' },
-    { id: 3, text: "Auction for Study Lamp ends in 2 hours ⏰", type: 'auctionEnding' },
-    { id: 4, text: "Congrats! You won the bid for HP Laptop 🎉", type: 'winLoss' },
-    { id: 5, text: "Payment successful for your purchase 🧾", type: 'payment' },
-  ];
+  const togglePreference = (type) => {
+    const updatedPrefs = {
+      ...preferences,
+      [type]: !preferences[type],
+    };
+    setPreferences(updatedPrefs);
 
-  const filteredNotifications = dummyNotifications.filter(
-    notif => preferences[notif.type]
+    axios
+      .post(
+        'http://localhost:5000/api/notifications/preferences/update',
+        {
+          email: userEmail,
+          preferences: updatedPrefs,
+        },
+        authHeader
+      )
+      .catch((err) => {
+        console.error('⚠️ Error updating preferences', err);
+      });
+  };
+
+  useEffect(() => {
+    if (!userEmail || !token) {
+      setError('User not logged in or token missing');
+      setLoading(false);
+      return;
+    }
+
+    const fetchData = async () => {
+      try {
+        const [notifRes, prefsRes] = await Promise.all([
+          axios.get(`http://localhost:5000/api/notifications/${userEmail}`),
+          axios.get(
+            `http://localhost:5000/api/notifications/preferences/${userEmail}`,
+            authHeader
+          ),
+        ]);
+
+        setNotifications(notifRes.data.notifications || []);
+        setPreferences(prefsRes.data.preferences || {});
+      } catch (err) {
+        console.error(err);
+        setError('Error fetching notifications or preferences');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [userEmail, token]);
+
+  const filteredNotifications = notifications.filter(
+    (n) => preferences[`enable_${n.type}`]
   );
 
   return (
     <div className="notifications-wrapper">
       <div className="profile-header">
-        <h2 style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span role="img" aria-label="money bag">🔔</span>Notifications
-        </h2>
+        <h2>🔔 Notifications</h2>
       </div>
 
-    <div className="notifications-container">
-      <div className='left-section'>
-      <div className="notification-list">
-        {filteredNotifications.length > 0 ? (
-          filteredNotifications.map(notif => (
-            <div key={notif.id} className="notification-card">
-              <p>{notif.text}</p>
+      <div className="notifications-container">
+        <div className="left-section">
+          {loading ? (
+            <p>Loading...</p>
+          ) : error ? (
+            <p className="error-message">{error}</p>
+          ) : filteredNotifications.length > 0 ? (
+            filteredNotifications.map((n) => (
+              <div
+                key={n._id}
+                className={`notification-card ${
+                  n.type === 'admin_comment' ? 'admin-comment' : ''
+                }`}
+              >
+                <strong className="notif-title">
+                  {n.type.replace(/_/g, ' ').toUpperCase()}
+                </strong>
+                <p className="notif-message">{n.message}</p>
+                <small className="notif-time">
+                  {new Date(n.timestamp).toLocaleString()}
+                </small>
+              </div>
+            ))
+          ) : (
+            <p className="no-alerts">🎉 You're all caught up!</p>
+          )}
+        </div>
+
+        <div className="right-section">
+          <h4>Manage Notifications</h4>
+          {Object.keys(preferences).map((key) => (
+            <div key={key} className="toggle-item">
+              <label>
+                <input
+                  type="checkbox"
+                  checked={preferences[key]}
+                  onChange={() => togglePreference(key)}
+                />
+                {' '}
+                {key
+                  .replace('enable_', '')
+                  .replace(/_/g, ' ')
+                  .replace(/\b\w/g, (c) => c.toUpperCase())}
+              </label>
             </div>
-          ))
-        ) : (
-          <p className="no-alerts">You're all caught up. 🎉</p>
-        )}
+          ))}
+        </div>
       </div>
-      </div>
-
-    <div className='right-section'>
-      <div className="notification-preferences">
-        <h4>Manage Notifications</h4>
-        {Object.keys(preferences).map(type => (
-          <div key={type} className="toggle-item">
-            <label>
-              <input
-                type="checkbox"
-                checked={preferences[type]}
-                onChange={() => togglePreference(type)}
-              />
-              {type === 'outbid' && 'Outbid Alerts'}
-              {type === 'auctionEnding' && 'Auction Ending Soon'}
-              {type === 'winLoss' && 'Win/Loss Updates'}
-              {type === 'newListing' && 'New Listings in Favorite Categories'}
-              {type === 'payment' && 'Payment Updates'}
-            </label>
-          </div>
-        ))}
-      </div>
-      </div>
-
-    
-    </div>
     </div>
   );
 };
 
 export default NotificationsPage;
+

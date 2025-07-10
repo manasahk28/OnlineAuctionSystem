@@ -1,11 +1,11 @@
 // src/components/Layout.jsx
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faInstagram, faLinkedin, faTwitter } from '@fortawesome/free-brands-svg-icons';
-import { FaInfoCircle, FaEnvelopeOpenText, FaQuestionCircle, FaArrowLeft } from 'react-icons/fa';
-import './Layout.css';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { useEffect, useState } from 'react';
+import { FaArrowLeft, FaEnvelopeOpenText, FaInfoCircle, FaQuestionCircle } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
 import ChatBot from './ChatBot';
+import './Layout.css';
 
 
 const Layout = ({ children, hideFooter }) => {
@@ -14,6 +14,7 @@ const Layout = ({ children, hideFooter }) => {
   const [showLogoutPopup, setShowLogoutPopup] = useState(false);
   const [showFarewell, setShowFarewell] = useState(false);
   const [fadePopup, setFadePopup] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
@@ -27,13 +28,16 @@ const Layout = ({ children, hideFooter }) => {
 
   const handleLogout = () => setShowLogoutPopup(true);
 
+  const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
+
+  const closeSidebar = () => setSidebarOpen(false);
+
+
   const confirmLogout = () => {
     localStorage.removeItem('user');
     sessionStorage.removeItem('loggedIn');
     setShowFarewell(true);
-
     setTimeout(() => setFadePopup(true), 4000);
-
     setTimeout(() => {
       setShowLogoutPopup(false);
       setShowFarewell(false);
@@ -51,12 +55,13 @@ const Layout = ({ children, hideFooter }) => {
 
   return (
     <>
-      {/* Navbar */}
+      {sidebarOpen && <div className="sidebar-overlay" onClick={closeSidebar} />} {/* Blur background */}
       <nav className="navbar">
         <div className="navbar-left">
-          <h2>Online Auction</h2>
+          <button className="menu-icon" onClick={toggleSidebar}>☰</button>
+          <h2 className="site-title">Online Auction</h2>
         </div>
-        <div className="navbar-right">
+        <div className="navbar-right desktop-only">
           {user ? (
             <>
               <a href="/">Home</a>
@@ -74,6 +79,7 @@ const Layout = ({ children, hideFooter }) => {
         </div>
       </nav>
 
+      <div className={`layout-content ${sidebarOpen ? 'blurred' : ''}`}>
       <ChatBot /> {/* 🌟 Always floating in the corner */}
 
       {/* Logout Confirmation Popup */}
@@ -123,6 +129,7 @@ const Layout = ({ children, hideFooter }) => {
           </div>
         </footer>
       )}
+      </div>
     </>
   );
 };

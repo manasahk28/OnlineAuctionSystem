@@ -1,6 +1,14 @@
 body {
-  background: #f6f7fa;
+  background: #980909;
 }
+* {
+  background-color: transparent;
+  box-sizing: border-box;
+}
+body > div {
+  background-color: inherit;
+}
+
 /* Login Page - No scroll */
 .login-wrapper {
   display: flex;
@@ -225,7 +233,7 @@ body {
   margin: 0;
   background-color: #fff;
   font-family: 'Segoe UI', sans-serif;
-  min-height: 100vh;
+  /* min-height: 100vh; */
 }
 
 .login-wrapper {
@@ -480,8 +488,8 @@ body {
   background-color: #ffffff;
   padding: 60px 20px;
   text-align: center;
-  width: 96.5%;
-  margin-bottom: 1.5rem;
+  width: 100%;
+  /* margin-bottom: 1.5rem; */
 }
 
 .hero-container {
@@ -521,7 +529,7 @@ body {
 }
 
 .hero-image {
-  width: 90%;
+  width: 95%;
   border-radius: 3px;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
 }
@@ -600,8 +608,6 @@ body {
   padding: 60px 0px;
   margin-top: 0;
   padding-top: 20px;
-  margin-bottom: 0;
-  padding-bottom: 0;
 }
 
 .how-title {
@@ -746,6 +752,12 @@ body {
 
 .orange-light {
   color: #ff9900;
+}
+
+.preview-section {
+  background-color: #fff;
+  padding: 60px 20px;
+  text-align: center;
 }
 
 .preview-container {

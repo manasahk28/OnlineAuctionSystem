@@ -9,11 +9,11 @@ import os
 from bson import ObjectId
 from App.routes.listings import listings_bp
 from dotenv import load_dotenv
-from datetime import datetime
+from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 from bson.errors import InvalidId
 from flask import request, jsonify
-import secrets   
+import secrets
 
 app = Flask(__name__)
 CORS(app)
@@ -33,9 +33,9 @@ db = client["auction_db"]
 users_collection = db["users"]
 profiles_collection = db["profiles"]
 items_collection = db["items"]
-bids_collection = db["bids"]  
+bids_collection = db["bids"]
 notifications_collection = db["notifications"]
-notifications_collection.create_index('email') 
+notifications_collection.create_index('email')
 reset_tokens_collection = db["reset_tokens"]
 preferences_collection = db["preferences"]
 
@@ -118,10 +118,14 @@ def login():
     password = data.get('password')
 
     user = users_collection.find_one({'email': email})
+
     if user and bcrypt.checkpw(password.encode('utf-8'), user['password'].encode('utf-8')):
+        access_token = create_access_token(identity=email, expires_delta=timedelta(days=1))
+
         response_data = {
             'status': 'success',
             'message': 'Login successful',
+            'access_token': access_token,  # ✅ return token
             'user': {
                 'email': user['email'],
                 'UserName': user.get('UserName', ''),
@@ -131,12 +135,12 @@ def login():
                 'is_admin': user.get('is_admin', False)
             }
         }
+
         if user.get('is_admin'):
             response_data['message'] = 'Admin login successful'
             response_data['admin_dashboard'] = True
+
         return jsonify(response_data), 200
-    else:
-        return jsonify({'status': 'fail', 'message': 'Invalid email or password'}), 401
 
 
 @app.route('/api/post-item', methods=['POST'])
@@ -187,7 +191,7 @@ def post_item():
 
     category = data.get('category', 'Other')
     code_prefix = category_codes.get(category, 'GEN')
-    
+
     # Count items already in that category
     item_count = items_collection.count_documents({'category': category})
     custom_id = f"AUC{code_prefix}-{item_count + 1:03d}"  # e.g. ELEC-001
@@ -373,7 +377,7 @@ def get_all_items():
         query['item_condition'] = {'$in': item_condition}
 
     items = list(items_collection.find(query))
-    
+
     for item in items:
         item['_id'] = str(item['_id'])  # ✅ Convert _id to string
         if 'images' in item and isinstance(item['images'], list) and item['images']:
@@ -491,7 +495,7 @@ def get_user_items(email):
             items_collection.update_one({'_id': ObjectId(item['_id'])}, {'$set': {'custom_item_id': custom_id}})
             item['custom_item_id'] = custom_id
         return jsonify({'status': 'success', 'items': user_items}), 200
-    
+
 @app.route('/my-bids/<bidder_id>', methods=['GET'])
 def get_my_bids(bidder_id):
     try:
@@ -514,7 +518,7 @@ def get_my_bids(bidder_id):
                     'images': item.get('images', []),
                     'highest_bid': item.get('highest_bid', item.get('base_price', 0)),
                     'your_bid': bid.get('bid_amount'),
-                    'end_time': item.get('end_date_time'),  
+                    'end_time': item.get('end_date_time'),
                     'outbid': bid.get('outbid', False)
                 })
 
@@ -831,39 +835,125 @@ def send_admin_comment():
 
     return jsonify({"status": "success", "message": "Comment sent to seller"}), 200
 
-@app.route('/api/notifications', methods=['GET'])
-def get_notifications():
-    try:
-        email = request.args.get('email')
-        if not email:
-            return jsonify({'status': 'fail', 'message': 'Missing email parameter'}), 400
+# ======================
+# GET notifications for user
+# ======================
+@app.route('/api/notifications/<email>', methods=['GET'])
+def get_notifications(email):
+    user_notifications = list(
+        notifications_collection
+        .find({'email': email})
+        .sort('timestamp', -1)
+    )
+    for n in user_notifications:
+        n['_id'] = str(n['_id'])
+    return jsonify({'status': 'success', 'notifications': user_notifications}), 200
 
-        # Fetch both personalized and general (null/empty email) notifications
-        notifications_cursor = db.notifications.find({
-            '$or': [
-                {'email': email},
-                {'email': None},
-                {'email': ''}
-            ]
-        }).sort("timestamp", -1)
 
-        notifications = []
-        for notif in notifications_cursor:
-            notif['_id'] = str(notif['_id'])
-            if 'timestamp' in notif and notif['timestamp']:
-                notif['timestamp'] = notif['timestamp'].isoformat()
-            else:
-                notif['timestamp'] = ''
-            notifications.append(notif)
+# ======================
+# Add new notification
+# ======================
+@app.route('/api/notifications/add', methods=['POST'])
+def add_notification():
+    data = request.get_json()
+    email = data.get('email')
+    message = data.get('message')
+    n_type = data.get('type', 'general')
 
-        return jsonify({
-            'status': 'success',
-            'notifications': notifications
-        }), 200
+    if not email or not message:
+        return jsonify({'status': 'fail', 'message': 'Missing email or message'}), 400
 
-    except Exception as e:
-        print("❌ Error fetching notifications:", e)
-        return jsonify({'status': 'error', 'message': str(e)}), 500
+    # Respect user preferences
+    prefs = preferences_collection.find_one({'email': email})
+    if prefs and not prefs.get(f'enable_{n_type}', True):
+        return jsonify({'status': 'skipped', 'message': f'{n_type} notifications disabled by user'}), 200
+
+    notifications_collection.insert_one({
+        'email': email,
+        'message': message,
+        'type': n_type,
+        'seen': False,
+        'timestamp': datetime.now(ZoneInfo("Asia/Kolkata")).isoformat()
+    })
+    return jsonify({'status': 'success', 'message': 'Notification added'}), 200
+
+
+# ======================
+# Mark notification as seen
+# ======================
+@app.route('/api/notifications/mark_seen', methods=['POST'])
+def mark_notification_seen():
+    data = request.get_json()
+    notification_id = data.get('notification_id')
+
+    if not notification_id:
+        return jsonify({'status': 'fail', 'message': 'Missing notification_id'}), 400
+
+    notifications_collection.update_one(
+        {'_id': ObjectId(notification_id)},
+        {'$set': {'seen': True}}
+    )
+    return jsonify({'status': 'success', 'message': 'Notification marked as seen'}), 200
+
+
+# ======================
+# Get user preferences
+# ======================
+@app.route('/api/notifications/preferences/<email>', methods=['GET'])
+@jwt_required()
+def get_notification_preferences(email):
+    prefs = preferences_collection.find_one({'email': email})
+    if not prefs:
+        prefs = {
+            'enable_outbid': True,
+            'enable_auction_end': True,
+            'enable_winner': True,
+            'enable_new_item': True,
+            'enable_payment': True,
+            'enable_admin_comment': True  # ✅ include this
+        }
+        preferences_collection.insert_one({"email": email, **prefs})
+    prefs.pop('_id', None)
+    return jsonify({'status': 'success', 'preferences': prefs})
+
+
+# ======================
+# Update user preferences
+# ======================
+@app.route('/api/notifications/preferences/update', methods=['POST'])
+@jwt_required()
+def update_notification_preferences():
+    data = request.get_json()
+    email = data.get('email')
+    updates = data.get('preferences', {})
+
+    if not email or not isinstance(updates, dict):
+        return jsonify({'status': 'fail', 'message': 'Invalid request'}), 400
+
+    preferences_collection.update_one(
+        {'email': email},
+        {'$set': updates},
+        upsert=True
+    )
+    return jsonify({'status': 'success', 'message': 'Preferences updated'}), 200
+
+
+# ======================
+# Reusable helper to send notification
+# ======================
+def send_notification_if_allowed(email, message, n_type='general'):
+    prefs = preferences_collection.find_one({'email': email})
+    if prefs and not prefs.get(f'enable_{n_type}', True):
+        return False
+
+    notifications_collection.insert_one({
+        'email': email,
+        'message': message,
+        'type': n_type,
+        'seen': False,
+        'timestamp': datetime.now(ZoneInfo("Asia/Kolkata")).isoformat()
+    })
+    return True
 
 @app.route('/api/chatbot', methods=['POST'])
 def chatbot():
