@@ -7,7 +7,6 @@ import { useNavigate } from 'react-router-dom';
 import ChatBot from './ChatBot';
 import './Layout.css';
 
-
 const Layout = ({ children, hideFooter }) => {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
@@ -31,7 +30,6 @@ const Layout = ({ children, hideFooter }) => {
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
   const closeSidebar = () => setSidebarOpen(false);
-
 
   const confirmLogout = () => {
     localStorage.removeItem('user');
@@ -57,10 +55,10 @@ const Layout = ({ children, hideFooter }) => {
     <>
       {sidebarOpen && <div className="sidebar-overlay" onClick={closeSidebar} />} {/* Blur background */}
       <nav className="navbar">
-        <div className="navbar-left">
-          <button className="menu-icon" onClick={toggleSidebar}>☰</button>
-          <h2 className="site-title">Online Auction</h2>
-        </div>
+<div className="navbar-left">
+  <button className="menu-icon" onClick={toggleSidebar}>☰</button>
+  <h2 className="site-title">Online Auction</h2>
+</div>
         <div className="navbar-right desktop-only">
           {user ? (
             <>
@@ -68,7 +66,7 @@ const Layout = ({ children, hideFooter }) => {
               <a href="/explore">Bid Quest</a>
               <a href="/post-item">Post Item</a>
               <a href="/dashboard">Profile</a>
-              <button className="logout-btn" onClick={handleLogout}>Logout</button>
+              <button className="logout-btn red" onClick={handleLogout}>Logout</button>
             </>
           ) : (
             <>
@@ -77,12 +75,30 @@ const Layout = ({ children, hideFooter }) => {
             </>
           )}
         </div>
+
+        <div className={`mobile-sidebar ${sidebarOpen ? 'open' : ''}`}>
+          <button className="clos-btn" onClick={closeSidebar}>x</button>
+          {user ? (
+            <>
+              <a href="/" onClick={closeSidebar}>Home</a>
+              <a href="/explore" onClick={closeSidebar}>Bid Quest</a>
+              <a href="/post-item" onClick={closeSidebar}>Post Item</a>
+              <a href="/dashboard" onClick={closeSidebar}>Profile</a>
+              <button className="logout-btn red" onClick={() => { handleLogout(); closeSidebar(); }}>Logout</button>
+            </>
+          ) : (
+            <>
+              <button className="btn" onClick={() => { navigate('/register'); closeSidebar(); }}>Register</button>
+              <button className="btn" onClick={() => { navigate('/login'); closeSidebar(); }}>Login</button>
+            </>
+          )}
+        </div>
       </nav>
 
-      <div className={`layout-content ${sidebarOpen ? 'blurred' : ''}`}>
-      <ChatBot /> {/* 🌟 Always floating in the corner */}
+<div className={`layout-content ${sidebarOpen ? 'blurred' : ''}`}>
 
-      {/* Logout Confirmation Popup */}
+      <ChatBot />
+
       {showLogoutPopup && (
         <div className="popup-overlay">
           <div className={`popup-box ${fadePopup ? 'fade-out' : ''}`}>
@@ -101,10 +117,8 @@ const Layout = ({ children, hideFooter }) => {
         </div>
       )}
 
-      {/* Main content */}
       <main>{children}</main>
 
-      {/* Footer */}
       {!hideFooter && (
         <footer className="footer">
           <div className="footer-content">

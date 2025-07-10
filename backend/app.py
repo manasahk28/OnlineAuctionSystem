@@ -52,6 +52,17 @@ category_codes = {
     'Other': 'MISC'
 }
 
+# 💫 Recursive function to convert all ObjectIds to strings
+def convert_objectids(obj):
+    if isinstance(obj, list):
+        return [convert_objectids(item) for item in obj]
+    elif isinstance(obj, dict):
+        return {key: convert_objectids(value) for key, value in obj.items()}
+    elif isinstance(obj, ObjectId):
+        return str(obj)
+    else:
+        return obj
+
 # Loop through all items missing a custom_item_id
 for item in items_collection.find({'custom_item_id': {'$exists': True}}):
     if not item['custom_item_id'].startswith('AUC'):
@@ -481,20 +492,50 @@ def update_item(item_id):
         print("❌ Error in update_item:", e)
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
+# 🛠 Your updated route
 @app.route('/api/items/user/<email>', methods=['GET'])
 def get_user_items(email):
-    user_items = list(items_collection.find({'seller_id': email}))
-    # new
-    for item in user_items:
-        item['_id'] = str(item['_id'])
-        if 'custom_item_id' not in item:
-            category = item.get('category', 'Other')
-            prefix = category_codes.get(category, 'GEN')
-            count = items_collection.count_documents({'category': category, 'custom_item_id': {'$exists': True}})
-            custom_id = f"AUC       {prefix}-{count + 1:03d}"
-            items_collection.update_one({'_id': ObjectId(item['_id'])}, {'$set': {'custom_item_id': custom_id}})
-            item['custom_item_id'] = custom_id
+    try:
+        user_items = list(items_collection.find({'seller_id': email}))
+
+        for item in user_items:
+            # ✅ Ensure _id is a string BEFORE using it
+            item['_id'] = str(item['_id'])
+
+            # 💡 Check and generate custom_item_id if missing
+            if 'custom_item_id' not in item:
+                category = item.get('category', 'Other')
+                prefix = category_codes.get(category, 'GEN')
+                count = items_collection.count_documents({
+                    'category': category,
+                    'custom_item_id': {'$exists': True}
+                })
+                custom_id = f"AUC       {prefix}-{count + 1:03d}"
+                items_collection.update_one(
+                    {'_id': ObjectId(item['_id'])},
+                    {'$set': {'custom_item_id': custom_id}}
+                )
+                item['custom_item_id'] = custom_id
+
+        # 🧙 Convert any remaining ObjectIds
+        user_items = convert_objectids(user_items)
+
         return jsonify({'status': 'success', 'items': user_items}), 200
+
+    except Exception as e:
+        print("❌ ERROR:", e)
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+@app.route('/api/items/<item_id>', methods=['GET'])
+def get_edit_item(item_id):
+    try:
+        item = items_collection.find_one({'_id': ObjectId(item_id)})
+        if not item:
+            return jsonify({'status': 'fail', 'message': 'Item not found'}), 404
+        item['_id'] = str(item['_id'])  # serialize ObjectId
+        return jsonify({'status': 'success', 'item': item}), 200
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
 
 @app.route('/my-bids/<bidder_id>', methods=['GET'])
 def get_my_bids(bidder_id):
@@ -525,9 +566,6 @@ def get_my_bids(bidder_id):
         return jsonify(result), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-
-from datetime import datetime
-from zoneinfo import ZoneInfo
 
 @app.route('/my-bids/email/<bidder_email>', methods=['GET'])
 def get_my_bids_by_email(bidder_email):

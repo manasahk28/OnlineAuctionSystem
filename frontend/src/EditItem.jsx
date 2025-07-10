@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import './EditItem.css';
 
 const EditItem = ({ itemId, setActiveSection }) => {
@@ -190,8 +190,9 @@ const handleSubmit = async (e) => {
           <label>Pickup Method:</label>
           <select name="pickup_method" value={formData.pickup_method} onChange={handleChange}>
             <option value="">Select</option>
-            <option value="Self Pickup">Self Pickup</option>
-            <option value="Courier">Courier</option>
+            <option value="Return Campus">Return Campus</option>
+            <option value="Home Delivery">Home Delivery</option>
+            <option value="Pick from Seller">Pick from Seller</option>
           </select>
         </div>
 
@@ -276,7 +277,7 @@ const handleSubmit = async (e) => {
 
         <div className="edit-form-actions">
           <button type="submit" className="save-btn">💾 Save</button>
-          <button type="button" className="cancel-btn" onClick={handleClear}>Clear</button>
+          <button type="button" className="can-btn" onClick={handleClear}>Clear</button>
         </div>
       </form>
     </div>

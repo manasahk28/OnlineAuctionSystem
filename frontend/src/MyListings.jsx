@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import './MyListings.css';
 
 const MyListings = ({ setEditingItemId, setActiveSection }) => {
@@ -71,7 +71,6 @@ const MyListings = ({ setEditingItemId, setActiveSection }) => {
                 <h3 className="listing-title">{item.title}</h3>
                 {/*new line below one*/}
                 <p className="item-id"><strong>ID:</strong> {item.customId}</p>
-                <p className="listing-description">{item.description}</p>
 
                 <div className="listing-meta">
                   <span className="price-tag">₹{item.startingPrice}</span>
@@ -87,19 +86,19 @@ const MyListings = ({ setEditingItemId, setActiveSection }) => {
                   >
                     ✏️ Edit
                   </button>
-                
+
                   <button
                     className="delete-btn"
                     onClick={async () => {
                       const confirmDelete = window.confirm(`Are you sure you want to delete "${item.title}"?`);
                       if (!confirmDelete) return;
-                
+
                       try {
                         const res = await fetch(`http://localhost:5000/api/items/${item._id}`, {
                           method: 'DELETE',
                         });
                         const data = await res.json();
-                
+
                         if (data.status === 'success') {
                           // Remove from state
                           setListings(prev => prev.filter(i => i._id !== item._id));

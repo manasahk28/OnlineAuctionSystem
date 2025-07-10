@@ -119,11 +119,11 @@ max-width: 900px;
   margin-top: 2rem;
 }
 
-.save-btn, .cancel-btn {
+.save-btn, .can-btn {
   padding: 0.6rem 1.5rem;
   font-size: 1rem;
   border: none;
-  border-radius: 8px;
+  border-radius: 3px;
   cursor: pointer;
   transition: background 0.3s;
 }
@@ -133,16 +133,19 @@ max-width: 900px;
   color: white;
 }
 
-.cancel-btn {
+.can-btn {
   background-color: #f58a0f;
   color: white;
+  margin-top: 24px;
+  padding: 0rem 2rem;
+  height: 3rem;
 }
 
 .save-btn:hover {
   background-color: #45a049;
 }
 
-.cancel-btn:hover {
+.can-btn:hover {
   background-color: #d32f2f;
 }
 

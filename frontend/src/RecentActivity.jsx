@@ -1,12 +1,14 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import './RecentActivity.css';
 
 const RecentActivity = () => {
   const [activities, setActivities] = useState([]);
+  const [loading, setLoading] = useState(true); // 🌟 added loading state
   const user = JSON.parse(localStorage.getItem('user'));
 
   useEffect(() => {
     const fetchActivities = async () => {
+      setLoading(true); // 🔄 start loading
       try {
         const [postedRes, bidsRes] = await Promise.all([
           fetch(`http://localhost:5000/api/items/user/${user.email}`),
@@ -18,7 +20,7 @@ const RecentActivity = () => {
 
         let combinedActivities = [];
 
-        // Handle posted items
+        // 📨 Handle posted items
         if (postedData.status === 'success') {
           const postActivities = postedData.items.map((item) => ({
             type: 'post',
@@ -29,7 +31,7 @@ const RecentActivity = () => {
           combinedActivities = [...combinedActivities, ...postActivities];
         }
 
-        // Handle bid activities
+        // 🪙 Handle bid activities
         if (Array.isArray(bidData)) {
           const bidActivities = bidData.map((bid) => ({
             type: 'bid',
@@ -40,7 +42,7 @@ const RecentActivity = () => {
           combinedActivities = [...combinedActivities, ...bidActivities];
         }
 
-        // Sort by newest first
+        // 🕒 Sort by newest first
         combinedActivities.sort((a, b) => {
           const timeA = new Date(a.time).getTime();
           const timeB = new Date(b.time).getTime();
@@ -50,13 +52,17 @@ const RecentActivity = () => {
         setActivities(combinedActivities);
       } catch (error) {
         console.error('Error fetching activity:', error);
+      } finally {
+        setLoading(false); // ✅ stop loading no matter what
       }
     };
 
     if (user?.email) {
       fetchActivities();
+    } else {
+      setLoading(false); // ✅ prevent infinite loading if no user
     }
-  }, [user]);
+  }, []);
 
   const getActivityMessage = (activity) => {
     switch (activity.type) {
@@ -75,17 +81,19 @@ const RecentActivity = () => {
     if (!timestamp) return 'Unknown time';
     const date = new Date(timestamp);
     if (isNaN(date.getTime())) return 'Unknown time';
-    return date.toLocaleString(); // IST is handled automatically by browser's timezone
+    return date.toLocaleString(); // handled by browser
   };
 
   return (
     <div className="recent-activity-wrapper">
       <div className="profile-header">
-        <h2 style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#444' }}>
+        <h2 style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#444', marginLeft:'30px'}}>
           <span role="img" aria-label="recent activity">🗒️</span>Recent Activity
         </h2>
       </div>
-      {activities.length === 0 ? (
+      {loading ? (
+        <p className="loading-text">⏳ Loading your activities...</p>
+      ) : activities.length === 0 ? (
         <p className="no-activity">No recent activity yet.</p>
       ) : (
         <ul className="activity-list">

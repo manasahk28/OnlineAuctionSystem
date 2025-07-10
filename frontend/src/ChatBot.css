@@ -40,7 +40,8 @@
   top: 0;
   right: -350px;
   height: 100%;
-  width: 350px;
+  width: 340px;
+  top: 75px;
   background-color: white;
   box-shadow: -2px 0 10px rgba(0,0,0,0.2);
   transition: right 0.3s ease;
@@ -69,6 +70,7 @@
   color: white;
   font-size: 22px;
   cursor: pointer;
+  top: 10px
 }
 
 .chat-content {

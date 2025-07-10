@@ -53,9 +53,8 @@ body, html{
 
 @keyframes floatCard {
   0% { transform: translateY(0); }
-  100% { transform: translateY(-12px); }
+  100% { transform: translateY(-12px);}
 }
-
 
 /* .dashboard-wrapper {
   /* min-height: 100vh;

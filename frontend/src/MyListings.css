@@ -38,6 +38,7 @@
   flex-direction: column;
   justify-content: space-between;  /* ✅ Spread content evenly */
   height: 100%;
+  width: 250px;
 }
 
 .listing-card:hover {
@@ -47,7 +48,7 @@
 
 .listing-image {
   width: 100%;
-  height: 180px;
+  height: 140px;
   object-fit: cover;
   border-top-left-radius: 16px;
   border-top-right-radius: 16px;
@@ -98,7 +99,7 @@
   font-size: 1.2rem;
   font-weight: bold;
   color: #ff6b00;
-  margin-bottom: 8px;
+  margin-bottom: 0px;
 }
 
 .end-time {
@@ -180,7 +181,6 @@
 }
 
 .delete-btn {
-  margin-top: 8px;
   padding: 8px 14px;
   font-size: 14px;
   background-color: #e60000;

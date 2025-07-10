@@ -102,28 +102,6 @@ button[type='submit']:hover {
   background-color: #43a047;
 }
 
-@media (max-width: 600px) {
-  .post-items-form {
-    padding: 1rem;
-  }
-
-  .form-section {
-    padding: 1rem;
-  }
-
-  .input-group {
-    flex-direction: column;
-  }
-
-  .post-items-form h2 {
-    font-size: 24px;
-  }
-
-  .post-items-form h3 {
-    font-size: 18px;
-  }
-}
-
 .estimate-btn {
   background-color: #ff6f00;
   color: white;
@@ -137,7 +115,6 @@ button[type='submit']:hover {
 .estimate-btn:hover {
   background-color: #e65c00;
 }
-
 
 .input-row select {
   padding: 8px;
@@ -355,6 +332,12 @@ button[type='submit']:hover {
   font-weight: bold;
 }
 
+.input-row #red-mark {
+  color: red;
+  margin-right: 4px;
+  font-weight: bold;
+}
+
 .readonly-input {
   background-color: #f3f3f3;
   cursor: not-allowed;
@@ -441,13 +424,23 @@ button[type='submit']:hover {
   }
 
   .post-items-form h2 {
-    font-size: 24px;
+    font-size: 20px;
   }
 
   .post-items-form h3 {
-    font-size: 18px;
+    font-size: 15px;
   }
+
+  .input-row label {
+    font-size: 14px;
+  }
+
+  .input-textarea{
+    font-size: 10px;
+    padding: 8px;
 }
+}
+
 
 .estimate-btn {
   background-color: #ff6f00;
@@ -658,4 +651,164 @@ button[type='submit']:hover {
   font-size: 0.95rem;
   font-weight: bold;
   border-radius: 4px;
+}
+
+@media screen and (max-width: 768px) {
+
+  .pre-image {
+  width: 90px;
+  height: 90px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 2px solid #ffa500;
+  box-shadow: 0 0 5px rgba(255, 165, 0, 0.4);
+}
+  .remove-image-btn {
+    position: absolute;
+    top: 2px;
+    right: 5px;
+    background: none;
+    color: #fff;
+    border: none;
+    padding: 0.4rem 0.6rem;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 0.9rem;
+  }
+
+  .preview-video {
+    width: 100%;
+    max-height: 200px;
+    border-radius: 6px;
+  }
+
+  .estimate-btn,
+  .close-btn-bottom,
+  button[type="submit"] {
+    padding: 0.6rem 1rem;
+    font-size: 1rem;
+    border: none;
+    border-radius: 6px;
+    background-color: #007bff;
+    color: white;
+    margin-top: 1rem;
+    cursor: pointer;
+  }
+
+  .terms-popup {
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .input-row {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .input-row label {
+    width: 30%;
+    min-width: 100px;
+    font-weight: 500;
+    font-size: 0.95rem;
+    padding-top: 0.5rem;
+  }
+
+  .input-row textarea {
+    flex: 1;
+    min-width: 200px;
+    height: 100px;
+    resize: vertical;
+    padding: 0.6rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 0.95rem;
+  }
+
+  .input-row input,
+  .input-row select {
+    flex: 1;
+    min-width: 200px;
+    padding: 0.6rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 0.95rem;
+  }
+
+  .input-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: nowrap;
+  gap: 0.5rem;
+}
+
+.input-row label {
+  white-space: nowrap;
+  width: 90px;
+  font-weight: 500;
+  font-size: 0.9rem;
+  margin-right: 0.5rem;
+  flex-shrink: 0;
+}
+
+.input-row input,
+.input-row select,
+.input-row textarea {
+  flex: 1;
+  font-size: 0.95rem;
+  padding: 0.5rem;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  width: 100%;
+}
+
+.input-row select {
+    font-size: 0.7rem;
+    max-height: 38px;
+    overflow-y: auto;
+    appearance: none;
+    box-sizing: border-box;
+  }
+
+  .input-row select option {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 0.95rem;
+    padding: 0.4rem;
+  }
+
+  .input-row.side-by-side {
+  display: flex;
+  flex-direction: row;
+  align-items: left;
+  gap: 0px;
+}
+.input-row.side-by-side label {
+  flex: 0 0 130px;
+  font-weight: 400;
+  font-size: 15px;
+}
+
+.input-row.side-by-side input[type="file"] {
+  flex: 1;
+  padding: 4px;
+  background-color: #ffffff;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  cursor: pointer;
+  font-size: 10px;
+}
+.image-count{
+  font-size: 0.5rem;
+  margin-top: 7px;
+  color: #666;
+}
 }

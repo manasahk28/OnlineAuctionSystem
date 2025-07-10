@@ -63,7 +63,7 @@ const Registration = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const email = `${emailPrefix}@uni.edu.in`;
+    const email = `${emailPrefix}@gmail.com`;
 
     const { UserName, collegeName, password, confirmPassword } = formData;
     if (!UserName || !emailPrefix || !collegeName || !password || !confirmPassword) {
@@ -144,7 +144,7 @@ const Registration = () => {
               required
             />
             {isEmailFocused && (
-              <span className="email-suffix-fixed">@uni.edu.in</span>
+              <span className="email-suffix-fixed">@gmail.com</span>
             )}
           </div>
 

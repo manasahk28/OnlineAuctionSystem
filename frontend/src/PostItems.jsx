@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import './PostItem.css';
 import Layout from './Layout';
+import './PostItem.css';
 
 const PostItems = () => {
     const navigate = useNavigate();
@@ -12,7 +12,7 @@ const PostItems = () => {
     const [itemCondition, setItemCondition] = useState('');
     const [imagePreviews, setImagePreviews] = useState([]);
     const [videoPreview, setVideoPreview] = useState(null);
-    
+
     const [form, setForm] = useState({
     title: '',
     description: '',
@@ -132,6 +132,9 @@ const handleSubmit = async (e) => {
     return;
   }
 
+  form.warranty = warranty;
+  form.item_condition = itemCondition;
+
   const payload = {
     ...form,
     category: form.category === 'Other' ? customCategory : form.category,
@@ -159,11 +162,11 @@ const handleSubmit = async (e) => {
       alert("Please enter a valid Starting Price first.");
       return;
     }
-  
+
     const damageText = form.damage_description.toLowerCase();
     const issues = ["scratch", "crack", "not working", "broken", "no power", "display issue"];
     let deductionAmount = 0;
-  
+
     // First: Detect known damage keywords
     let matched = false;
     issues.forEach(issue => {
@@ -171,18 +174,18 @@ const handleSubmit = async (e) => {
         matched = true;
       }
     });
-  
+
     // Smart deduction based on price slabs
     if (baseInput >=30 && baseInput <= 60) {
       deductionAmount = matched ? 5 : 2;
-    } else if (baseInput > 60 && baseInput <= 150) {  
+    } else if (baseInput > 60 && baseInput <= 150) {
       deductionAmount = matched ? 12 : 10;
     } else if (baseInput > 150 && baseInput <= 500) {
       deductionAmount = matched ? (baseInput * 0.1) : (baseInput * 0.05);
     } else {
       deductionAmount = matched ? (baseInput * 0.15) : (baseInput * 0.1);
     }
-  
+
     const estimated = Math.max(baseInput - deductionAmount, 10); // ensure it's not too low
     setForm(prev => ({ ...prev, starting_price: estimated.toFixed(2) }));
     alert(`Estimated Price (based on damage): ₹${estimated.toFixed(2)}`);
@@ -270,7 +273,7 @@ const handleRemoveImage = (index) => {
           {renderInput('Title', 'title', 'text', 'Item Title')}
           {renderInput('Description', 'description', 'text', 'Description', true)}
           <div className="input-row">
-            <label htmlFor="category">Category</label>
+            <label htmlFor="category"><span id='red-mark'>* </span> Category</label>
             <select
               id="category"
               name="category"
@@ -295,7 +298,7 @@ const handleRemoveImage = (index) => {
               <option value="Other">🧩 Other</option>
             </select>
           </div>
-          
+
           {form.category === 'Other' && (
             <div className="input-row">
               <label htmlFor="customCategory">Specify Category</label>
@@ -580,7 +583,7 @@ const handleRemoveImage = (index) => {
         <button type="submit">Post Item</button>
       </form>
     </div>
-    
+
     </Layout>
   );
 };
