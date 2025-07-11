@@ -260,16 +260,27 @@ def place_bid():
         ist_time = datetime.now(ZoneInfo("Asia/Kolkata")).isoformat()
 
         bid_amount = float(bid_amount)
-        current_highest = float(item.get('highest_bid', item.get('starting_price', 0)))
+        # Check latest bid from bids_collection
+        bids = list(bids_collection.find({'item_id': item_id}))
+        
+        if bids:
+            # Sort bids by amount desc, then timestamp asc
+            bids.sort(key=lambda b: (-float(b['bid_amount']), b['timestamp']))
+            current_highest = float(bids[0]['bid_amount'])
+        else:
+            current_highest = float(item.get('starting_price', 0))
+
 
         if bid_amount <= current_highest:
             return jsonify({'status': 'fail', 'message': 'Bid must be higher than current highest bid'}), 400
 
+        user_doc = users_collection.find_one({'email': bidder_email})
         # Prepare bid data
         bid_data = {
             'bid_amount': bid_amount,
             'bidder_email': bidder_email,
             'bidder_id': bidder_id,
+            'bidder_UserName': user_doc.get('UserName', '') if user_doc else '',
             'timestamp': ist_time,
             'item_id': item_id,
             'item_title': item.get('title', ''),
@@ -306,6 +317,99 @@ def place_bid():
     except Exception as e:
         print("❌ Error placing bid:", e)
         return jsonify({'status': 'fail', 'message': 'Internal server error'}), 500
+
+@app.route('/admin/fix-old-bidder-usernames', methods=['POST'])
+def fix_old_bidder_usernames():
+    try:
+        updated_count = 0
+
+        # 🔍 Find bids with missing/blank username
+        bids = bids_collection.find({
+            '$or': [
+                {'bidder_UserName': {'$exists': False}},
+                {'bidder_UserName': ''},
+                {'bidder_UserName': None}
+            ]
+        })
+
+        for bid in bids:
+            email = bid.get('bidder_email')
+            if not email:
+                continue  # Skip if no email
+
+            # 🧠 Get username from users collection
+            user = users_collection.find_one({'email': email})
+            if user:
+                username = user.get('UserName')
+                if not username or username.strip() == '':
+                    username = email.split('@')[0]  # fallback to email prefix
+            else:
+                username = email.split('@')[0]  # fallback if user not found
+
+            # ✅ Update the bid with username
+            bids_collection.update_one(
+                {'_id': bid['_id']},
+                {'$set': {'bidder_UserName': username}}
+            )
+            updated_count += 1
+
+        return jsonify({
+            'status': 'success',
+            'message': f'✅ Fixed {updated_count} old bids with proper usernames'
+        }), 200
+
+    except Exception as e:
+        print("❌ Error in fix_old_bidder_usernames:", e)
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+@app.route('/api/item/<item_id>/highest-bid', methods=['GET'])
+def get_highest_bid(item_id):
+    try:
+        print("📦 Incoming item_id:", item_id)
+
+        # Step 1: Get the item
+        item = items_collection.find_one({'_id': ObjectId(item_id)})
+        if not item:
+            return jsonify({'status': 'fail', 'message': 'Item not found'}), 404
+
+        starting_price = float(item.get('starting_price', 0))
+
+        # Step 2: Find all bids on this item
+        bids = list(bids_collection.find({'item_id': str(item_id)}))
+
+        if not bids:
+            # No bids yet, return starting price
+            return jsonify({
+                "status": "success",
+                "no_bids": True,
+                "starting_price": 1200,
+                "bidder_id": None,
+                "bidder_username": None,
+                "timestamp": None
+            }), 200
+
+        # Step 3: Find highest bid by bid_amount and timestamp (ascending)
+        bids.sort(key=lambda b: (-float(b['bid_amount']), b['timestamp']))
+
+        highest_bid = bids[0]  # This will be the highest by amount, then by earliest time
+
+        user_name = highest_bid.get('bidder_UserName')
+        if not user_name:
+            email = highest_bid.get('bidder_email')
+            user = users_collection.find_one({'email': email})
+            user_name = user.get('UserName') if user else email.split('@')[0]
+        
+        return jsonify({
+            'status': 'success',
+            'bid_amount': highest_bid['bid_amount'],
+            'bidder_id': highest_bid.get('bidder_id'),
+            'bidder_username': user_name,
+            'timestamp': highest_bid.get('timestamp')
+        })
+
+    except Exception as e:
+        print("❌ Error fetching highest bid:", e)
+        return jsonify({'status': 'fail', 'message': str(e)}), 500
 
 @app.route('/api/get-profile', methods=['GET'])
 def get_profile():
@@ -371,6 +475,7 @@ def get_all_items():
     categories = request.args.getlist('category')
     pickup_methods = request.args.getlist('pickup_method')
     item_condition = request.args.getlist('item_condition')
+    time_filter = request.args.get('time_filter', '').strip()  # New time filter
 
     query = {}
 
@@ -387,6 +492,24 @@ def get_all_items():
     if item_condition:
         query['item_condition'] = {'$in': item_condition}
 
+    # Get current time in IST
+    now = datetime.now(ZoneInfo("Asia/Kolkata"))
+    
+    # Apply time-based filtering
+    if time_filter:
+        if time_filter == 'upcoming':
+            # Items that haven't started yet (start_date_time > now)
+            query['start_date_time'] = {'$gt': now.isoformat()}
+        elif time_filter == 'live':
+            # Items currently active (start_date_time <= now <= end_date_time)
+            query['$and'] = [
+                {'start_date_time': {'$lte': now.isoformat()}},
+                {'end_date_time': {'$gte': now.isoformat()}}
+            ]
+        elif time_filter == 'ended':
+            # Items that have ended (end_date_time < now)
+            query['end_date_time'] = {'$lt': now.isoformat()}
+
     items = list(items_collection.find(query))
 
     for item in items:
@@ -395,6 +518,25 @@ def get_all_items():
             item['thumbnail'] = item['images'][0]
         else:
             item['thumbnail'] = ''
+
+        # Add time status for frontend display
+        try:
+            start_time = datetime.fromisoformat(item.get('start_date_time', '')).astimezone(ZoneInfo("Asia/Kolkata"))
+            end_time = datetime.fromisoformat(item.get('end_date_time', '')).astimezone(ZoneInfo("Asia/Kolkata"))
+            
+            if now < start_time:
+                item['time_status'] = 'upcoming'
+                item['time_status_text'] = 'Upcoming'
+            elif now <= end_time:
+                item['time_status'] = 'live'
+                item['time_status_text'] = 'Live'
+            else:
+                item['time_status'] = 'ended'
+                item['time_status_text'] = 'Ended'
+        except:
+            item['time_status'] = 'unknown'
+            item['time_status_text'] = 'Unknown'
+
         # 👇 Also check if item contains any embedded `ObjectId` in other fields (like nested bids)
         if 'bids' in item:
             for bid in item['bids']:
@@ -408,26 +550,39 @@ def get_all_items():
 def get_single_item(item_id):
     try:
         # 🛡️ Ensure item_id is a valid ObjectId
-        item_id = ObjectId(item_id)
-    except InvalidId:
-        return jsonify({'status': 'fail', 'message': 'Invalid item ID'}), 400
+        try:
+            item_id = ObjectId(item_id)
+        except InvalidId:
+            return jsonify({'status': 'fail', 'message': 'Invalid item ID'}), 400
 
-    # 🔍 Find the item
-    item = items_collection.find_one({'_id': item_id})
-    if not item:
-        return jsonify({'status': 'fail', 'message': 'Item not found'}), 404
+        # 🔍 Find the item
+        item = items_collection.find_one({'_id': item_id})
+        if not item:
+            return jsonify({'status': 'fail', 'message': 'Item not found'}), 404
 
-    # 🧹 Convert _id to string
-    item['_id'] = str(item['_id'])
+        # ➕ Generate custom_item_id if missing
+        if 'custom_item_id' not in item:
+            category = item.get('category', 'Other')
+            prefix = category_codes.get(category, 'GEN')
+            count = items_collection.count_documents({'category': category, 'custom_item_id': {'$exists': True}})
+            custom_id = f"{prefix}-{count + 1:03d}"
+            items_collection.update_one({'_id': item['_id']}, {'$set': {'custom_item_id': custom_id}})
+            item['custom_item_id'] = custom_id
 
+        # 🧹 Convert _id to string
+        item['_id'] = str(item['_id'])
 
-    # ✅ Convert nested ObjectIds (like in 'bids' field)
-    if 'bids' in item:
-        for bid in item['bids']:
-            if '_id' in bid:
-                bid['_id'] = str(bid['_id'])
+        # ✅ Convert nested ObjectIds (like in 'bids' field)
+        if 'bids' in item:
+            for bid in item['bids']:
+                if '_id' in bid:
+                    bid['_id'] = str(bid['_id'])
 
-    return jsonify({'status': 'success', 'item': item}), 200
+        return jsonify({'status': 'success', 'item': item}), 200
+
+    except Exception as e:
+        print("❌ Error in get_single_item:", e)
+        return jsonify({'status': 'fail', 'message': 'Internal server error'}), 500
 
 
 @app.route('/api/items/<string:item_id>', methods=['PUT'])

@@ -31,6 +31,41 @@
   display: inline-block;
 }
 
+/* Quick Time Filters */
+.quick-time-filters {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  padding: 0 1rem;
+}
+
+.quick-filter-btn {
+  padding: 8px 16px;
+  border: 2px solid #fb9e3a;
+  background-color: white;
+  color: #fb9e3a;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.quick-filter-btn:hover {
+  background-color: #fb9e3a;
+  color: white;
+  transform: translateY(-2px);
+}
+
+.quick-filter-btn.active {
+  background-color: #fb9e3a;
+  color: white;
+  box-shadow: 0 4px 8px rgba(251, 158, 58, 0.3);
+}
+
 /* Top Bar */
 .top-bar {
   display: flex;
@@ -71,8 +106,6 @@
 .filter-toggle-btn:hover {
   background-color: #f8c389;
 }
-
-
 
 /* Items Grid */
 .items-grid {
@@ -133,6 +166,49 @@
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 
+.time-status-badge {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  font-size: 0.75rem;
+  font-weight: bold;
+  padding: 4px 8px;
+  border-radius: 12px;
+  color: white;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.time-status-badge.upcoming {
+  background-color: #4CAF50;
+}
+
+.time-status-badge.live {
+  background-color: #FF5722;
+  animation: pulse 2s infinite;
+}
+
+.time-status-badge.ended {
+  background-color: #9E9E9E;
+}
+
+.time-status-badge.unknown {
+  background-color: #607D8B;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
 .item-content {
   padding: 1.5rem;
   display: flex;
@@ -155,6 +231,22 @@
   font-size: 1.3rem;
   margin: 0.5rem 0;
   text-align: center;
+}
+
+.item-time-info {
+  margin: 0.5rem 0;
+  font-size: 0.8rem;
+  color: #666;
+}
+
+.time-text {
+  margin: 0.2rem 0;
+  text-align: center;
+}
+
+.time-label {
+  font-weight: bold;
+  color: #333;
 }
 
 .item-card button {
@@ -271,6 +363,15 @@
   .filter-sidebar.open {
     left: 0;
   }
+
+    .quick-time-filters {
+    gap: 0.3rem;
+  }
+
+  .quick-filter-btn {
+    padding: 6px 12px;
+    font-size: 0.8rem;
+  }
 }
 
 @media (max-width: 480px) {
@@ -290,6 +391,19 @@
   align-items: center;
   z-index: 999; /* above everything else */
   background-color: rgba(255, 255, 255, 0.7); /* optional: semi-transparent white bg */
+}
+
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(255, 255, 255, 0.7); /* semi-transparent white */
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .loading-spinner {

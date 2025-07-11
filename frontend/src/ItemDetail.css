@@ -107,11 +107,13 @@ video.product-image {
 .item-user strong,
 .item-date strong {
   color: #444;
+  font-size: 18px;
+  line-height: 2px;
 }
 
 .action-buttons {
   display: flex;
-  gap: 1rem;
+  gap: 2rem;
   margin-top: 2rem;
 }
 
@@ -128,6 +130,9 @@ video.product-image {
 .back-button {
   background-color: #ccc;
   color: #333;
+  width:90px;
+  margin-top: -2px;
+  height: 60px;
 }
 
 .back-button:hover {
@@ -137,6 +142,8 @@ video.product-image {
 .bid-button {
   background-color: #ffa500;
   color: white;
+  height: 60px;
+  margin-top: -4px;
 }
 
 .bid-button:hover {
@@ -343,4 +350,144 @@ video.product-image {
   padding: 10px 14px;
   border: 1px solid #e0b4b4;
   border-radius: 8px;
+}
+
+
+.highest-bid {
+  color: #1e8449;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+/* Upcoming Auction Button Styles */
+.upcoming-bid-button {
+  background-color: #ffa500;
+  color: white;
+  width: 300px;
+  height: 105px;
+  font-size: 1rem;
+  border-radius: 8px;
+  border: none;
+  cursor: not-allowed;
+  opacity: 0.8;
+  transition: all 0.3s ease;
+  margin-top: -1.3rem;
+}
+
+.upcoming-bid-button:hover {
+  background-color: #f3e708;
+  opacity: 0.9;
+  transform: none;
+}
+
+.upcoming-button-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.upcoming-icon {
+  font-size: 1.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.upcoming-text {
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+
+.countdown-text {
+  font-size: 0.9rem;
+  opacity: 0.9;
+}
+
+.countdown-text strong {
+  color: #df0f0f;
+  font-weight: bold;
+}
+
+/* Auction Status Indicator */
+.auction-status-indicator {
+  margin-bottom: 1rem;
+}
+
+.status-badge {
+  min-width: 110px;
+  min-height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-weight: bold;
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.status-badge.upcoming {
+  background-color: #4CAF50;
+  color: white;
+  animation: pulse 2s infinite;
+}
+
+.status-badge.live {
+  background-color: #FF5722;
+  color: white;
+  animation: pulse 1.5s infinite;
+}
+
+.status-badge.ended {
+  background-color: #9E9E9E;
+  color: white;
+}
+
+.status-badge.approved {
+  background-color: #e0fbe0;
+  color: #3fc846;
+  border: 1px solid #35e23e;
+}
+
+.status-badge.rejected {
+  background-color: #fdecea;
+  color: #d33333;
+  border: 1px solid #e52f2f;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.05);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.item-status-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.item-price.small {
+  font-size: 0.98rem;
+  margin-bottom: -0.2rem;
+  margin-top: -0.2;
+  
+}
+
+.item-user,
+.item-date,
+.right-panel p,
+.right-panel strong {
+  line-height: 1.5;
 }

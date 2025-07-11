@@ -13,11 +13,14 @@ const ItemDetail = () => {
   const [showModal, setShowModal] = useState(false);
   const [bidAmount, setBidAmount] = useState('');
   const [error, setError] = useState('');
+  const [highestBid, setHighestBid] = useState(null);
   const [showMediaFullscreen, setShowMediaFullscreen] = useState(false);
 
   const user = JSON.parse(localStorage.getItem('user'));
   const isAdmin = user?.is_admin === true;
   const isAuctionEnded = item && new Date(item.end_date_time) < new Date();
+  const isAuctionUpcoming = item && new Date(item.start_date_time) > new Date();
+  const isAuctionLive = item && new Date(item.start_date_time) <= new Date() && new Date(item.end_date_time) >= new Date();
 
 
 
@@ -41,6 +44,29 @@ const ItemDetail = () => {
 
     fetchItem();
   }, [id]);
+
+    
+  useEffect(() => {
+    const fetchHighestBid = async () => {
+      try {
+        const res = await axios.get(`http://localhost:5000/api/item/${id}/highest-bid`);
+        if (res.data.status === 'success') {
+          console.log("✅ Highest Bid API Response:", res.data); // Add this!
+          setHighestBid(res.data);
+        } else {
+          setHighestBid(null);
+        }
+      } catch (err) {
+        console.error('Error fetching highest bid:', err);
+      }
+    };
+  
+    fetchHighestBid();
+    const interval = setInterval(fetchHighestBid, 3000);
+  
+    return () => clearInterval(interval);
+  }, [id]);
+
 
   const handlePrev = () => {
     setCurrentMediaIndex((prev) => (prev === 0 ? mediaList.length - 1 : prev - 1));
@@ -74,22 +100,55 @@ const ItemDetail = () => {
     setShowMediaFullscreen(!showMediaFullscreen);
   };
 
+  // Function to calculate time remaining until auction starts
+  const getTimeUntilStart = () => {
+    if (!item || !isAuctionUpcoming) return null;
+    
+    const startTime = new Date(item.start_date_time);
+    const now = new Date();
+    const timeDiff = startTime - now;
+    
+    const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
+    
+    if (days > 0) {
+      return `${days} day${days > 1 ? 's' : ''} ${hours} hour${hours > 1 ? 's' : ''}`;
+    } else if (hours > 0) {
+      return `${hours} hour${hours > 1 ? 's' : ''} ${minutes} minute${minutes > 1 ? 's' : ''}`;
+    } else {
+      return `${minutes} minute${minutes > 1 ? 's' : ''}`;
+    }
+  };
+
 
   const handleBid = async () => {
-     if (isAdmin) {
-      setError("Admins are not allowed to place bids.");
-      return;
-    }
+  if (isAdmin) {
+    setError("Admins are not allowed to place bids.");
+    return;
+  }
 
-    const minAllowed = Number(item.starting_price) + Number(item.minimum_increment);
+  const numericBid = parseFloat(bidAmount);
 
-    if (!Number.isFinite(bidAmount) || bidAmount <= 0) {
-      setError('Please enter a valid positive number for your bid');
-      return;
-    }
+  if (!Number.isFinite(numericBid) || numericBid <= 0) {
+    setError('Please enter a valid positive number for your bid');
+    return;
+  }
 
-  if (bidAmount < minAllowed) {
-    setError(`Your bid must be at least ₹${minAllowed}`);
+  let minAllowed;
+
+  if (highestBid?.no_bids) {
+    // First bid → must be at least: starting_price + min increment
+    minAllowed = Number(item.starting_price) + Number(item.minimum_increment);
+  } else {
+    // Not first bid → must be greater than highest bid only
+    minAllowed = Number(highestBid.bid_amount);
+  }
+
+  if (numericBid <= minAllowed) {
+    setError(
+      `Your bid must be greater than ₹${minAllowed}`
+    );
     return;
   }
 
@@ -97,7 +156,7 @@ const ItemDetail = () => {
     const user = JSON.parse(localStorage.getItem('user'));
     const res = await axios.post('http://localhost:5000/api/place-bid', {
       item_id: item._id,
-      bid_amount: bidAmount,
+      bid_amount: numericBid,
       bidder_email: user?.email || '',
       bidder_id: user?.collegeId || ''
     });
@@ -115,6 +174,7 @@ const ItemDetail = () => {
     setError('Something went wrong while placing the bid');
   }
 };
+
 
 if (!item) {
   return (
@@ -180,17 +240,41 @@ if (!item) {
 
         <div className="right-panel">
           <h1 className="item-title">{item.title}</h1>
-          {item.status && (<p className={`approval-status ${item.status.toLowerCase()}`}><strong>Status:</strong> {item.status}</p>)}
+          <div className="item-status-row">
+            {item.status && (
+              <span className={`status-badge ${item.status.toLowerCase()}`}>{item.status}</span>
+            )}
+            {isAuctionUpcoming && (
+              <span className="status-badge upcoming">⏰ Upcoming Auction</span>
+            )}
+            {isAuctionLive && (
+              <span className="status-badge live">🔥 Auction Live</span>
+            )}
+            {isAuctionEnded && (
+              <span className="status-badge ended">⏳ Auction Ended</span>
+            )}
+          </div>
           {item.limitedCollection && (
             <p style={{ color: '#E6521F', fontWeight: 'bold' }}>
               🚨 Exclusive Limited Collection Item
             </p>
           )}
-          <p className="item-price"><strong>Base Price:</strong> ₹{item.starting_price}</p>
-          <p className="item-price"><strong>Min Increment:</strong> ₹{item.minimum_increment}</p>
-          {item.buy_now_price && <p className="item-price"><strong>Buy Now Price:</strong> ₹{item.buy_now_price}</p>}
+          <p className="item-price small"><strong>Base Price:</strong> ₹{item.starting_price}</p>
+          <p className="item-price small"><strong>Min Increment:</strong> ₹{item.minimum_increment}</p>
+          {item.buy_now_price && <p className="item-price small"><strong>Buy Now Price:</strong> ₹{item.buy_now_price}</p>}
+         
+          {highestBid && !highestBid.no_bids ? (
+            <p className="item-price highest-bid">
+              💰 <strong>Highest Bid:</strong> ₹{highestBid.bid_amount} by {highestBid.bidder_username}
+            </p>
+          ) : (
+            <p className="item-price highest-bid">No Bids Yet — Be the first one!</p>
+          )}
+
           {item.custom_item_id && (<p className="item-id"><strong>Item ID:</strong> {item.custom_item_id}</p>)}
-          <p className="item-user"><strong>Posted By:</strong> {item.seller_id?.replace(/(.{2}).+(@.+)/, '$1****$2')}</p>          <p className="item-date"><strong>Auction Starts:</strong> {new Date(item.start_date_time).toLocaleString()}</p>
+
+          <p className="item-user"><strong>Posted By:</strong> {item.seller_id?.replace(/(.{2}).+(@.+)/, '$1****$2')}</p>          
+          <p className="item-date"><strong>Auction Starts:</strong> {new Date(item.start_date_time).toLocaleString()}</p>
           <p className="item-date"><strong>Auction Ends:</strong> {new Date(item.end_date_time).toLocaleString()}</p>
           {item.category && <p><strong>Category:</strong> {item.category}</p>}
           {item.tags && <p><strong>Tags:</strong> {item.tags}</p>}
@@ -227,12 +311,28 @@ if (!item) {
           >
             ← Back
           </button>
-          {!isAdmin && !isAuctionEnded && (
-            <button className="bid-button" onClick={() => setShowModal(true)}>
-              Bid for Auction
+          
+          {/* Upcoming Auction - Show countdown */}
+          {!isAdmin && isAuctionUpcoming && (
+            <button className="upcoming-bid-button" disabled>
+              <div className="upcoming-button-content">
+                <span className="upcoming-icon">⏰</span>
+                <span className="upcoming-text">Upcoming Auction</span>
+                <span className="countdown-text">
+                  Starts in <strong>{getTimeUntilStart()}</strong>
+                </span>
+              </div>
             </button>
           )}
           
+          {/* Live Auction - Show bid button */}
+          {!isAdmin && isAuctionLive && (
+            <button className="bid-button" onClick={() => setShowModal(true)}>
+              🔥 Bid Now - Auction Live!
+            </button>
+          )}
+          
+          {/* Ended Auction - Show ended message */}
           {!isAdmin && isAuctionEnded && (
             <p className="auction-ended-text">⏳ Auction has ended. Bidding is closed.</p>
           )}
@@ -249,14 +349,24 @@ if (!item) {
             <p><strong>Base Price:</strong> ₹{item.starting_price}</p>
             <p><strong>Min Increment:</strong> ₹{item.minimum_increment}</p>
 
+
             <input
               type="number"
-              min={Number(item.starting_price) + Number(item.minimum_increment)}
-              placeholder={`Enter bid ≥ ₹${Number(item.starting_price) + Number(item.minimum_increment)}`}
+              min={
+                highestBid?.no_bids
+                  ? Number(item.starting_price) + Number(item.minimum_increment)
+                  : Number(highestBid.bid_amount) + Number(item.minimum_increment)
+              }
+              placeholder={
+                highestBid?.no_bids
+                  ? `Enter bid ≥ ₹${Number(item.starting_price) + Number(item.minimum_increment)}`
+                  : `Enter bid > ₹${Number(highestBid.bid_amount)}`
+              }
               value={bidAmount}
               onChange={(e) => setBidAmount(Number(e.target.value))}
               className="bid-input"
             />
+
 
             {error && <p className="error-text">{error}</p>}
 

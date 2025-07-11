@@ -6,7 +6,10 @@ import axios from 'axios';
 
 const ExploreItems = () => {
   const navigate = useNavigate();
-  const [items, setItems] = useState([]);
+  const [items, setItems] = useState(() => {
+    const cached = localStorage.getItem('explore_items_cache');
+    return cached ? JSON.parse(cached) : [];
+  });
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -17,12 +20,14 @@ const ExploreItems = () => {
     priceRange: [],
     pickupMethod: [],
     item_condition: [],
+    timeFilter: '', // New time filter
   });
   const [pendingFilters, setPendingFilters] = useState({
     category: [],
     priceRange: [],
     pickupMethod: [],
     item_condition: [],
+    timeFilter: '', // New time filter
   });
   const [pendingSortOrder, setPendingSortOrder] = useState('');
 
@@ -52,6 +57,13 @@ const ExploreItems = () => {
     { label: "⚠️ For Parts", value: "For Parts" },
   ];
 
+  const timeFilterOptions = [
+    { label: "🕐 All Items", value: "" },
+    { label: "⏰ Upcoming Items", value: "upcoming" },
+    { label: "🔥 Live Items", value: "live" },
+    { label: "✅ Recently Ended", value: "ended" },
+  ];
+
   const priceOptions = [
     { label: "💸 Under ₹100", min: 0, max: 100 },
     { label: "🪙 ₹100 – ₹300", min: 100, max: 300 },
@@ -65,17 +77,36 @@ const ExploreItems = () => {
   };
 
   useEffect(() => {
-      fetchItems();
-      setPendingFilters(filters);
-      setPendingSortOrder(sortOrder);
-    }, [filters, sortOrder]);
+    // When filters or sortOrder change, show loading and clear items
+    setLoading(true);
+    setItems([]);
+    fetchItems();
+    setPendingFilters(filters);
+    setPendingSortOrder(sortOrder);
+  }, [filters, sortOrder]);
   
     const fetchItems = async () => {
-      setLoading(true);
       try {
-        const response = await axios.get('http://localhost:5000/api/items');
+        // Build query parameters
+        const params = new URLSearchParams();
+        
+        if (filters.category.length > 0) {
+          filters.category.forEach(cat => params.append('category', cat));
+        }
+        if (filters.pickupMethod.length > 0) {
+          filters.pickupMethod.forEach(method => params.append('pickup_method', method));
+        }
+        if (filters.item_condition.length > 0) {
+          filters.item_condition.forEach(condition => params.append('item_condition', condition));
+        }
+        if (filters.timeFilter) {
+          params.append('time_filter', filters.timeFilter);
+        }
+        
+        const response = await axios.get(`http://localhost:5000/api/items?${params.toString()}`);
         if (response.data.status === 'success') {
           setItems(response.data.items);
+          localStorage.setItem('explore_items_cache', JSON.stringify(response.data.items));
         }
       } catch (error) {
         console.error('Error fetching items:', error);
@@ -147,14 +178,6 @@ const ExploreItems = () => {
     const filteredItems = applyFilters();
   
 
-  // if (loading) {
-  //   return (
-  //     <div className="explore-container">
-  //       <div className="loading-spinner"></div>
-  //     </div>
-  //   );
-  // }
-
   return (
       <Layout>
         <div className="explore-container">
@@ -162,7 +185,23 @@ const ExploreItems = () => {
             <h2 className="explore-heading">🧭 Hunt & Win</h2>
             <div className="header-underline"></div>
           </div>
-  
+
+          {/* Quick Time Filters */}
+          <div className="quick-time-filters">
+            {timeFilterOptions.map((option) => (
+              <button
+                key={option.value}
+                className={`quick-filter-btn ${filters.timeFilter === option.value ? 'active' : ''}`}
+                onClick={() => {
+                  setFilters(prev => ({ ...prev, timeFilter: option.value }));
+                  setPendingFilters(prev => ({ ...prev, timeFilter: option.value }));
+                }}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
+
           <div className="top-bar">
             <div className="search-bar">
               <input
@@ -180,7 +219,23 @@ const ExploreItems = () => {
   
           <div className={`filter-sidebar ${sidebarOpen ? 'open' : ''}`}>
             <h3>Filters</h3>
-  
+
+            <div className="filter-group">
+              <h4>⏰ Time Status</h4>
+              {timeFilterOptions.map((option) => (
+                <label key={option.value}>
+                  <input
+                    type="radio"
+                    name="timeFilter"
+                    value={option.value}
+                    checked={pendingFilters.timeFilter === option.value}
+                    onChange={() => setPendingFilters(prev => ({ ...prev, timeFilter: option.value }))}
+                  />
+                  {option.label}
+                </label>
+              ))}
+            </div>
+
             <div className="filter-group">
               <h4>Category</h4>
               {categoryOptions.map((cat) => (
@@ -288,6 +343,10 @@ const ExploreItems = () => {
                     {item.limitedCollection && (
                       <div className="exclusive-badge" title="Exclusive Item">⭐</div>
                     )}
+                     {/* Time status badge */}
+                    <div className={`time-status-badge ${item.time_status || 'unknown'}`}>
+                      {item.time_status_text || 'Unknown'}
+                    </div>
                   </div>
   
                   <div className="item-content">
@@ -295,6 +354,19 @@ const ExploreItems = () => {
                     <p className="item-price" style={{ color: getColorByIndex(index) }}>
                       ₹{item.starting_price}
                     </p>
+                    {/* Time information */}
+                    <div className="item-time-info">
+                      {item.start_date_time && (
+                        <p className="time-text">
+                          <span className="time-label">Start:</span> {new Date(item.start_date_time).toLocaleDateString()}
+                        </p>
+                      )}
+                      {item.end_date_time && (
+                        <p className="time-text">
+                          <span className="time-label">End:</span> {new Date(item.end_date_time).toLocaleDateString()}
+                        </p>
+                      )}
+                    </div>
                     <button
                       onClick={() => navigate(`/item/${item._id}`)}
                       style={{
