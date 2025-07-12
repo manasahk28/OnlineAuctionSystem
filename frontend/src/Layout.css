@@ -4,7 +4,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.1rem 1.2rem;
+  padding: 0rem 1.2rem;
   position: fixed;
   z-index: 1000;
   width: 100%;
@@ -19,24 +19,11 @@
   display: none;
 }
 
-.navbar-center {
-  flex-grow: 1;
-  text-align: center;
-}
-
-.navbar-center h2 {
-  margin: 0;
-  /* margin-left: -400px; */
-  color: var(--color-navbar-text, #fff) !important;
-  font-size: 1.8rem;
-  font-weight: bold;
-  font-family: 'Times New Roman', serif;
-}
-
 .navbar-right{
   display: flex;
   align-items: center;
-  gap: 1.7rem;
+  gap: 2rem;
+  margin-right: 40px; /* Move the button group left from the edge */
 }
 
 .navbar-right .btn {
@@ -51,16 +38,6 @@
   text-decoration: none;
   font-size: 20px;
 }
-
-/* .navbar-right a {
-  margin: 2px 12px;
-  margin-left: 10px;
-  text-decoration: none;
-  color: white;
-  font-size: 20px;
-  font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
-  transition: color 0.3s ease;
-} */
 
 .navbar-right a,
 .navbar-right button {
@@ -85,17 +62,25 @@
 }
 
 .site-title {
-  height: 70px;
-  font-size: 35px;
+  height: 50px;
+  font-size: 32px;
   font-weight: bold;
   color: white;
   margin: 0px;
-  margin-top: 13px;;
-  margin-left: 60px;}
+  margin-top: 10px;
+  margin-bottom: 10px;
+  margin-left: 60px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Dark theme: Auction Verse header text should be black */
+.dark-theme .site-title {
+  color: #111 !important;
+}
 
 .logout-btn.red {
   background-color: #e77314;
-  color: white;
+  color: #fff !important;
   border: none;
   padding: 8px 12px;
   border-radius: 4px;
@@ -104,10 +89,14 @@
   margin-right: 40px;
 }
 
+/* Dark theme: logout button text should be black */
+.dark-theme .logout-btn.red {
+  color: #111 !important;
+}
+
 .logout-btn:hover {
   background-color: #c62828;
 }
-
 
 .nav-buttons .btn {
   background-color: #E5751F;
@@ -292,7 +281,7 @@
 
 .footer h3 {
   font-size: 1.5rem;
-  color: #f57c00;
+  color: #f57c00 !important;
 }
 
 .footer p {
@@ -309,9 +298,22 @@
 }
 
 .footer-links a {
-  color: #f57c00;
+  color: #f57c00 !important;
   text-decoration: none;
   transition: color 0.3s ease;
+}
+
+.footer .footer-links a {
+  color: #f57c00 !important;
+}
+
+.footer .social-icons a {
+  color: #f57c00 !important;
+}
+
+/* Make all footer text orange except copyright line */
+.footer .footer-content > *:not(p) {
+  color: #f57c00 !important;
 }
 
 .footer-links a:hover {
@@ -326,7 +328,7 @@
 }
 
 .social-icons a {
-  color: #f57c00;
+  color: #f57c00 !important;
   font-size: 24px;
   transition: transform 0.3s ease, color 0.3s ease;
 }

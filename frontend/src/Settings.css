@@ -168,3 +168,23 @@
         max-width: 100%;
     }
     } 
+
+.dark-theme .settings-main-container {
+  background: #181a1b !important;
+}
+
+.dark-theme .settings-section {
+  background: #23272a !important;
+} 
+
+.settings-section.change-password-section {
+  max-width: 350px;
+  padding: 1.2rem 1rem;
+}
+
+@media (max-width: 600px) {
+  .settings-section.change-password-section {
+    max-width: 98vw;
+    padding: 0.7rem 0.3rem;
+  }
+} 

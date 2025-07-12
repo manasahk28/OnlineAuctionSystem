@@ -17,6 +17,7 @@ import secrets
 from flask_mail import Mail, Message
 from werkzeug.exceptions import RequestEntityTooLarge
 from App.routes.auth import auth_bp
+import threading
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True, allow_headers=["Content-Type", "Authorization"], methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"])
@@ -116,7 +117,7 @@ for item in items_collection.find({'custom_item_id': {'$exists': True}}):
 
 
 # Insert Admin
-admin_email = "admin@uni.edu.in"
+admin_email = os.getenv("ADMIN_EMAIL")
 admin_password = "admin_password"
 if not users_collection.find_one({"email": admin_email}):
     admin_user = {
@@ -199,6 +200,78 @@ def login():
     else:
         return jsonify({'status': 'fail', 'message': 'Invalid email or password'}), 401
 
+def send_auction_emails(item):
+    try:
+        seller_email = item.get('seller_id')
+        item_title = item.get('title')
+        item_category = item.get('category')
+        starting_price = item.get('starting_price')
+        end_time = item.get('end_date_time')
+        custom_id = item.get('custom_item_id')
+
+        # Admin email
+        admin_user = db.users.find_one({"is_admin": True})
+        admin_email = admin_user['email'] if admin_user else None
+
+        # Send to all users except seller and admin
+        user_emails = [
+            user['email'] for user in db.users.find({}, {"email": 1})
+            if "@" in user.get("email", "")
+            and user['email'] != seller_email
+            and user['email'] != admin_email
+        ]
+
+        subject_all = "📢 New Auction Live Now!"
+        body_all = f"""
+Hello there! 👋
+
+A new auction item has just gone live on AuctionVerse! 🛍️
+
+🆕 Item: {item_title}
+📂 Category: {item_category}
+💰 Starting Price: ₹{starting_price}
+⏰ Ends On: {end_time}
+
+🔥 Head over to the platform and place your bids before time runs out!
+
+Cheers,  
+Team AuctionVerse 🌟
+""".strip()
+
+        for email in user_emails:
+            try:
+                msg = Message(subject=subject_all, recipients=[email], body=body_all)
+                mail.send(msg)
+                print(f"📧 Auction alert sent to {email}")
+            except Exception as e:
+                print(f"❌ Failed to send to {email}: {e}")
+
+        # 📬 Email to Admin
+        if admin_email:
+            subject_admin = f"🔎 New Item Awaiting Review: {item_title}"
+            body_admin = f"""
+Hello Admin,
+
+A new item has been posted by {seller_email} and is awaiting your review. 🕵️‍♀️
+
+📦 Item Details:
+Title: {item_title}
+Category: {item_category}
+Starting Price: ₹{starting_price}
+Auction Ends: {end_time}
+Seller: {seller_email}
+
+👉 Item ID: {custom_id}
+
+- AuctionVerse Bot 🤖
+""".strip()
+
+            msg_admin = Message(subject=subject_admin, recipients=[admin_email], body=body_admin)
+            mail.send(msg_admin)
+            print(f"✅ Admin email sent to {admin_email}")
+
+    except Exception as e:
+        print(f"❌ Error in send_auction_emails: {e}")
 
 @app.route('/api/post-item', methods=['POST'])
 def post_item():
@@ -232,7 +305,6 @@ def post_item():
     if video and (not isinstance(video, str) or not video.startswith('data:video')):
         return jsonify({'status': 'fail', 'message': 'Invalid video format'}), 400
 
-    #new
     category_codes = {
         'Electronics': 'ELEC',
         'Books': 'BOOK',
@@ -248,16 +320,13 @@ def post_item():
 
     category = data.get('category', 'Other')
     code_prefix = category_codes.get(category, 'GEN')
-
-    # Count items already in that category
     item_count = items_collection.count_documents({'category': category})
-    custom_id = f"AUC{code_prefix}-{item_count + 1:03d}"  # e.g. ELEC-001
-    #here
+    custom_id = f"AUC{code_prefix}-{item_count + 1:03d}"
 
     item = {
         'title': data.get('title', ''),
         'description': data.get('description', ''),
-        'category': data.get('category', ''),
+        'category': category,
         'tags': data.get('tags', ''),
         'images': images,
         'video': video if video else '',
@@ -283,78 +352,43 @@ def post_item():
         'timestamp': datetime.now().isoformat(),
         'custom_item_id': custom_id
     }
+
     items_collection.insert_one(item)
 
-    # Prepare custom email message
-    seller_email = item.get('seller_id')
-    item_title = item.get('title')
-    item_category = item.get('category')
-    starting_price = item.get('starting_price')
-    end_time = item.get('end_date_time')
-
-    subject = "🎉 Your item has been listed successfully!"
-    body = f"""
+    # 📨 Send email to seller immediately
+    try:
+        seller_email = item['seller_id']
+        subject = "🎉 Your item has been listed successfully!"
+        body = f"""
 Hello {seller_email},
 
-Your item titled "{item_title}" has been successfully posted on the Online Auction System! 🛒✨
+Your item titled "{item['title']}" has been successfully posted on the Online Auction System! 🛒✨
 
 📝 Item Summary:
-Title: {item_title}
-Category: {item_category}
-Starting Price: ₹{starting_price}
-Auction Ends: {end_time}
+Title: {item['title']}
+Category: {item['category']}
+Starting Price: ₹{item['starting_price']}
+Auction Ends: {item['end_date_time']}
 
 You'll start receiving bids soon! 🎯  
 Stay tuned and track your auction on your dashboard.
 
 Warm regards,  
 Team AuctionVerse 🌟
-"""
-
-    # Send the email
-    try:
-        msg = Message(subject=subject, recipients=[seller_email], body=body)
-        mail.send(msg)
-        print(f"✅ Email sent to {seller_email}")
-    except Exception as e:
-        print(f"❌ Email sending failed: {e}")
-
-    # 🎉 Notify all users (except the seller) about the new live auction
-    try:
-        user_emails = [
-            user['email'] for user in db.users.find({}, {"email": 1})
-            if "@" in user.get("email", "") and user.get("email") != seller_email
-        ]
-
-        subject_all = "📢 New Auction Live Now!"
-        body_all = f"""
-Hello there! 👋
-
-A new auction item has just gone live on AuctionVerse! 🛍️
-
-🆕 Item: {item_title}
-📂 Category: {item_category}
-💰 Starting Price: ₹{starting_price}
-⏰ Ends On: {end_time}
-
-🔥 Head over to the platform and place your bids before time runs out!
-
-Cheers,  
-Team AuctionVerse 🌟
 """.strip()
 
-        for email in user_emails:
-            try:
-                msg_all = Message(subject=subject_all, recipients=[email], body=body_all)
-                mail.send(msg_all)
-                print(f"📧 New auction alert sent to {email}")
-            except Exception as e:
-                print(f"❌ Failed to send to {email}: {e}")
+        msg = Message(subject=subject, recipients=[seller_email], body=body)
+        mail.send(msg)
+        print(f"✅ Seller email sent to {seller_email}")
 
     except Exception as e:
-        print(f"❌ Error notifying users about new auction: {e}")
+        print(f"❌ Failed to send seller email: {e}")
+
+    # ✅ Trigger async thread for admin + users
+    threading.Thread(target=send_auction_emails, args=(item,)).start()
 
     return jsonify({'status': 'success', 'message': 'Item posted successfully!'}), 201
+
 
 @app.route('/api/place-bid', methods=['POST'])
 def place_bid():
@@ -371,6 +405,10 @@ def place_bid():
         item = items_collection.find_one({'_id': ObjectId(item_id)})
         if not item:
             return jsonify({'status': 'fail', 'message': 'Item not found'}), 404
+
+        # Prevent user from bidding on their own item
+        if (bidder_email == item.get('contact_email')) or (bidder_id == item.get('seller_id')):
+            return jsonify({'status': 'fail', 'message': 'You cannot bid on your own item.'}), 403
 
         # Get current IST time
         ist_time = datetime.now(ZoneInfo("Asia/Kolkata")).isoformat()
@@ -547,7 +585,7 @@ def get_profile():
         'collegeName': (profile.get('collegeName') if profile and profile.get('collegeName') else user.get('collegeName', '')),
         'phone': profile.get('phone', '') if profile else '',
         'linkedin': profile.get('linkedin', '') if profile else '',
-        'profileImage': profile.get('profileImage', '') if profile else ''
+        'profileImage': (profile.get('profileImage', '') if profile else '') or user.get('profileImage', '')
     }
 
     return jsonify({'status': 'success', 'profile': combined}), 200
@@ -560,6 +598,9 @@ def update_profile():
     if not email:
         return jsonify({'status': 'fail', 'message': 'Email required'}), 400
 
+    print(f"🔄 Updating profile for: {email}")
+    print(f"📝 Profile data received: {data}")
+
     profile_fields = {
         "UserName": data.get("UserName", ''),
         "collegeId": data.get("collegeId", ''),
@@ -568,19 +609,24 @@ def update_profile():
         "linkedin": data.get("linkedin", ''),
         "profileImage": data.get("profileImage", '')
     }
-    profiles_collection.update_one({'email': email}, {'$set': profile_fields}, upsert=True)
+    print(f"🗂️ Updating profiles collection with: {profile_fields}")
+    profiles_result = profiles_collection.update_one({'email': email}, {'$set': profile_fields}, upsert=True)
+    print(f"✅ Profiles collection updated: {profiles_result.modified_count} documents modified")
 
     users_update = {
         'UserName': data.get('UserName', ''),
         'collegeId': data.get('collegeId', ''),
-        'collegeName': data.get('collegeName', '')
+        'collegeName': data.get('collegeName', ''),
+        'profileImage': data.get("profileImage", '')  # Also update profileImage in users collection
     }
 
     if data.get("password"):
         hashed = bcrypt.hashpw(data['password'].encode('utf-8'), bcrypt.gensalt())
         users_update['password'] = hashed.decode('utf-8')
 
-    users_collection.update_one({'email': email}, {'$set': users_update})
+    print(f"👥 Updating users collection with: {users_update}")
+    users_result = users_collection.update_one({'email': email}, {'$set': users_update})
+    print(f"✅ Users collection updated: {users_result.modified_count} documents modified")
 
     return jsonify({'status': 'success', 'message': 'Profile updated'}), 200
 
@@ -659,6 +705,17 @@ def get_all_items():
                 bid['timestamp'] = bid.get('timestamp', '')
                 if '_id' in bid:
                     bid['_id'] = str(bid['_id'])  # Just in case
+
+        # Add winner information for recently ended auctions
+        if item['time_status'] == 'ended':
+            winner_info = get_auction_winner(item['_id'])
+            if winner_info:
+                item['winner_info'] = {
+                    'winner_username': winner_info['winner_username'],
+                    'winning_amount': winner_info['winning_amount'],
+                    'winning_timestamp': winner_info['winning_timestamp']
+                }
+
     return jsonify({'status': 'success', 'items': items}), 200
 
 
@@ -693,6 +750,22 @@ def get_single_item(item_id):
             for bid in item['bids']:
                 if '_id' in bid:
                     bid['_id'] = str(bid['_id'])
+
+        # Add winner information for ended auctions
+        try:
+            end_time = datetime.fromisoformat(item.get('end_date_time', '')).astimezone(ZoneInfo("Asia/Kolkata"))
+            now = datetime.now(ZoneInfo("Asia/Kolkata"))
+            
+            if now > end_time:  # Auction has ended
+                winner_info = get_auction_winner(item['_id'])
+                if winner_info:
+                    item['winner_info'] = {
+                        'winner_username': winner_info['winner_username'],
+                        'winning_amount': winner_info['winning_amount'],
+                        'winning_timestamp': winner_info['winning_timestamp']
+                    }
+        except Exception as e:
+            print(f"❌ Error checking auction status for {item['_id']}: {e}")
 
         return jsonify({'status': 'success', 'item': item}), 200
 
@@ -761,6 +834,77 @@ def update_item(item_id):
     except Exception as e:
         print("❌ Error in update_item:", e)
         return jsonify({'status': 'error', 'message': str(e)}), 500
+
+@app.route('/api/items/<item_id>', methods=['DELETE'])
+def delete_item(item_id):
+    try:
+        print(f"🗑️ Deleting item: {item_id}")
+        
+        # First, check if item exists
+        item = items_collection.find_one({'_id': ObjectId(item_id)})
+        if not item:
+            return jsonify({'status': 'fail', 'message': 'Item not found'}), 404
+        
+        # 1. Delete the item itself
+        result = items_collection.delete_one({'_id': ObjectId(item_id)})
+        
+        if result.deleted_count:
+            # 2. Delete all bids for this item
+            bids_deleted = bids_collection.delete_many({'item_id': str(item_id)})
+            print(f"🗑️ Deleted {bids_deleted.deleted_count} bids")
+            
+            # 3. Delete all notifications related to this item
+            notifications_deleted = notifications_collection.delete_many({'item_id': str(item_id)})
+            print(f"🗑️ Deleted {notifications_deleted.deleted_count} notifications")
+            
+            # 4. Delete all payments related to this item
+            payments_deleted = db.payments.delete_many({'item_id': str(item_id)})
+            print(f"🗑️ Deleted {payments_deleted.deleted_count} payments")
+            
+            # 5. Delete any admin comments for this item
+            admin_comments_deleted = db.admin_comments.delete_many({'item_id': str(item_id)})
+            print(f"🗑️ Deleted {admin_comments_deleted.deleted_count} admin comments")
+            
+            # 6. Delete uploaded files (images and videos)
+            try:
+                if item.get('images'):
+                    for image_filename in item['images']:
+                        image_path = os.path.join(app.config['UPLOAD_FOLDER'], image_filename)
+                        if os.path.exists(image_path):
+                            os.remove(image_path)
+                            print(f"🗑️ Deleted image file: {image_filename}")
+                
+                if item.get('video'):
+                    video_path = os.path.join(app.config['UPLOAD_FOLDER'], item['video'])
+                    if os.path.exists(video_path):
+                        os.remove(video_path)
+                        print(f"🗑️ Deleted video file: {item['video']}")
+            except Exception as file_error:
+                print(f"⚠️ Warning: Could not delete some files: {file_error}")
+            
+            print(f"✅ Item and all related data deleted successfully")
+            return jsonify({
+                'status': 'success', 
+                'message': 'Item and all related data deleted successfully',
+                'deleted_counts': {
+                    'item': 1,
+                    'bids': bids_deleted.deleted_count,
+                    'notifications': notifications_deleted.deleted_count,
+                    'payments': payments_deleted.deleted_count,
+                    'admin_comments': admin_comments_deleted.deleted_count
+                }
+            }), 200
+        else:
+            return jsonify({'status': 'fail', 'message': 'Item not found'}), 404
+            
+    except Exception as e:
+        print(f"❌ Error in delete_item: {str(e)}")
+        if "InvalidId" in str(e):
+            return jsonify({'status': 'error', 'message': 'Invalid item ID format'}), 400
+        elif "Connection" in str(e):
+            return jsonify({'status': 'error', 'message': 'Database connection error'}), 500
+        else:
+            return jsonify({'status': 'error', 'message': f'Delete failed: {str(e)}'}), 500
 
 # 🛠 Your updated route
 @app.route('/api/items/user/<email>', methods=['GET'])
@@ -1118,6 +1262,38 @@ Team AuctionVerse 🌟
         print("❌ Error in handle_auction_win:", e)
         return jsonify({"status": "error", "message": str(e)}), 500
 
+def get_auction_winner(item_id):
+    """Determine the winner of an auction based on highest bid"""
+    try:
+        # Find all bids for this item
+        bids = list(bids_collection.find({'item_id': str(item_id)}))
+        
+        if not bids:
+            return None  # No bids placed
+        
+        # Sort by bid amount (descending) and timestamp (ascending for tie-breaks)
+        bids.sort(key=lambda b: (-float(b['bid_amount']), b['timestamp']))
+        
+        # Get the highest bid
+        highest_bid = bids[0]
+        
+        # Get winner's username
+        winner_username = highest_bid.get('bidder_UserName')
+        if not winner_username:
+            # Fallback to email prefix if username not available
+            winner_email = highest_bid.get('bidder_email', '')
+            winner_username = winner_email.split('@')[0] if winner_email else 'Unknown'
+        
+        return {
+            'winner_username': winner_username,
+            'winner_email': highest_bid.get('bidder_email'),
+            'winning_amount': float(highest_bid['bid_amount']),
+            'winning_timestamp': highest_bid.get('timestamp')
+        }
+    except Exception as e:
+        print(f"❌ Error determining auction winner for {item_id}: {e}")
+        return None
+
 @app.route('/api/payments/<buyer_email>', methods=['GET'])
 def get_user_payments(buyer_email):
     try:
@@ -1193,6 +1369,47 @@ def approve_reject_item(item_id):
 
         if result.matched_count == 0:
             return jsonify({'message': 'Item not found'}), 404
+
+        # 📨 Fetch item and notify seller
+        item = items_collection.find_one({"_id": ObjectId(item_id)})
+        seller_email = item.get("seller_id")
+        item_title = item.get("title")
+
+        # 💌 Prepare message
+        subject = f"📝 Your item has been {status}"
+        
+        if status.lower() == "approved":
+            body = f"""
+Hello {seller_email},
+
+🎉 Great news! Your item "{item_title}" has been successfully reviewed and APPROVED by the admin. 🟢
+
+It is now visible to all users and open for bidding on AuctionVerse! 🚀
+
+Best of luck with your auction!  
+- Team AuctionVerse 💛
+""".strip()
+        else:
+            body = f"""
+Hello {seller_email},
+
+Unfortunately, your item "{item_title}" has been REJECTED by the admin. 🔴
+
+This could be due to missing details, inappropriate content, or rule violations.
+
+You can edit and resubmit your item anytime.
+
+Thanks for understanding,  
+- Team AuctionVerse 💛
+""".strip()
+
+        # ✉️ Send the email
+        try:
+            msg = Message(subject=subject, recipients=[seller_email], body=body)
+            mail.send(msg)
+            print(f"✅ Email sent to seller ({seller_email}) about {status}")
+        except Exception as e:
+            print(f"❌ Failed to send email to seller: {e}")
 
         return jsonify({'message': f'Item {status} successfully'}), 200
 
@@ -1341,53 +1558,6 @@ def send_notification_if_allowed(email, message, n_type='general'):
     })
     return True
 
-@app.route('/api/chatbot', methods=['POST'])
-def chatbot():
-    data = request.get_json()
-    message = data.get('message', '').strip().lower()
-    user_email = data.get('email', '').strip().lower()
-
-    # 🔧 Simple typo corrections
-    message = message.replace("preent", "present").replace("staionary", "stationery").replace("art supllies", "art supplies")
-
-    # 📌 Category/item keywords
-    item_keywords = ["stationery", "art supplies", "books", "television", "laptop", "bag", "furniture", "phone", "sketch book"]
-
-    for keyword in item_keywords:
-        if keyword in message:
-            found = db.items.count_documents({
-                "$or": [
-                    {"category": {"$regex": keyword, "$options": "i"}},
-                    {"title": {"$regex": keyword, "$options": "i"}},
-                    {"tags": {"$regex": keyword, "$options": "i"}},
-                    {"description": {"$regex": keyword, "$options": "i"}}
-                ]
-            })
-            if found > 0:
-                return jsonify({"response": f"Yes! We have {found} item(s) related to '{keyword}'. 🔍"})
-            else:
-                return jsonify({"response": f"Sorry, no items found for '{keyword}' at the moment. 🙁"})
-
-    # 📊 Total item count
-    if re.search(r"(total items|how many items.*total|how many products)", message):
-        total = db.items.count_documents({})
-        return jsonify({"response": f"We currently have {total} item(s) listed in total. 🛒"})
-
-    # 📈 Bidding stats
-    if re.search(r"how many items.*(bid|bidded|bidding)", message) and user_email:
-        bid_count = db.bids.count_documents({"bidder_email": user_email})
-        return jsonify({"response": f"You have placed bids on {bid_count} item(s) so far. 🔥"})
-
-    # 📤 Posted item stats
-    if re.search(r"how many items.*(posted|listed)", message) and user_email:
-        post_count = db.items.count_documents({"seller_email": user_email})
-        return jsonify({"response": f"You have posted {post_count} item(s) for auction. 📦"})
-
-    # ❓ Default fallback
-    return jsonify({
-        "response": "Hmm... I’m still learning. Try asking about items, bidding, or listings! 🧠"
-    })
-
 # ------------------ Forgot/Reset Password Routes ------------------
 
 @app.route('/api/forgot-password', methods=['POST'])
@@ -1500,15 +1670,7 @@ def dashboard():
     user_email = get_jwt_identity()
     return jsonify({'message': f'Welcome {user_email}, this is a protected route!'}), 200
 
-@app.route('/api/items/<item_id>', methods=['DELETE'])
-def delete_item(item_id):
-    try:
-        result = items_collection.delete_one({'_id': ObjectId(item_id)})
-        if result.deleted_count:
-            return jsonify({'status': 'success', 'message': 'Item deleted'}), 200
-        return jsonify({'status': 'fail', 'message': 'Item not found'}), 404
-    except Exception as e:
-        return jsonify({'status': 'error', 'message': str(e)}), 500
+
     
 # ------------------ Delete Account Endpoint ------------------
 

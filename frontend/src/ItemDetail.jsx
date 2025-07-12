@@ -4,6 +4,12 @@ import './ItemDetail.css';
 import Layout from './Layout';
 import axios from 'axios';
 
+// Utility function to capitalize first letter of username
+const capitalizeUsername = (username) => {
+  if (!username) return '';
+  return username.charAt(0).toUpperCase() + username.slice(1).toLowerCase();
+};
+
 const ItemDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -15,14 +21,14 @@ const ItemDetail = () => {
   const [error, setError] = useState('');
   const [highestBid, setHighestBid] = useState(null);
   const [showMediaFullscreen, setShowMediaFullscreen] = useState(false);
+  const [isDescExpanded, setIsDescExpanded] = useState(false);
 
   const user = JSON.parse(localStorage.getItem('user'));
   const isAdmin = user?.is_admin === true;
   const isAuctionEnded = item && new Date(item.end_date_time) < new Date();
   const isAuctionUpcoming = item && new Date(item.start_date_time) > new Date();
   const isAuctionLive = item && new Date(item.start_date_time) <= new Date() && new Date(item.end_date_time) >= new Date();
-
-
+  const isOwnItem = item && user && (user.email === item.seller_id || user.email === item.contact_email);
 
   useEffect(() => {
     const fetchItem = async () => {
@@ -45,7 +51,14 @@ const ItemDetail = () => {
     fetchItem();
   }, [id]);
 
-    
+  function toggleDescription() {
+    const wrapper = document.getElementById('descWrapper');
+    const btn = document.getElementById('readMoreBtn');
+  
+    wrapper.classList.toggle('expanded');
+    btn.textContent = wrapper.classList.contains('expanded') ? 'Show less' : 'Read more';
+  }
+
   useEffect(() => {
     const fetchHighestBid = async () => {
       try {
@@ -254,6 +267,30 @@ if (!item) {
               <span className="status-badge ended">⏳ Auction Ended</span>
             )}
           </div>
+
+        {/* Show winner information for ended auctions */}
+        {isAuctionEnded && item.winner_info && (
+          <div className="winner-section">
+            <div className="winner-card">
+              <div className="winner-header">
+                <span className="winner-icon">🏆</span>
+                <h3>Auction Winner</h3>
+              </div>
+              <div className="winner-details">
+                <p className="winner-name">
+                  <strong>{capitalizeUsername(item.winner_info.winner_username)}</strong>
+                </p>
+                <p className="winning-amount">
+                  Winning Bid: <strong>₹{item.winner_info.winning_amount.toLocaleString()}</strong>
+                </p>
+                <p className="winning-time">
+                  Won on: {new Date(item.winner_info.winning_timestamp).toLocaleString()}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
           {item.limitedCollection && (
             <p style={{ color: '#E6521F', fontWeight: 'bold' }}>
               🚨 Exclusive Limited Collection Item
@@ -270,6 +307,19 @@ if (!item) {
           ) : (
             <p className="item-price highest-bid">No Bids Yet — Be the first one!</p>
           )}
+
+          <div className="description-toggle-box">
+            {!isDescExpanded ? (
+              <span className="know-more-text" onClick={() => setIsDescExpanded(true)}>
+                📘 Know about this item
+              </span>
+            ) : (
+              <div className="item-description-expanded">
+                <p className="item-desc">{item.description}</p>
+                <span className="collapse-text" onClick={() => setIsDescExpanded(false)}>Show less ↑</span>
+              </div>
+            )}
+          </div>
 
           {item.custom_item_id && (<p className="item-id"><strong>Item ID:</strong> {item.custom_item_id}</p>)}
 
@@ -293,17 +343,6 @@ if (!item) {
             </>
           )}
 
-          {/* <div className="action-buttons">
-            <button className="back-button" onClick={() => navigate('/explore')}>
-              ← Back
-            </button>
-            <button className="bid-button" onClick={() => setShowModal(true)}>
-              Bid for Auction
-            </button>
-          </div> 
-          </div>
-          </div>        */}
-
         <div className="action-buttons">
           <button
             className="back-button"
@@ -313,7 +352,7 @@ if (!item) {
           </button>
           
           {/* Upcoming Auction - Show countdown */}
-          {!isAdmin && isAuctionUpcoming && (
+          {!isAdmin && !isOwnItem && isAuctionUpcoming && (
             <button className="upcoming-bid-button" disabled>
               <div className="upcoming-button-content">
                 <span className="upcoming-icon">⏰</span>
@@ -326,7 +365,7 @@ if (!item) {
           )}
           
           {/* Live Auction - Show bid button */}
-          {!isAdmin && isAuctionLive && (
+          {!isAdmin && !isOwnItem && isAuctionLive && (
             <button className="bid-button" onClick={() => setShowModal(true)}>
               🔥 Bid Now - Auction Live!
             </button>
@@ -337,10 +376,15 @@ if (!item) {
             <p className="auction-ended-text">⏳ Auction has ended. Bidding is closed.</p>
           )}
 
+          {/* If own item, show message only if auction is not ended */}
+          {isOwnItem && !isAuctionEnded && (
+            <p className="auction-ended-text">You cannot bid on your own item.</p>
+          )}
+
         </div>
       </div>
 
-      {!isAdmin && showModal && (
+      {!isAdmin && showModal && !isOwnItem && (
         <div className="modal-overlay" onClick={() => setShowModal(false)}>
           <div className="modal-box" onClick={(e) => e.stopPropagation()}>
             <h2>Place Your Bid</h2>

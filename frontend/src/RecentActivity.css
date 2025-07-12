@@ -80,3 +80,8 @@
 .activity-card.win {
   border-left-color: #38b000;
 }
+
+.dark-theme .recent-heading,
+.dark-theme .activity-message {
+  color: var(--color-text) !important;
+}

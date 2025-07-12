@@ -6,9 +6,10 @@
 }
 
 .my-listings-wrapper {
-  padding: 40px;
+  padding: 20px;
   min-height: 100vh;
   font-family: 'Segoe UI', sans-serif;
+  width: 100%;
 }
 
 .my-listings-title {
@@ -30,15 +31,15 @@
 .listings-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 20px;
+  gap: 0px;
 }
 
 .listing-card {
   display: flex;
   flex-direction: column;
   justify-content: space-between;  /* ✅ Spread content evenly */
-  height: 100%;
-  width: 250px;
+  height: 85%;
+  width: 85%;
   background: var(--color-bg-card);
   color: var(--color-text);
 }
@@ -49,7 +50,7 @@
 }
 
 .listing-image {
-  width: 100%;
+  width: 90%;
   height: 140px;
   object-fit: cover;
   border-top-left-radius: 16px;
@@ -197,4 +198,9 @@
 
 .delete-btn:hover {
   background-color: #c10000;
+}
+
+.dark-theme .my-listings-title,
+.dark-theme .profile-header h2 {
+  color: var(--color-text) !important;
 }

@@ -45,3 +45,10 @@
 .payment-card.pending .payment-status {
   color: #ff9800;
 } 
+
+.dark-theme .profile-header h2,
+.dark-theme .payment-item,
+.dark-theme .payment-amount,
+.dark-theme .payment-status {
+  color: var(--color-text) !important;
+} 

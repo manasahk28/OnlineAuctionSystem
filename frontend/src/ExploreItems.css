@@ -250,6 +250,10 @@
   color: #333;
 }
 
+.dark-theme .time-label {
+  color: var(--color-text) !important;
+}
+
 .item-card button {
   margin-top: auto;
   padding: 0.7rem 1.5rem;

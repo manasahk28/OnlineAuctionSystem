@@ -10,13 +10,13 @@ body {
   justify-content: flex-start;
   padding: 20px;
   overflow-x: auto; /* ✅ Enables horizontal scroll if screen is small */
-  background-color: #fff;
+  background: var(--color-bg-card);
 }
 
 .listing-card {
   flex: 0 0 220px; /* 5 cards in a row on desktop */
   position: relative;
-  background-color: white;
+  background: var(--color-bg-card);
   border: 1px solid #eee;
   border-radius: 12px;
   padding: 12px;

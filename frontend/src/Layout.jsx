@@ -53,6 +53,7 @@ const Layout = ({ children, hideFooter }) => {
 
   return (
     <>
+      <ChatBot />
       {sidebarOpen && <div className="sidebar-overlay" onClick={closeSidebar} />} {/* Blur background */}
       <nav className="navbar">
 <div className="navbar-left">

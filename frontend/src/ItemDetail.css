@@ -302,6 +302,10 @@ video.product-image {
   border-color: #e6521f;
 }
 
+.thumbnail:hover {
+  border-color: #ffa500;
+  transform: scale(1.05);
+}
 
 .item-id {
   font-size: 1rem;
@@ -322,7 +326,8 @@ video.product-image {
   padding: 6px 10px;
   border-radius: 8px;
   display: inline-block;
-  font-size: 14px;
+  text-transform: uppercase;
+  font-size: 1rem;
 }
 
 .approval-status.approved {
@@ -352,6 +357,127 @@ video.product-image {
   padding: 10px 14px;
   border: 1px solid #e0b4b4;
   border-radius: 8px;
+}
+
+.winner-section {
+  margin: 16px 0;
+  padding: 20px 24px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+  position: relative;
+  transition: all 0.3s ease-in-out;
+  overflow: hidden;
+}
+
+.winner-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(255, 138, 0, 0.08), rgba(229, 46, 113, 0.08));
+  z-index: -1;
+}
+
+.winner-card {
+  text-align: center;
+  padding: 0 8px;
+  position: relative;
+  z-index: 1;
+}
+
+.winner-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.winner-icon {
+  font-size: 1rem;
+  animation: bounce 2s infinite;
+}
+
+.winner-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #2c3e50;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+.winner-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.winner-name {
+  font-size: 1.2rem;
+  margin: 0;
+  font-weight: 600;
+  color: #34495e;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.winner-name strong {
+  color: #e74c3c;
+  font-weight: 700;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+.winning-amount {
+  font-size: 1rem;
+  margin: 0;
+  color: #7f8c8d;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-weight: 500;
+}
+
+.winning-amount strong {
+  color: #27ae60;
+  font-weight: 700;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+.winning-time {
+  font-size: 0.85rem;
+  margin: 0;
+  color: #95a5a6;
+  font-style: italic;
+  opacity: 0.8;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-weight: 400;
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-2px);
+  }
+  60% {
+    transform: translateY(-1px);
+  }
+}
+
+@media screen and (max-width: 600px) {
+  .winner-section {
+    width: 90%; /* instead of fixed 500px */
+  }
 }
 
 .activity-message {
@@ -430,6 +556,7 @@ video.product-image {
   text-transform: uppercase;
   letter-spacing: 0.5px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-right: 10px;
 }
 
 .status-badge.upcoming {
@@ -495,4 +622,69 @@ video.product-image {
 .right-panel p,
 .right-panel strong {
   line-height: 1.5;
+}
+
+.highest-bid {
+  color: #1e8449;
+  font-size: 21px;
+  font-weight: bold;
+}
+
+/* Style for when there are no bids */
+.highest-bid.no-bids {
+  color: #4CAF50;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.back-button:focus,
+.bid-button:focus,
+.cancel-button:focus,
+.confirm-bid-button:focus {
+  outline: 2px dashed #ffa500;
+  outline-offset: 3px;
+}
+
+.item-description-wrapper {
+  position: relative;
+  max-height: 4.5em; /* ~3 lines */
+  overflow: hidden;
+  line-height: 1.5em;
+  transition: max-height 0.3s ease;
+}
+
+.item-description-wrapper.expanded {
+  max-height: 100vh;
+}
+.description-toggle-box {
+  margin-top: 1rem;
+  font-size: 1.1rem;
+  color: #2d7fa5;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 600;
+  text-decoration:underline;
+}
+
+.know-more-text:hover,
+.collapse-text:hover {
+  color: #e6521f;
+  text-decoration: underline;
+}
+
+.item-description-expanded {
+  background-color: #f2efea;
+  padding: 1rem;
+  margin-top: 0.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  color: #444;
+}
+
+.collapse-text {
+  display: inline-block;
+  margin-top: 0.5rem;
+  color: #555;
+  font-size: 0.9rem;
+  font-style: italic;
 }

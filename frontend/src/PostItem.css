@@ -890,3 +890,57 @@ button[type='submit']:hover {
 }
 }
 
+.dark-theme .post-items-form {
+  background-color: var(--color-bg-card) !important;
+  color: var(--color-text) !important;
+}
+
+.dark-theme .form-section {
+  background-color: var(--color-bg-card) !important;
+  color: var(--color-text) !important;
+}
+
+.dark-theme .input-row input,
+.dark-theme .input-row textarea,
+.dark-theme .input-row select {
+  background-color: var(--color-bg-card) !important;
+  color: var(--color-text) !important;
+  border: 1px solid #555 !important;
+}
+
+.dark-theme .post-items-form input[type="file"] {
+  background-color: var(--color-bg-card) !important;
+  color: var(--color-text) !important;
+  border: 1px solid #555 !important;
+}
+
+.dark-theme .input-row.side-by-side input[type="file"] {
+  background-color: var(--color-bg-card) !important;
+  color: var(--color-text) !important;
+  border: 1px solid #555 !important;
+}
+
+.dark-theme .terms-popup {
+  background-color: var(--color-bg-card) !important;
+  color: var(--color-text) !important;
+}
+
+.dark-theme .readonly-input {
+  background-color: var(--color-bg-card) !important;
+  color: var(--color-text) !important;
+}
+
+.dark-theme .post-items-form h2,
+.dark-theme .post-items-form h3,
+.dark-theme .form-section h3,
+.dark-theme .input-row label,
+.dark-theme .input-group label,
+.dark-theme .media-warning,
+.dark-theme .terms-link {
+  color: var(--color-text) !important;
+}
+
+.dark-theme .media-warning {
+  background: #2a2a2a !important;
+  color: #ffb74d !important;
+}

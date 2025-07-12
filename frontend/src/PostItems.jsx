@@ -12,6 +12,7 @@ const PostItems = () => {
     const [itemCondition, setItemCondition] = useState('');
     const [imagePreviews, setImagePreviews] = useState([]);
     const [videoPreview, setVideoPreview] = useState(null);
+    const [isPosting, setIsPosting] = useState(false);
 
     const [form, setForm] = useState({
     title: '',
@@ -106,9 +107,10 @@ const handleChange = (e) => {
   }
 };
 
-
 const handleSubmit = async (e) => {
   e.preventDefault();
+  if (isPosting) return; // Prevent duplicate
+  setIsPosting(true);
 
   const missingFields = requiredFields.filter((field) => {
     const value = form[field];
@@ -119,16 +121,19 @@ const handleSubmit = async (e) => {
 
   if (form.images.length === 0) {
     alert('Please upload at least one image.');
+    setIsPosting(false);
     return;
   }
 
   if (missingFields.length > 0) {
     alert(`🚫 Please fill all required fields:\n${missingFields.join(', ')}`);
+    setIsPosting(false);
     return;
   }
 
   if (!form.terms_accepted) {
     alert('You must accept the terms and conditions.');
+    setIsPosting(false);
     return;
   }
 
@@ -157,6 +162,8 @@ const handleSubmit = async (e) => {
   } catch (err) {
     alert('❌ Failed to post item');
     console.error(err);
+  } finally {
+    setIsPosting(false);
   }
 };
 
@@ -584,7 +591,7 @@ const handleRemoveImage = (index) => {
         )}
 
       </div>
-        <button type="submit">Post Item</button>
+        <button type="submit" disabled={isPosting}>{isPosting ? 'Posting...' : 'Post Item'}</button>
       </form>
     </div>
 

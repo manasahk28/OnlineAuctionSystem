@@ -34,6 +34,17 @@ const UserDashboard = () => {
   const [categoryData, setCategoryData] = useState([]);       // For pie chart
   const [biddedCategoryData, setBiddedCategoryData] = useState([]); // For bar chart
 
+  // Define the predefined categories that should be shown in the graph (matching the dropdown exactly)
+  const predefinedCategories = [
+    "Books", "Electronics", "Clothing", "Stationery", "Lab Equipment", 
+    "Sports Gear", "Hostel Essentials", "Cycle/Bike Accessories", "Art Supplies", "Other"
+  ];
+
+  // Helper to normalize category names (trim and case-insensitive)
+  function normalizeCategory(name) {
+    return name ? name.trim().toLowerCase() : '';
+  }
+
   useEffect(() => {
     const userData = JSON.parse(localStorage.getItem("user") || '{}');
     if (!userData.email) return;
@@ -66,11 +77,40 @@ const UserDashboard = () => {
     fetch(`http://localhost:5000/api/user-category-stats/${user.email}`)
       .then(res => res.json())
       .then(data => {
-        if (data.status === 'success') {
-          const pieFormatted = data.pie_data.map(d => ({ name: d.category, value: d.count }));
-          const barFormatted = data.bar_data.map(d => ({ category: d.category, count: d.count }));
-          setCategoryData(pieFormatted);
-          setBiddedCategoryData(barFormatted);
+if (data.status === 'success') {
+          // Build a map of normalized category to count
+          const pieMap = {};
+          data.pie_data.forEach(d => {
+            const norm = normalizeCategory(d.category);
+            pieMap[norm] = (pieMap[norm] || 0) + d.count;
+          });
+          // Map predefined categories to their normalized form
+          const normalizedPredefined = predefinedCategories.map(c => normalizeCategory(c));
+          // Build filteredPieData using normalized matching
+          const filteredPieData = predefinedCategories.map((category, i) => {
+            const norm = normalizedPredefined[i];
+            return {
+              name: category,
+              value: pieMap[norm] || 0
+            };
+          }).filter(item => item.value > 0);
+
+          // Repeat for bar data
+          const barMap = {};
+          data.bar_data.forEach(d => {
+            const norm = normalizeCategory(d.category);
+            barMap[norm] = (barMap[norm] || 0) + d.count;
+          });
+          const filteredBarData = predefinedCategories.map((category, i) => {
+            const norm = normalizedPredefined[i];
+            return {
+              category: category,
+              count: barMap[norm] || 0
+            };
+          }).filter(item => item.count > 0);
+
+          setCategoryData(filteredPieData);
+          setBiddedCategoryData(filteredBarData);
         }
       });
   }, [user?.email]);
@@ -116,6 +156,46 @@ const UserDashboard = () => {
     reader.readAsDataURL(file);
   };
 
+  const handleDeleteProfileImage = async () => {
+    const confirmDelete = window.confirm('Are you sure you want to delete your profile image? This action cannot be undone.');
+    
+    if (!confirmDelete) return;
+
+    try {
+      // Get current profile data
+      const res1 = await fetch(`http://localhost:5000/api/get-profile?email=${user.email}`);
+      const data1 = await res1.json();
+      const existingProfile = data1.profile;
+
+      // Update profile with empty profileImage
+      const updatedProfile = {
+        ...existingProfile,
+        email: user.email,
+        profileImage: '' // Set to empty string to remove the image
+      };
+
+      const res = await fetch('http://localhost:5000/api/update-profile', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedProfile)
+      });
+
+      const result = await res.json();
+      if (result.status === 'success') {
+        // Update local state
+        setProfileImage(null);
+        setProfile(updatedProfile);
+        localStorage.setItem('user', JSON.stringify({ ...user, profileImage: null }));
+        alert('✅ Profile image deleted successfully!');
+      } else {
+        alert('❌ Failed to delete profile image: ' + result.message);
+      }
+    } catch (err) {
+      console.error('Error deleting profile image:', err);
+      alert('❌ Something went wrong while deleting the profile image.');
+    }
+  };
+
   if (!user) return null;
 
   return (
@@ -154,6 +234,12 @@ const UserDashboard = () => {
                   e.stopPropagation();
                   fileInputRef.current.click();
                 }}>{profileImage ? 'Change' : 'Add Image'}</button>
+                {profileImage && (
+                  <button className="hover-btn delete-btn" onClick={(e) => {
+                    e.stopPropagation();
+                    handleDeleteProfileImage();
+                  }}>Delete</button>
+                )}
               </div>
 
               <input
@@ -166,16 +252,19 @@ const UserDashboard = () => {
             </div>
 
             {showImageModal && (
-              <div className="image-modal">
+              <div
+                className="image-modal"
+                onClick={(e) => {
+                  if (e.target.classList.contains("image-modal")) {
+                    setShowImageModal(false);
+                  }
+                }}
+              >
                 <div className="image-modal-content">
-                  <button className="close-modal go-back-btn" onClick={() => setShowImageModal(false)}>
-                    ✖
-                  </button>
                   <img src={profileImage} alt="Full View" />
                 </div>
-              </div>
+              </div>            
             )}
-
             <h3 className="username">{profile.UserName || user.UserName || 'Your Name'}</h3>
 
             <div className="sidebar-buttons">
