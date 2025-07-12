@@ -58,7 +58,12 @@ items_collection = db["items"]
 ```text
 cd backend  # Navigate to backend folder
 
-pip install flask flask-cors pymongo  # Install required packages
+# Install required packages
+pip install flask flask-cors pymongo
+pip install tzdata
+pip install Flask-mail
+pip install python-dotenv
+pip install pymongo dnspythn flask-cors 
 
 python app.py  # Start the Flask server
 
@@ -90,8 +95,7 @@ Online-Auction-System/
 │       └── auctions.py
 ├── frontend/
 │   ├── src/
-│   │   ├── components/
-│   │   ├── pages/
+│   │   ├── pages
 │   │   └── App.js
 │   └── package.json
 ├── README.md
