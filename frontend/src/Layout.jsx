@@ -57,7 +57,7 @@ const Layout = ({ children, hideFooter }) => {
       <nav className="navbar">
 <div className="navbar-left">
   <button className="menu-icon" onClick={toggleSidebar}>☰</button>
-  <h2 className="site-title">Online Auction</h2>
+  <h2 className="site-title">Auction Verse</h2>
 </div>
         <div className="navbar-right desktop-only">
           {user ? (
@@ -122,7 +122,7 @@ const Layout = ({ children, hideFooter }) => {
       {!hideFooter && (
         <footer className="footer">
           <div className="footer-content">
-            <h3>Online Auction</h3>
+            <h3>Auction Verse</h3>
             <p>© 2025 Campus Auction System · All rights reserved</p>
             <div className="footer-links">
               <a href="/about">About</a>

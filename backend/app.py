@@ -14,6 +14,8 @@ from zoneinfo import ZoneInfo
 from bson.errors import InvalidId
 from flask import request, jsonify
 import secrets
+from flask_mail import Mail, Message
+from werkzeug.exceptions import RequestEntityTooLarge
 
 app = Flask(__name__)
 CORS(app)
@@ -23,14 +25,27 @@ MONGO_URI = os.getenv("MONGO_URI")
 print("MONGO_URI Loaded:", MONGO_URI)
 JWT_SECRET = os.getenv("JWT_SECRET", "super-secret")
 
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16 MB
 
 app.config["JWT_SECRET_KEY"] = JWT_SECRET
 jwt = JWTManager(app)
 
+app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')
+app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
+
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USERNAME'] = 'manasahk736@gmail.com'
+app.config['MAIL_PASSWORD'] = 'tcrzievvdexxowqp'
+app.config['MAIL_DEFAULT_SENDER'] = 'manasahk736@gmail.com'
+
+mail = Mail(app)
 
 client = MongoClient(MONGO_URI)
 db = client["auction_db"]
 users_collection = db["users"]
+user_emails = [user['email'] for user in users_collection.find({}, {"email": 1}) if "@" in user.get("email", "")]
 profiles_collection = db["profiles"]
 items_collection = db["items"]
 bids_collection = db["bids"]
@@ -52,6 +67,13 @@ category_codes = {
     'Other': 'MISC'
 }
 
+@app.errorhandler(RequestEntityTooLarge)
+def handle_file_too_large(e):
+    return jsonify({
+        "status": "fail",
+        "message": "Uploaded file is too large! Max allowed is 50MB."
+    }), 413
+
 # 💫 Recursive function to convert all ObjectIds to strings
 def convert_objectids(obj):
     if isinstance(obj, list):
@@ -62,6 +84,27 @@ def convert_objectids(obj):
         return str(obj)
     else:
         return obj
+
+@app.route('/test-email')
+def test_email():
+    try:
+        msg = Message(
+            subject="🎯 Hello from Auction System!",
+            recipients=["youremail@gmail.com"],
+            body="Hi Mansi! This is a test email from your auction backend 💌"
+        )
+        mail.send(msg)
+        return "✅ Email sent successfully!"
+    except Exception as e:
+        return f"❌ Email sending failed: {str(e)}"
+
+def send_email(subject, recipients, body):
+    try:
+        msg = Message(subject=subject, recipients=[recipients], body=body)
+        mail.send(msg)
+        print(f"✅ Email sent to {recipients}")
+    except Exception as e:
+        print("❌ Error sending email:", e)
 
 # Loop through all items missing a custom_item_id
 for item in items_collection.find({'custom_item_id': {'$exists': True}}):
@@ -162,7 +205,7 @@ def post_item():
         'title', 'description', 'category',
         'starting_price', 'minimum_increment',
         'start_date_time', 'end_date_time',
-        'seller_id', 'contact_email',
+        'seller_id',
         'item_condition', 'pickup_method',
         'terms_accepted'
     ]
@@ -238,6 +281,76 @@ def post_item():
         'custom_item_id': custom_id
     }
     items_collection.insert_one(item)
+
+    # Prepare custom email message
+    seller_email = item.get('seller_id')
+    item_title = item.get('title')
+    item_category = item.get('category')
+    starting_price = item.get('starting_price')
+    end_time = item.get('end_date_time')
+
+    subject = "🎉 Your item has been listed successfully!"
+    body = f"""
+Hello {seller_email},
+
+Your item titled "{item_title}" has been successfully posted on the Online Auction System! 🛒✨
+
+📝 Item Summary:
+Title: {item_title}
+Category: {item_category}
+Starting Price: ₹{starting_price}
+Auction Ends: {end_time}
+
+You'll start receiving bids soon! 🎯  
+Stay tuned and track your auction on your dashboard.
+
+Warm regards,  
+Team AuctionVerse 🌟
+"""
+
+    # Send the email
+    try:
+        msg = Message(subject=subject, recipients=[seller_email], body=body)
+        mail.send(msg)
+        print(f"✅ Email sent to {seller_email}")
+    except Exception as e:
+        print(f"❌ Email sending failed: {e}")
+
+    # 🎉 Notify all users (except the seller) about the new live auction
+    try:
+        user_emails = [
+            user['email'] for user in db.users.find({}, {"email": 1})
+            if "@" in user.get("email", "") and user.get("email") != seller_email
+        ]
+
+        subject_all = "📢 New Auction Live Now!"
+        body_all = f"""
+Hello there! 👋
+
+A new auction item has just gone live on AuctionVerse! 🛍️
+
+🆕 Item: {item_title}
+📂 Category: {item_category}
+💰 Starting Price: ₹{starting_price}
+⏰ Ends On: {end_time}
+
+🔥 Head over to the platform and place your bids before time runs out!
+
+Cheers,  
+Team AuctionVerse 🌟
+""".strip()
+
+        for email in user_emails:
+            try:
+                msg_all = Message(subject=subject_all, recipients=[email], body=body_all)
+                mail.send(msg_all)
+                print(f"📧 New auction alert sent to {email}")
+            except Exception as e:
+                print(f"❌ Failed to send to {email}: {e}")
+
+    except Exception as e:
+        print(f"❌ Error notifying users about new auction: {e}")
+
     return jsonify({'status': 'success', 'message': 'Item posted successfully!'}), 201
 
 @app.route('/api/place-bid', methods=['POST'])
@@ -284,7 +397,7 @@ def place_bid():
             'timestamp': ist_time,
             'item_id': item_id,
             'item_title': item.get('title', ''),
-            'seller_email': item.get('contact_email', ''),
+            'seller_email': item.get('seller_id', ''),
             'outbid': False  # This is the new highest bid
         }
 
@@ -605,7 +718,6 @@ def update_item(item_id):
         update_data['end_date_time'] = form_data.get('end_date_time')
         update_data['duration'] = form_data.get('duration')
         update_data['seller_id'] = form_data.get('seller_id')
-        update_data['contact_email'] = form_data.get('contact_email')
         update_data['location'] = form_data.get('location')
         update_data['pickup_method'] = form_data.get('pickup_method')
         update_data['delivery_charge'] = form_data.get('delivery_charge')
@@ -877,7 +989,6 @@ def handle_auction_win():
         if now <= end_time:
             return jsonify({"status": "fail", "message": "Auction still ongoing"}), 400
 
-        # Get the latest bid from the bidder for this item
         bid = db.bids.find_one(
             {"item_id": item_id, "bidder_email": bidder_email},
             sort=[("timestamp", -1)]
@@ -892,6 +1003,16 @@ def handle_auction_win():
         if user_bid < highest_bid or bid.get("outbid", False):
             return jsonify({"status": "fail", "message": "User did not win the auction"}), 403
 
+        # Common values
+        seller_email = item.get("seller_id", "")
+        item_title = item.get("title", "")
+        item_category = item.get("category", "N/A")
+
+        # Check if payment already exists
+        seller_email = item.get("seller_id", "")
+        item_title = item.get("title", "")
+        item_category = item.get("category", "N/A")
+
         # Check if payment already exists
         existing = db.payments.find_one({
             "item_id": item_id,
@@ -901,8 +1022,8 @@ def handle_auction_win():
         if not existing:
             db.payments.insert_one({
                 "buyer_email": bidder_email,
-                "seller_email": item.get("contact_email", ""),
-                "item_title": item.get("title", ""),
+                "seller_email": seller_email,
+                "item_title": item_title,
                 "item_id": item_id,
                 "amount": user_bid,
                 "status": "Pending",
@@ -910,16 +1031,85 @@ def handle_auction_win():
             })
 
             db.notifications.insert_one({
-                "email": item.get("contact_email", ""),
+                "email": seller_email,
                 "type": "payment_pending",
-                "message": f"{bidder_email} won your item '{item.get('title')}' and payment is pending.",
+                "message": f"{bidder_email} won your item '{item_title}' and payment is pending.",
                 "item_id": item_id,
                 "read": False,
                 "timestamp": now.isoformat(),
-                "actionable": True  # ✅ For tick icon
+                "actionable": True
             })
 
-        return jsonify({"status": "success", "message": "Payment created and seller notified"}), 200
+            # 📨 Email to Winner
+            try:
+                subject = "🎉 Congratulations! You won the auction!"
+                body = f"""
+Hello {bidder_email},
+
+You did it! 🥳  
+You've won the auction for "{item_title}" with a final bid of ₹{user_bid}! 🛍️
+
+📦 Item Details:
+Title: {item_title}
+Category: {item_category}
+Final Price: ₹{user_bid}
+Seller: {seller_email}
+
+🎯 What's next?
+Please contact the seller immediately at 📧 {seller_email} to arrange payment and pickup/delivery.
+
+⏰ Complete the handover within the next 48 hours to avoid delays.
+
+If you have any questions, reply to this email or contact support.
+
+Happy shopping,  
+Team AuctionVerse 🌟
+""".strip()
+
+                msg = Message(subject=subject, recipients=[bidder_email], body=body)
+                mail.send(msg)
+                print(f"✅ Winner email sent to {bidder_email}")
+            except Exception as e:
+                print(f"❌ Failed to send winner email: {e}")
+
+            # 📬 Email to Seller
+            if not seller_email or "@" not in seller_email:
+                print("❌ Seller email is invalid. Skipping seller email.")
+            else:
+                try:
+                    subject_seller = "📢 Your item has been sold!"
+                    body_seller = f"""
+Hello {seller_email},
+
+Great news! 🎉  
+Your auction item "{item_title}" has been won by {bidder_email} with a final bid of ₹{user_bid}.
+
+🛍️ Item Summary:
+Title: {item_title}
+Category: {item_category}
+Final Price: ₹{user_bid}
+Buyer Email: {bidder_email}
+
+📞 Please contact the buyer as soon as possible to complete the transaction.
+
+⏰ Complete the handover within the next 48 hours.
+
+Thank you for using AuctionVerse 🧡  
+
+Happy Selling!  
+Team AuctionVerse 🌟
+""".strip()
+
+                    msg_seller = Message(subject=subject_seller, recipients=[seller_email], body=body_seller)
+                    mail.send(msg_seller)
+                    print(f"✅ Seller email sent to {seller_email}")
+                except Exception as e:
+                    print(f"❌ Failed to send seller email: {e}")
+
+        return jsonify({
+            "status": "success",
+            "message": "Payment created, emails sent to both seller and winner!"
+        }), 200
 
     except Exception as e:
         print("❌ Error in handle_auction_win:", e)

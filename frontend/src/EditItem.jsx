@@ -112,7 +112,11 @@ const handleSubmit = async (e) => {
   const form = new FormData();
   for (const key in formData) {
     if (key === 'images') {
-      formData.images.forEach(img => form.append('images', img));
+      formData.images.forEach(img => {
+        if (img instanceof File) {
+          form.append('images', img);
+        }
+      });
     } else {
       form.append(key, formData[key]);
     }

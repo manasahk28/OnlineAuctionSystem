@@ -148,8 +148,12 @@ const handleSubmit = async (e) => {
     });
 
     const result = await response.json();
-    alert(result.message || 'Item posted successfully!');
-    navigate('/dashboard');
+    if (result.status === 'success') {
+      alert('🎉 Item posted successfully!\n📩 Confirmation email sent to your inbox.');
+      navigate('/dashboard');
+    } else {
+      alert(`❌ Failed to post item: ${result.message}`);
+    }
   } catch (err) {
     alert('❌ Failed to post item');
     console.error(err);

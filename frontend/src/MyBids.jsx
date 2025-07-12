@@ -88,8 +88,9 @@ const MyBids = () => {
     }
   };
 
-  if (loading) return <div className="charts-section">Loading your bids...</div>;
+  // if (loading) return <div className="charts-section">Loading your bids...</div>;
 
+  
   return (
     <div className="charts-section">
       <div className="profile-header">
@@ -97,8 +98,10 @@ const MyBids = () => {
           <span role="img" aria-label="money bag">💰</span>My Bids
         </h2>
       </div>
-      {bids.length === 0 ? (
-        <p>You have not placed any bids yet.</p>
+      {loading ? (
+        <p className="loading-text">⏳ Loading your biddings...</p>
+      ) : bids.length === 0 ? (
+        <p className="no-listings-text">😢 You haven't bid on anything yet.</p>
       ) : (
         <div className="my-bids-list">
           {bids.map((bid) => {

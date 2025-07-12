@@ -28,7 +28,7 @@ const Payments = () => {
     .filter(p => p.status === 'Pending')
     .reduce((sum, p) => sum + Number(p.amount || 0), 0);
 
-  if (loading) return <div className="charts-section">Loading payments...</div>;
+  // if (loading) return <div className="charts-section">Loading payments...</div>;
 
   return (
     <div className="charts-section">
@@ -43,8 +43,10 @@ const Payments = () => {
       </div>
 
       <div className="payments-list">
-        {payments.length === 0 ? (
-          <p>No payments available yet.</p>
+      {loading ? (
+        <p className="loading-text">⏳ Loading your payments...</p>
+      ) : payments.length === 0 ? (
+        <p className="no-listings-text">😢 No payments yet...</p>
         ) : (
           payments.map(payment => (
             <div key={payment._id} className={`payment-card ${payment.status.toLowerCase()}`}>
