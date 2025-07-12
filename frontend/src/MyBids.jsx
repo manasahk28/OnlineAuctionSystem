@@ -134,11 +134,11 @@ const MyBids = () => {
                       {isWinner ? (
                         <>
                           <p style={{ color: 'green', fontWeight: 'bold' }}>🎉 You won this auction!</p>
-                          {bid.seller_email && (
+                          {/* {bid.seller_email && (
                             <p style={{ color: '#333' }}>
                               Contact Seller: <b>{bid.seller_email}</b>
                             </p>
-                          )}
+                          )} */}
                         </>
                       ) : bid.auction_result === 'lost' ? (
                         <p style={{ color: 'gray', fontStyle: 'italic' }}>You did not win this auction.</p>

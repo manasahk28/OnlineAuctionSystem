@@ -29,26 +29,22 @@ const Login = () => {
       });
 
       const data = await response.json();
+      console.log('Login response:', data); // ✅ Debug: Check returned data
 
-      if (data.status === 'success') {
-        const token = data.access_token;
-        const user = data.user;
-
-        if (!token || !user?.email) {
-          setError('Invalid response from server.');
-          return;
+      if (response.ok && data.status === 'success') {
+        // ✅ Save JWT token to localStorage
+        if (data.access_token) {
+          localStorage.setItem('token', data.access_token);
         }
 
         // ✅ Save user info and token in localStorage
-        localStorage.setItem('token', token);
-        localStorage.setItem('userEmail', user.email);
-        localStorage.setItem('user', JSON.stringify(user));
-
+        localStorage.setItem('user', JSON.stringify(data.user || { email }));
         sessionStorage.setItem('loggedIn', 'true');
+
         setSuccess('Login successful!');
         setError('');
 
-        const isAdmin = user.is_admin === true;
+        const isAdmin = data.user?.is_admin === true;
 
         setTimeout(() => {
           if (isAdmin) {
@@ -113,7 +109,7 @@ const Login = () => {
         </form>
 
         <p className="switch-link">
-          Don’t have an account?{' '}
+          Don't have an account?{' '}
           <button type="button" onClick={() => navigate('/register')}>
             Register here
           </button>

@@ -4,6 +4,8 @@
   flex-wrap: wrap;
   gap: 24px;
   margin-top: 20px;
+  background: var(--color-bg);
+
 }
 .my-bid-card {
   width: calc((100% - 48px) / 3);
@@ -12,7 +14,8 @@
   flex-direction: column;
   justify-content: space-between;
   align-items: center;
-  background: #f8f7f7;
+  background: var(--color-bg-card);
+  color: var(--color-text);
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(255, 140, 0, 0.08);
   padding: 18px 16px;
@@ -42,7 +45,7 @@
 }
 .my-bid-info {
   flex: 1;
-  color: #333;
+  color: var(--color-text);
   word-break: break-word;
 }
 .my-bid-info h4 {
@@ -103,7 +106,8 @@ input[name="newBid"] {
   border: 1px solid #ccc;
   border-radius: 8px;
   font-size: 1rem;
-  background-color: #fff;
+  background-color: var(--color-bg-card);
+  color: var(--color-text);
   box-sizing: border-box;
   transition: border 0.3s ease, box-shadow 0.3s ease;
 }

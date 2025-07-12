@@ -1,12 +1,30 @@
-body {
-  background: #980909;
+:root {
+  --color-bg: #f6f7fa;
+  --color-bg-card: #fff;
+  --color-text: #222;
+  --color-primary: #f57c1f;
+  --color-secondary: #FF6B00;
+  --color-accent: #FFA500;
 }
-* {
-  background-color: transparent;
-  box-sizing: border-box;
+
+.dark-theme {
+  --color-bg: #181a1b;
+  --color-bg-card: #23272a;
+  --color-text: #f1f1f1;
+  --color-primary: #ff9800;
+  --color-secondary: #ff9800;
+  --color-accent: #ffb74d;
+  background: var(--color-bg) !important;
+  color: var(--color-text) !important;
 }
-body > div {
-  background-color: inherit;
+
+body, .registration-container, .login-wrapper, .register-wrapper, .dashboard-container, .dashboard-card, .settings-main-container, .settings-section, .settings-sidebar, .settings-content-card, .homepage, .listing-card, .about-card, .contact-card, .footer, .navbar, .sidebar-left, .sidebar-right, .charts-section, .scroll-container {
+  background: var(--color-bg-card) !important;
+  color: var(--color-text) !important;
+}
+
+h1, h2,h3, h4, h5, h6, label, p, span, a, button {
+  color: var(--color-text) ;
 }
 
 /* Login Page - No scroll */
@@ -66,8 +84,10 @@ body > div {
 
 .registration-container .tagline {
   font-size: 0.9rem;
-  color: #888;
+  /* color: #888; */
+  color: var(--color-text);
   margin-bottom: 25px;
+  opacity: 0.8;
 }
 
 .registration-container form input,
@@ -155,7 +175,8 @@ body > div {
 .email-input::placeholder {
   font-size: 14px;
   font-weight: 400;
-  color: #666;
+  /* color: #666; */
+  color: var(--color-text);
   opacity: 1;
 }
 
@@ -286,16 +307,17 @@ body {
 
 .login-container h2 {
   margin-bottom: 8px;
-  color: #2e2e2e;
+  color: var(--color-text);
   font-weight: 700;
   font-size: 24px;
 }
 
 .tagline {
   font-size: 0.95rem;
-  color: #666;
+  color: var(--color-text);
   margin-bottom: 25px;
   line-height: 1.5;
+  opacity: 0.8;
 }
 
 .error-message {
@@ -385,7 +407,8 @@ body {
 .switch-link {
   margin-top: 20px;
   font-size: 14px;
-  color: #666;
+  color: var(--color-text);
+  opacity: 0.8;
 }
 
 .switch-link button {
@@ -472,8 +495,8 @@ body {
 body {
   margin: 0;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-color: #ffffff;
-  color: #333;
+  background: var(--color-bg);
+  color: var(--color-text);
 }
 
 .homepage {
@@ -520,6 +543,7 @@ body {
 }
 .highlight {
   color: #f26522;
+  font-family: 'Georgia', serif;
 }
 .subheading {
   font-size: 20px;
@@ -544,7 +568,8 @@ body {
 /* How it works */
 
 .how-it-works {
-  background-color: #fff;
+  background-color: var(--color-bg-card);
+  color: var(--color-text);
   font-family: Arial, sans-serif;
 }
 
@@ -553,7 +578,7 @@ body {
   font-size: 32px;
   font-weight: bold;
   margin-bottom: -10px;
-  color: #222;
+  color: var(--color-text);
   font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
 }
 
@@ -586,7 +611,7 @@ body {
 
 .step-content p {
   font-size: 16px;
-  color: #333;
+  color: var(--color-text);
   line-height: 1.6;
 }
 
@@ -602,7 +627,7 @@ body {
 }
 
 .how-section {
-  background: #fff !important;
+  background: var(--color-bg-card) !important;
   box-shadow: none !important;
   border-radius: 0 !important;
   margin: 40px 0;
@@ -613,7 +638,7 @@ body {
 
 .how-title {
   font-size: 30px;
-  color: #333;
+  color: var(--color-text);
   text-align: left;
   font-family: cursive;
   margin-top: -60px;
@@ -664,8 +689,9 @@ body {
 }
 
 .steps-horizontal {
-  background: #fff !important;
-  background-color: #fff !important;
+  background: var(--color-bg-card) !important;
+  color: var(--color-text) !important;
+  /* background-color: #fff !important; */
   border-radius: 0 !important;
   box-shadow: none !important;
   display: flex;
@@ -684,7 +710,8 @@ body {
   min-height: 420px;
   text-align: center;
   padding: 0;
-  background-color: white;
+  background-color: var(--color-bg-card) !important;
+  color: var(--color-text) !important;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
   border-radius: 10px;
   transition: transform 0.3s ease;
@@ -722,6 +749,17 @@ body {
 
 .flip-card-back {
   z-index: 3;
+}
+
+.flip-card-front, .flip-card-back {
+  background-color: var(--color-bg-card) !important;
+  color: var(--color-text) !important;
+}
+
+.dark-theme .flip-card-front,
+.dark-theme .flip-card-back {
+  background: var(--color-bg-card) !important;
+  color: var(--color-text) !important;
 }
 
 .how-step:hover {
@@ -785,7 +823,6 @@ h2.preview {
   text-align: center;
   font-family: 'Pacifico', cursive, sans-serif;
   letter-spacing: 2px;
-  text-shadow: 0 2px 12px #ffd699;
   animation: slideDownFadeIn 1s cubic-bezier(0.23, 1, 0.32, 1) both;
 }
 
@@ -975,4 +1012,74 @@ h2.preview {
   padding: 10px;
   border-radius: 5px;
   margin:10px 0;
+}
+
+.flip-card.flipped .flip-card-back {
+  background-color: var(--color-bg-card) !important;
+  color: var(--color-text) !important;
+}
+
+.login-wrapper, .login-container, .registration-container {
+  background: var(--color-bg-card) !important;
+  color: var(--color-text) !important;
+}
+
+.reg-header {
+  background: var(--color-secondary) !important;
+  color: #fff !important;
+}
+
+.dark-theme .login-wrapper, .dark-theme .login-container, .dark-theme .registration-container {
+  background: var(--color-bg-card) !important;
+  color: var(--color-text) !important;
+}
+
+.dark-theme .reg-header {
+  background: var(--color-secondary) !important;
+  color: #fff !important;
+}
+
+.login-container input, .registration-container input, .registration-container select {
+  background: var(--color-bg) !important;
+  color: var(--color-text) !important;
+}
+
+.dark-theme .login-container input, .dark-theme .registration-container input, .dark-theme .registration-container select {
+  background: var(--color-bg) !important;
+  color: var(--color-text) !important;
+}
+
+.dark-theme h2.preview,
+.dark-theme .how-title.how-animate ,
+.dark-theme .listing-card,
+.dark-theme .dashboard-card,
+.dark-theme .dashboard-heading,
+.dark-theme .dashboard-user,
+.dark-theme .dashboard-message {
+  color: #fff !important;
+}
+
+.dark-theme .listing-card {
+  background: #23272a !important;
+  border-color: #444 !important;
+}
+
+.dark-theme .listing-card h4 {
+  color: #fff !important;
+}
+
+.dark-theme .dashboard-card {
+  background: linear-gradient(135deg, #23272a 0%, #181a1b 100%) !important;
+  color: #fff !important;
+  border-color: #444 !important;
+}
+
+.dark-theme .footer, .dark-theme .footer *, .dark-theme .footer a, .dark-theme .footer span, .dark-theme .footer p, .dark-theme .footer h1, .dark-theme .footer h2, .dark-theme .footer h3, .dark-theme .footer h4, .dark-theme .footer h5, .dark-theme .footer h6 {
+  color: #fff !important;
+}
+
+.dark-theme .footer {
+  background-color: #23272a !important;
+  border-top: 2px solid #444 !important;
+  box-shadow: 0 -4px 24px 0 rgba(0,0,0,0.7), 0 -1.5px 0 #444;
 }

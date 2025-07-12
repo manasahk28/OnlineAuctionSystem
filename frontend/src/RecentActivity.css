@@ -1,7 +1,8 @@
 /* General page styling */
 .recent-activity-page {
   padding: 2rem;
-  background: #fffdf8;
+  background: var(--color-bg);
+  color: var(--color-text);
   min-height: 80vh;
   font-family: 'Segoe UI', sans-serif;
 }
@@ -32,7 +33,8 @@
 }
 
 .activity-card {
-  background: #fff8f0;
+  background: var(--color-bg);
+  color: var(--color-text);
   border-left: 6px solid #ffa94d;
   padding: 0.8rem 1.3rem;
   margin-bottom: 1rem;
@@ -61,7 +63,7 @@
 
 .activity-message {
   font-size: 1.1rem;
-  color: #333;
+  color: var(--color-text);
   font-weight: 500;
   margin: 0;
 }

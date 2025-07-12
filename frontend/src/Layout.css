@@ -27,7 +27,7 @@
 .navbar-center h2 {
   margin: 0;
   /* margin-left: -400px; */
-  color: white;
+  color: var(--color-navbar-text, #fff) !important;
   font-size: 1.8rem;
   font-weight: bold;
   font-family: 'Times New Roman', serif;
@@ -64,7 +64,7 @@
 
 .navbar-right a,
 .navbar-right button {
-  color: white;
+  color: var(--color-navbar-text, #fff) !important;
   background: none;
   border: none;
   font-size: 1.2rem;
@@ -74,7 +74,8 @@
 }
 
 .navbar-right a:hover {
-  color: #2b2c2c;
+  color: #111 !important;
+  text-decoration: none;
 }
 
 .navbar-left {
@@ -281,8 +282,8 @@
 
 /* 🔻 Footer */
 .footer {
-  background-color: #ffefe2;
-  color: #333;
+  background-color: #ffefe2 !important;
+  color: #333 !important;
   padding: 20px;
   text-align: center;
   border-top: 2px solid #f5c16c;
@@ -437,4 +438,96 @@
 /* 📌 Misc */
 main {
   padding-top: 80px;
+}
+
+.navbar, .popup-box, .popup-overlay, .about-card, .contact-card {
+  background: var(--color-bg-card) !important;
+  color: var(--color-text) !important;
+}
+
+.navbar a, .footer a, .navbar button, .footer button {
+  color: var(--color-text) !important;
+}
+
+/* Remove dark-theme .navbar and .footer overrides so header and footer keep their light theme color in dark mode */
+/* .dark-theme .navbar {
+  background-color: var(--color-bg-card) !important;
+  color: var(--color-text) !important;
+}
+
+.dark-theme .footer {
+  background-color: var(--color-bg-card) !important;
+  color: var(--color-text) !important;
+} */
+
+.navbar {
+  background-color: #f57c1f !important;
+  color: white !important;
+}
+
+.about-card, .contact-card, .help-card {
+  background: var(--color-bg-card) !important;
+  color: var(--color-text) !important;
+}
+
+.dark-theme .about-card, .dark-theme .contact-card, .dark-theme .help-card {
+  background: var(--color-bg-card) !important;
+  color: var(--color-text) !important;
+}
+
+.about-header, .contact-header, .help-header {
+  background: var(--color-bg) !important;
+  color: var(--color-text) !important;
+}
+
+.dark-theme .about-header, .dark-theme .contact-header, .dark-theme .help-header {
+  background: var(--color-bg) !important;
+  color: var(--color-text) !important;
+}
+
+.about-content, .help-content, .contact-content {
+  color: var(--color-text) !important;
+}
+
+.contact-form input, .contact-form textarea {
+  background: var(--color-bg-card) !important;
+  color: var(--color-text) !important;
+}
+
+.dark-theme .contact-form input, .dark-theme .contact-form textarea {
+  background: var(--color-bg-card) !important;
+  color: var(--color-text) !important;
+}
+
+.footer, .footer a, .footer p, .footer h3, .footer-links a {
+  color: #222 !important;
+}
+
+.navbar, .navbar-right a, .navbar-right .active {
+  /* Remove color: white !important; and set color using CSS variable */
+  color: var(--color-navbar-text, white) !important;
+}
+
+/* Light theme: navbar text should be white */
+:root {
+  --color-navbar-text: #fff;
+}
+
+/* Dark theme: navbar text should be black */
+.dark-theme {
+  --color-navbar-text: #111;
+}
+
+/* Ensure .navbar-right .active is also using the variable */
+.navbar-right .active {
+  color: var(--color-navbar-text, #fff) !important;
+}
+
+.dark-theme .navbar-right .active {
+  color: var(--color-navbar-text, #111) !important;
+}
+
+.dark-theme .navbar-right a:hover {
+  color: #fff !important;
+  text-decoration: none;
 }

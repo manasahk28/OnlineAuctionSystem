@@ -1,9 +1,8 @@
-
 .item-detail-container {
   display: flex;
   padding: 2rem;
   gap: 2rem;
-  background: #fefefe;
+  background: var(--color-bg);
 }
 
 .left-panel {
@@ -23,7 +22,7 @@
   max-width: 100%;
   border-radius: 16px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
-  background-color: #ffffff;
+  background: var(--color-bg);
   overflow: hidden;
   padding: 15px;
   transition: all 0.3s ease;
@@ -91,22 +90,22 @@ video.product-image {
 }
 
 .item-title {
-  color: #222;
-  border-bottom: 2px solid #ffa500;
+  color: var(--color-text);
+  border-bottom: 2px solid var(--color-secondary);
   padding-bottom: 0.5rem;
   margin-bottom: 1rem;
 }
 
 .item-desc {
   font-size: 1.1rem;
-  color: #444;
+  color: var(--color-text);
 }
 
 /* Highlight special text */
 .item-price strong,
 .item-user strong,
 .item-date strong {
-  color: #444;
+  color: var(--color-text);
   font-size: 18px;
   line-height: 2px;
 }
@@ -129,7 +128,7 @@ video.product-image {
 
 .back-button {
   background-color: #ccc;
-  color: #333;
+  color: var(--color-text);
   width:90px;
   margin-top: -2px;
   height: 60px;
@@ -140,7 +139,7 @@ video.product-image {
 }
 
 .bid-button {
-  background-color: #ffa500;
+  background-color: var(--color-secondary);
   color: white;
   height: 60px;
   margin-top: -4px;
@@ -165,13 +164,16 @@ video.product-image {
 }
 
 .modal-box {
-  background: white;
+  background: var(--color-bg-card);
+  color: var(--color-text);
   padding: 2rem;
   border-radius: 10px;
   width: 90%;
   max-width: 400px;
   box-shadow: 0 5px 15px rgba(0,0,0,0.3);
   text-align: center;
+  background: var(--color-bg-card);
+  color: var(--color-text);
 }
 
 .bid-input {
@@ -208,7 +210,7 @@ video.product-image {
 }
 
 .confirm-bid-button {
-  background-color: #28a745;
+  background-color: var(--color-secondary);
   color: white;
 }
 
@@ -352,6 +354,9 @@ video.product-image {
   border-radius: 8px;
 }
 
+.activity-message {
+  color: var(--color-text);
+}
 
 .highest-bid {
   color: #1e8449;

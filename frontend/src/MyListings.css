@@ -39,6 +39,8 @@
   justify-content: space-between;  /* ✅ Spread content evenly */
   height: 100%;
   width: 250px;
+  background: var(--color-bg-card);
+  color: var(--color-text);
 }
 
 .listing-card:hover {
@@ -70,7 +72,7 @@
 .listing-title {
   font-size: 20px;
   font-weight: 600;
-  color: #333;
+  color: var(--color-text);
   margin: 0 0 8px;
   white-space: normal;         /* ✅ Allows wrapping */
   word-wrap: break-word;       /* ✅ Wrap long words */
@@ -78,7 +80,7 @@
 
 .listing-description {
   font-size: 14px;
-  color: #666;
+  color: var(--color-text);
   height: 40px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -91,7 +93,7 @@
   gap: 4px;
   margin-top: 8px;
   font-size: 14px;
-  color: #444;
+  color: var(--color-text);
   text-align: center;
 }
 
@@ -110,7 +112,7 @@
 
 .status {
   font-size: 0.85rem;
-  color: #444;
+  color: var(--color-text);
   background-color: #ffe4c2;
   padding: 4px 8px;
   border-radius: 6px;
@@ -143,7 +145,8 @@
 .edit-form {
   margin-top: 10px;
   padding: 1rem;
-  background-color: #fff8ee;
+  background: var(--color-bg-card);
+  color: var(--color-text);
   border: 2px solid #ffa500;
   border-radius: 12px;
   display: flex;
@@ -176,7 +179,7 @@
 
 .item-id {
   font-size: 0.95rem;
-  color: #666;
+  color: var(--color-text);
   margin-bottom: 6px;
 }
 

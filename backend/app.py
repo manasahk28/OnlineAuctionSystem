@@ -16,9 +16,10 @@ from flask import request, jsonify
 import secrets
 from flask_mail import Mail, Message
 from werkzeug.exceptions import RequestEntityTooLarge
+from App.routes.auth import auth_bp
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True, allow_headers=["Content-Type", "Authorization"], methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"])
 
 load_dotenv()
 MONGO_URI = os.getenv("MONGO_URI")
@@ -174,7 +175,8 @@ def login():
     user = users_collection.find_one({'email': email})
 
     if user and bcrypt.checkpw(password.encode('utf-8'), user['password'].encode('utf-8')):
-        access_token = create_access_token(identity=email, expires_delta=timedelta(days=1))
+        # access_token = create_access_token(identity=email, expires_delta=timedelta(days=1))
+        access_token = create_access_token(identity=email)
 
         response_data = {
             'status': 'success',
@@ -193,8 +195,9 @@ def login():
         if user.get('is_admin'):
             response_data['message'] = 'Admin login successful'
             response_data['admin_dashboard'] = True
-
         return jsonify(response_data), 200
+    else:
+        return jsonify({'status': 'fail', 'message': 'Invalid email or password'}), 401
 
 
 @app.route('/api/post-item', methods=['POST'])
@@ -1427,7 +1430,6 @@ def reset_password():
     token = data.get('reset_token')
     new_password = data.get('new_password')
 
-
     # Validate password strength
     def is_password_strong(password):
         if len(password) < 8:
@@ -1462,7 +1464,13 @@ def reset_password():
 
     # Check if same as old password
     user = users_collection.find_one({'email': email})
-    if bcrypt.checkpw(new_password.encode('utf-8'), user['password'].encode('utf-8')):
+    password = user.get('password') if user else None
+    if not user or not password or not isinstance(password, str):
+        return jsonify({'status': 'fail', 'message': 'User not found or password missing'}), 404
+
+    # Ensure password is a string
+    password_str = str(password)
+    if bcrypt.checkpw(new_password.encode('utf-8'), password_str.encode('utf-8')):
         return jsonify({'status': 'fail', 'message': 'New password cannot be same as old password'}), 400
 
     hashed = bcrypt.hashpw(new_password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
@@ -1492,13 +1500,46 @@ def dashboard():
     user_email = get_jwt_identity()
     return jsonify({'message': f'Welcome {user_email}, this is a protected route!'}), 200
 
+@app.route('/api/items/<item_id>', methods=['DELETE'])
+def delete_item(item_id):
+    try:
+        result = items_collection.delete_one({'_id': ObjectId(item_id)})
+        if result.deleted_count:
+            return jsonify({'status': 'success', 'message': 'Item deleted'}), 200
+        return jsonify({'status': 'fail', 'message': 'Item not found'}), 404
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+    
+# ------------------ Delete Account Endpoint ------------------
+
+@app.route('/api/delete-account', methods=['DELETE'])
+@jwt_required()
+def delete_account():
+    email = get_jwt_identity()
+    if not email:
+        return jsonify({'status': 'fail', 'message': 'User not authenticated'}), 401
+
+    # Remove user from all relevant collections
+    users_collection.delete_one({'email': email})
+    profiles_collection.delete_one({'email': email})
+    bids_collection.delete_many({'bidder_email': email})
+    items_collection.delete_many({'seller_id': email})
+    notifications_collection.delete_many({'email': email})
+    db.payments.delete_many({'buyer_email': email})
+    db.payments.delete_many({'seller_email': email})
+    reset_tokens_collection.delete_many({'email': email})
+
+    return jsonify({'status': 'success', 'message': 'Account and all related data deleted.'}), 200
+
 @app.route('/')
 def home():
     return "✅ Flask backend with MongoDB, JWT Auth, and Auction APIs is live!"
 
 
 app.config["DB"] = db  # ✅ Important to set this before registering blueprint
+app.config["USERS_COLLECTION"] = users_collection
 app.register_blueprint(listings_bp, url_prefix="/api")
+app.register_blueprint(auth_bp, url_prefix='/api/auth')
 
 if __name__ == '__main__':
     app.run(debug=True, use_reloader=True, extra_files=[], reloader_type='watchdog')

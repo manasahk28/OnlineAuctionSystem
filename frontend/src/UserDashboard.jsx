@@ -9,6 +9,7 @@ import MyBids from './MyBids';
 import RecentActivity from './RecentActivity';
 import Notifications from './Notifications';
 import EditItem from './EditItem';
+import Settings from './Settings';
 
 import { useNavigate } from 'react-router-dom';
 import {
@@ -184,6 +185,7 @@ const UserDashboard = () => {
               <button onClick={() => setActiveSection('Payments')}>Payments</button>
               <button onClick={() => setActiveSection('Notifications')}>Notifications</button>
               <button onClick={() => setActiveSection('RecentActivity')}>Recent Activity</button>
+              <button onClick={() => setActiveSection('Settings')}>Settings</button>            
             </div>
           </div>
 
@@ -248,6 +250,12 @@ const UserDashboard = () => {
                 )}
                 {activeSection === 'Notifications' && <Notifications />}
                 {activeSection === 'RecentActivity' && <RecentActivity />}
+                {activeSection === 'Settings' && (
+                  <div className="dashboard-section">
+                    <h2 style={{ marginLeft: '24px', marginTop: '32px' }}>⚙️ Settings</h2>
+                    <Settings />
+                  </div>
+                )}       
               </>
             )}
           </div>

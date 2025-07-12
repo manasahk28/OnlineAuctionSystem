@@ -2,7 +2,8 @@
   max-width: 850px;
   margin: 2rem auto;
   margin-top: 0px;
-  background-color: #fdfdfd;
+  background-color: var(--color-bg-card);
+  color: var(--color-text);
   padding: 2.5rem;
   border-radius: 20px;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.07);
@@ -13,13 +14,13 @@
   font-size: 30px;
   margin-bottom: 1.5rem;
   text-align: center;
-  color: #333;
+  color: var(--color-text);
 }
 
 .post-items-form h3 {
   font-size: 20px;
   margin-bottom: 1rem;
-  color: #555;
+  color: var(--color-text);
   border-bottom: 2px solid #eee;
   padding-bottom: 4px;
 }
@@ -31,7 +32,8 @@
 }
 
 .readonly-input {
-  background-color: #f3f3f3;
+  background-color: var(--color-bg-card);
+  color: var(--color-text);
   cursor: not-allowed;
   pointer-events: auto;
 }
@@ -52,7 +54,8 @@
 }
 
 .form-section {
-  background-color: #fafafa;
+  background-color: var(--color-bg-card);
+  color: var(--color-text);
   padding: 1.5rem;
   margin: 1.5rem 0;
   border: 1px solid #e0e0e0;
@@ -69,7 +72,7 @@
 .input-row label {
   min-width: 180px;
   font-weight: 500;
-  color: #333;
+  color: var(--color-text);
 }
 
 .input-row input,
@@ -80,7 +83,8 @@
   border: 1px solid #ccc;
   border-radius: 10px;
   font-size: 16px;
-  background-color: #fff;
+  background-color: var(--color-bg-card);
+  color: var(--color-text);
 }
 
 button[type='submit'] {
@@ -145,7 +149,8 @@ button[type='submit']:hover {
 }
 
 .terms-popup {
-  background: #fff;
+  background-color: var(--color-bg-card);
+  color: var(--color-text);
   border-radius: 12px;
   width: 90%;
   max-width: 500px;
@@ -441,7 +446,6 @@ button[type='submit']:hover {
 }
 }
 
-
 .estimate-btn {
   background-color: #ff6f00;
   color: white;
@@ -653,6 +657,79 @@ button[type='submit']:hover {
   border-radius: 4px;
 }
 
+/* Placeholder color for all inputs, textareas, selects */
+.input-row input::placeholder,
+.input-row textarea::placeholder,
+.input-row select::placeholder {
+  color: #888;
+  opacity: 1;
+}
+
+.dark-theme .input-row input::placeholder,
+.dark-theme .input-row textarea::placeholder,
+.dark-theme .input-row select::placeholder {
+  color: #bbb;
+  opacity: 1;
+}
+
+.post-items-form input::placeholder,
+.post-items-form textarea::placeholder,
+.post-items-form select::placeholder {
+  color: #888;
+  opacity: 1;
+}
+
+.dark-theme .post-items-form input::placeholder,
+.dark-theme .post-items-form textarea::placeholder,
+.dark-theme .post-items-form select::placeholder {
+  color: #bbb;
+  opacity: 1;
+}
+
+.post-items-form select {
+  background-color: var(--color-bg-card);
+  color: var(--color-text);
+  border: 1px solid #ccc;
+}
+
+.dark-theme .post-items-form select {
+  background-color: var(--color-bg-card);
+  color: var(--color-text);
+  border: 1px solid #555;
+}
+
+/* For Chrome, Edge, Safari */
+.dark-theme .post-items-form select,
+.dark-theme .post-items-form select option {
+  background-color: var(--color-bg-card);
+  color: var(--color-text);
+}
+
+/* For Firefox */
+.dark-theme .post-items-form select:-moz-focusring {
+  color: var(--color-text);
+  background-color: var(--color-bg-card);
+}
+
+.dark-theme .post-items-form option {
+  background-color: var(--color-bg-card);
+  color: var(--color-text);
+}
+
+.post-items-form input[type="file"] {
+  background-color: var(--color-bg-card);
+  color: var(--color-text);
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 6px;
+}
+
+.dark-theme .post-items-form input[type="file"] {
+  background-color: var(--color-bg-card);
+  color: var(--color-text);
+  border: 1px solid #555;
+}
+
 @media screen and (max-width: 768px) {
 
   .pre-image {
@@ -809,6 +886,7 @@ button[type='submit']:hover {
 .image-count{
   font-size: 0.5rem;
   margin-top: 7px;
-  color: #666;
+  color:#666;
 }
 }
+

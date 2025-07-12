@@ -1,13 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './App.css';
 import PreviewListings from './PreviewListings'; // adjust path if needed
 import Layout from './Layout';
 
 const interestingInfo = [
-  "You can list any item for free—no hidden charges!",
-  "Bidding is real-time and you get instant notifications.",
-  "All transactions are student-only and super secure!"
+  "Free to list! Use clear photos and details for more bids.",
+  "Bidding is live—set a fair price and get instant updates!",
+  "Safe, student-only deals. Meet on campus and pay online."
 ];
 
 const HomePage = () => {
@@ -56,11 +56,12 @@ const HomePage = () => {
                   <h3 className="step-title orange">Step 1: Post Your Item</h3>
                   <img src="/images/step1.png" alt="Post Item" className="how-img" />
                   <p>📸 Click a pic. Add details. Set a starting price.</p>
-                  <p className="note">→ It's free to list, and takes less than a minute.</p>
+                  <p className="note">→Click on card to Know more.</p>
                 </div>
                 <div className="flip-card-back">
                   <h3>Did you know?</h3>
                   <p>{interestingInfo[0]}</p>
+                  <p className="note">→ It's free to list, and takes less than a minute.</p>
                 </div>
               </div>
             </div>
@@ -71,11 +72,12 @@ const HomePage = () => {
                   <h3 className="step-title orange">Step 2: Let the Bidding Begin</h3>
                   <img src="/images/step2.png" alt="Bidding" className="how-img" />
                   <p>🛎️ Watch your item get attention!</p>
-                  <p className="note">→ You'll get real-time notifications and updates.</p>
+                  {/* <p className="note">→ You'll get real-time notifications and updates.</p> */}
                 </div>
                 <div className="flip-card-back">
                   <h3>Fun Fact!</h3>
                   <p>{interestingInfo[1]}</p>
+                  <p className="note">→ You'll get real-time notifications and updates.</p>
                 </div>
               </div>
             </div>
@@ -86,11 +88,11 @@ const HomePage = () => {
                   <h3 className="step-title orange">Step 3: Meet & Exchange</h3>
                   <img src="/images/step3.png" alt="Exchange" className="how-img" />
                   <p>🤝 Once the auction ends, the winner pays online</p>
-                  <p className="note">→ Simple, secure, and student-only.</p>
                 </div>
                 <div className="flip-card-back">
                   <h3>Why choose us?</h3>
                   <p>{interestingInfo[2]}</p>
+                  <p className="note">→ Simple, secure, and student-only.</p>
                 </div>
               </div>
             </div>

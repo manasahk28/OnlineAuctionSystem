@@ -206,3 +206,70 @@
   cursor: pointer;
   font-weight: bold;
 }
+
+.chat-panel {
+  background-color: var(--color-bg-card);
+  color: var(--color-text);
+}
+
+.dark-theme .chat-panel {
+  background-color: var(--color-bg-card);
+  color: var(--color-text);
+}
+
+.chat-header {
+  background-color: var(--color-secondary);
+  color: #fff;
+}
+
+.dark-theme .chat-header {
+  background-color: var(--color-secondary);
+  color: #fff;
+}
+
+.message.nia {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+}
+
+.dark-theme .message.nia {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+}
+
+.message.user {
+  background-color: var(--color-secondary);
+  color: #fff;
+}
+
+.option-btn {
+  background-color: var(--color-bg-card);
+  color: var(--color-text);
+  border: 1.5px solid var(--color-secondary);
+}
+
+.dark-theme .option-btn {
+  background-color: var(--color-bg-card);
+  color: var(--color-text);
+  border: 1.5px solid var(--color-secondary);
+}
+
+.chat-input {
+  background-color: var(--color-bg-card);
+  color: var(--color-text);
+}
+
+.dark-theme .chat-input {
+  background-color: var(--color-bg-card);
+  color: var(--color-text);
+}
+
+.chat-input input {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+}
+
+.dark-theme .chat-input input {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+}

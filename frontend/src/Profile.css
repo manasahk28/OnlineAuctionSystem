@@ -15,7 +15,7 @@ body, html{
   font-weight: bold;
   margin-top: -20px;
   margin-bottom: 15px;
-  color: #333;
+  color: var(--color-text);
 }
 
 .profile-description{
@@ -25,6 +25,21 @@ body, html{
   box-shadow: #444;
   border: #d87f12;
   border-width: 2px;
+}
+
+.dark-theme .profile-description {
+  background-color: var(--color-bg-card);
+}
+
+.profile-input, .profile-text {
+  background-color: #fff;
+  color: #222;
+}
+
+.dark-theme .profile-input, .dark-theme .profile-text {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  border: 1px solid #555;
 }
 
 .edit-top-btn {
@@ -69,6 +84,10 @@ body, html{
   color: #444;
 }
 
+.dark-theme .profile-field label {
+  color: var(--color-text);
+}
+
 .profile-text {
   font-size: 16px;
   color: #222;
@@ -82,7 +101,6 @@ body, html{
   border-radius: 8px;
 }
 
-
 /* Read-only input fields styling */
 .profile-input[readonly] {
   background-color: #f9f9f9;
@@ -92,6 +110,11 @@ body, html{
   border: #f9f9f9;
 }
 
+.dark-theme .profile-input[readonly] {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  border: 1px solid #555;
+}
 
 .profile-text {
   flex: 1;
@@ -151,12 +174,20 @@ body, html{
   transition: all 0.3s ease;
 }
 
+.dark-theme .completion-text {
+  background-color: var(--color-bg-card);
+  border-left: 4px solid var(--color-secondary);
+  color: var(--color-text);
+}
+
 .completion-text strong {
   color: #6e4a0c;
   font-weight: bold;
 }
 
-
+.dark-theme .completion-text strong {
+  color: var(--color-secondary);
+}
 
 /* Responsive */
 @media (max-width: 600px) {

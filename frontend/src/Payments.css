@@ -4,9 +4,10 @@
   flex-wrap: wrap;
   gap: 20px;
   margin-top: 10px;
+  background: var(--color-bg);
 }
 .payment-card {
-  background: #fff;
+  background: var(--color-bg);
   border-radius: 10px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.06);
   padding: 18px 24px;
@@ -18,6 +19,7 @@
   flex-direction: column;
   align-items: flex-start;
   gap: 8px;
+  color: var(--color-text);
 }
 .payment-card.paid {
   border-color: #4caf50;
@@ -27,7 +29,7 @@
 }
 .payment-item {
   font-weight: 600;
-  color: #333;
+  color: var(--color-text);
 }
 .payment-amount {
   font-size: 1.1rem;
@@ -35,7 +37,7 @@
 }
 .payment-status {
   font-weight: bold;
-  color: #333;
+  color: var(--color-text);
 }
 .payment-card.paid .payment-status {
   color: #4caf50;

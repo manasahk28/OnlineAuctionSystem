@@ -1,7 +1,6 @@
 body {
   margin: 0;
   font-family: 'Segoe UI', sans-serif;
-  background-color: #fdfcfc; /* ✅ Set a light background color */
 }
 
 .preview-grid {
