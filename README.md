@@ -59,11 +59,18 @@ items_collection = db["items"]
 cd backend  # Navigate to backend folder
 
 # Install required packages
-pip install flask flask-cors pymongo
+pip install flask 
+pip install flask-cors 
+pip install pymongo
 pip install tzdata
-pip install Flask-mail
+pip install flask-mail
 pip install python-dotenv
-pip install pymongo dnspythn flask-cors 
+pip install dnspythn 
+pip install flask-jwt-extended
+pip install bcrypt 
+pip install python-dotenv 
+pip install werkzeug 
+pip install tzdata
 
 python app.py  # Start the Flask server
 
