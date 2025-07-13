@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from './Layout';
 import './PostItem.css';
+import { logPostActivity } from './utils/activityLogger';
 
 const PostItems = () => {
     const navigate = useNavigate();
@@ -154,6 +155,13 @@ const handleSubmit = async (e) => {
 
     const result = await response.json();
     if (result.status === 'success') {
+      // Log the activity
+      await logPostActivity(
+        form.title,
+        parseFloat(form.starting_price) || 0,
+        form.category === 'Other' ? customCategory : form.category
+      );
+      
       alert('🎉 Item posted successfully!\n📩 Confirmation email sent to your inbox.');
       navigate('/dashboard');
     } else {

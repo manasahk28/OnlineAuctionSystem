@@ -182,6 +182,29 @@
   padding: 1.2rem 1rem;
 }
 
+.settings-section.change-password-section h3 {
+  font-size: 1.35rem;
+  margin-bottom: 0.9rem;
+}
+.settings-section.change-password-section label {
+  font-size: 1.13rem;
+  margin-bottom: 0.22rem;
+}
+.settings-section.change-password-section input[type="password"],
+.settings-section.change-password-section input[type="text"] {
+  font-size: 1.13rem;
+  padding: 0.48rem 0.8rem;
+  height: 2.3rem;
+}
+.settings-section.change-password-section input::placeholder {
+  font-size: 1.08rem;
+  color: #aaa;
+}
+.settings-section.change-password-section button {
+  font-size: 1.08rem;
+  padding: 0.7rem 1.2rem;
+}
+
 @media (max-width: 600px) {
   .settings-section.change-password-section {
     max-width: 98vw;

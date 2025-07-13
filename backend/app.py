@@ -18,6 +18,7 @@ from flask_mail import Mail, Message
 from werkzeug.exceptions import RequestEntityTooLarge
 from App.routes.auth import auth_bp
 import threading
+from apscheduler.schedulers.background import BackgroundScheduler
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True, allow_headers=["Content-Type", "Authorization"], methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"])
@@ -44,6 +45,9 @@ app.config['MAIL_DEFAULT_SENDER'] = 'manasahk736@gmail.com'
 
 mail = Mail(app)
 
+scheduler = BackgroundScheduler()
+scheduler.start()
+
 client = MongoClient(MONGO_URI)
 db = client["auction_db"]
 users_collection = db["users"]
@@ -52,9 +56,24 @@ profiles_collection = db["profiles"]
 items_collection = db["items"]
 bids_collection = db["bids"]
 notifications_collection = db["notifications"]
+payments_collection = db['payments']
 notifications_collection.create_index('email')
 reset_tokens_collection = db["reset_tokens"]
 preferences_collection = db["preferences"]
+
+# 💫 Recursive function to convert all ObjectIds to strings
+def convert_objectids(obj):
+    if isinstance(obj, list):
+        return [convert_objectids(item) for item in obj]
+    elif isinstance(obj, dict):
+        return {key: convert_objectids(value) for key, value in obj.items()}
+    elif isinstance(obj, ObjectId):
+        return str(obj)
+    else:
+        return obj
+
+# In-memory storage for user activities (in production, use a database)
+user_activities = {}
 
 category_codes = {
     'Electronics': 'ELEC',
@@ -69,23 +88,37 @@ category_codes = {
     'Other': 'MISC'
 }
 
+@app.route('/api/admin/items/pending', methods=['GET'])
+def get_pending_items():
+    items = list(items_collection.find({
+        "is_approved": False,
+        "is_rejected": False
+    }))
+    print(f"📦 Found {len(items)} pending items")
+    converted_items = convert_objectids(items)
+    return jsonify(converted_items)
+
+@app.route('/api/admin/items/approved', methods=['GET'])
+def get_approved_items():
+    items = list(items_collection.find({
+        "is_approved": True
+    }))
+    return jsonify(convert_objectids(items))
+
+@app.route('/api/admin/items/rejected', methods=['GET'])
+def get_rejected_items():
+    items = list(items_collection.find({
+        "is_rejected": True
+    }))
+    return jsonify(convert_objectids(items))
+
+
 @app.errorhandler(RequestEntityTooLarge)
 def handle_file_too_large(e):
     return jsonify({
         "status": "fail",
         "message": "Uploaded file is too large! Max allowed is 50MB."
     }), 413
-
-# 💫 Recursive function to convert all ObjectIds to strings
-def convert_objectids(obj):
-    if isinstance(obj, list):
-        return [convert_objectids(item) for item in obj]
-    elif isinstance(obj, dict):
-        return {key: convert_objectids(value) for key, value in obj.items()}
-    elif isinstance(obj, ObjectId):
-        return str(obj)
-    else:
-        return obj
 
 @app.route('/test-email')
 def test_email():
@@ -201,28 +234,29 @@ def login():
         return jsonify({'status': 'fail', 'message': 'Invalid email or password'}), 401
 
 def send_auction_emails(item):
-    try:
-        seller_email = item.get('seller_id')
-        item_title = item.get('title')
-        item_category = item.get('category')
-        starting_price = item.get('starting_price')
-        end_time = item.get('end_date_time')
-        custom_id = item.get('custom_item_id')
+    with app.app_context():  # 🌟 this is the magic line
+        try:
+            seller_email = item.get('seller_id')
+            item_title = item.get('title')
+            item_category = item.get('category')
+            starting_price = item.get('starting_price')
+            end_time = item.get('end_date_time')
+            custom_id = item.get('custom_item_id')
 
-        # Admin email
-        admin_user = db.users.find_one({"is_admin": True})
-        admin_email = admin_user['email'] if admin_user else None
+            # Admin email
+            admin_user = db.users.find_one({"is_admin": True})
+            admin_email = admin_user['email'] if admin_user else None
 
-        # Send to all users except seller and admin
-        user_emails = [
-            user['email'] for user in db.users.find({}, {"email": 1})
-            if "@" in user.get("email", "")
-            and user['email'] != seller_email
-            and user['email'] != admin_email
-        ]
+            # Send to all users except seller and admin
+            user_emails = [
+                user['email'] for user in db.users.find({}, {"email": 1})
+                if "@" in user.get("email", "")
+                and user['email'] != seller_email
+                and user['email'] != admin_email
+            ]
 
-        subject_all = "📢 New Auction Live Now!"
-        body_all = f"""
+            subject_all = "📢 New Auction Live Now!"
+            body_all = f"""
 Hello there! 👋
 
 A new auction item has just gone live on AuctionVerse! 🛍️
@@ -235,21 +269,21 @@ A new auction item has just gone live on AuctionVerse! 🛍️
 🔥 Head over to the platform and place your bids before time runs out!
 
 Cheers,  
-Team AuctionVerse 🌟
+Team AuctionVerse 💛
 """.strip()
 
-        for email in user_emails:
-            try:
-                msg = Message(subject=subject_all, recipients=[email], body=body_all)
-                mail.send(msg)
-                print(f"📧 Auction alert sent to {email}")
-            except Exception as e:
-                print(f"❌ Failed to send to {email}: {e}")
+            for email in user_emails:
+                try:
+                    msg = Message(subject=subject_all, recipients=[email], body=body_all)
+                    mail.send(msg)
+                    print(f"📧 Auction alert sent to {email}")
+                except Exception as e:
+                    print(f"❌ Failed to send to {email}: {e}")
 
-        # 📬 Email to Admin
-        if admin_email:
-            subject_admin = f"🔎 New Item Awaiting Review: {item_title}"
-            body_admin = f"""
+            # 📬 Email to Admin
+            if admin_email:
+                subject_admin = f"🔎 New Item Awaiting Review: {item_title}"
+                body_admin = f"""
 Hello Admin,
 
 A new item has been posted by {seller_email} and is awaiting your review. 🕵️‍♀️
@@ -263,19 +297,24 @@ Seller: {seller_email}
 
 👉 Item ID: {custom_id}
 
-- AuctionVerse Bot 🤖
+Team AuctionVerse 💛
 """.strip()
 
-            msg_admin = Message(subject=subject_admin, recipients=[admin_email], body=body_admin)
-            mail.send(msg_admin)
-            print(f"✅ Admin email sent to {admin_email}")
+                msg_admin = Message(subject=subject_admin, recipients=[admin_email], body=body_admin)
+                mail.send(msg_admin)
+                print(f"✅ Admin email sent to {admin_email}")
 
-    except Exception as e:
-        print(f"❌ Error in send_auction_emails: {e}")
+        except Exception as e:
+            print(f"❌ Error in send_auction_emails: {e}")
 
 @app.route('/api/post-item', methods=['POST'])
 def post_item():
     data = request.get_json()
+    data['is_approved'] = False
+    data['status'] = 'Pending'  # optional but helps to label cleanly
+    data['approval_status'] = 'pending'
+    data['is_rejected'] = False  
+    data['is_approved'] = False
 
     required_fields = [
         'title', 'description', 'category',
@@ -349,8 +388,16 @@ def post_item():
         'warranty_duration': data.get('warranty_duration', ''),
         'damage_description': data.get('damage_description', ''),
         'limitedCollection': data.get('limitedCollection', False),
-        'timestamp': datetime.now().isoformat(),
-        'custom_item_id': custom_id
+        'contact_email': data.get('contact_email', ''),
+        'timestamp': datetime.now(ZoneInfo("Asia/Kolkata")).isoformat(),
+        'custom_item_id': custom_id,
+
+        # ✅ Add this below!
+        'is_approved': False,
+        'is_rejected': False,
+        'approval_status': 'pending',
+        'status': 'Pending'
+
     }
 
     items_collection.insert_one(item)
@@ -358,23 +405,31 @@ def post_item():
     # 📨 Send email to seller immediately
     try:
         seller_email = item['seller_id']
-        subject = "🎉 Your item has been listed successfully!"
+        subject = "📝 Your item has been submitted - awaiting admin approval"
         body = f"""
-Hello {seller_email},
+Hello {seller_email}, 👋
 
-Your item titled "{item['title']}" has been successfully posted on the Online Auction System! 🛒✨
+Thank you for submitting your item to AuctionVerse! 🛍️✨  
+Your listing "{item['title']}" has been received and is currently pending admin approval. 🔎✅
+
+Once approved, it will go live on the platform and become visible to all users for bidding.
 
 📝 Item Summary:
-Title: {item['title']}
-Category: {item['category']}
-Starting Price: ₹{item['starting_price']}
-Auction Ends: {item['end_date_time']}
+• Title: {item['title']}
+• Category: {item['category']}
+• Starting Price: ₹{item['starting_price']}
+• Auction Ends: {item['end_date_time']}
 
-You'll start receiving bids soon! 🎯  
-Stay tuned and track your auction on your dashboard.
+🕒 What happens now?
+Our team will review your item shortly to ensure it meets our platform guidelines.  
+You'll receive a confirmation email once it's approved and live.
+
+💡 You can track the status of your listing in your seller dashboard under “My Listings”.
+
+Thanks for using AuctionVerse — where student auctions come alive! 🎯  
 
 Warm regards,  
-Team AuctionVerse 🌟
+Team AuctionVerse 💛
 """.strip()
 
         msg = Message(subject=subject, recipients=[seller_email], body=body)
@@ -387,8 +442,35 @@ Team AuctionVerse 🌟
     # ✅ Trigger async thread for admin + users
     threading.Thread(target=send_auction_emails, args=(item,)).start()
 
+    # ✅ Check if item ends in less than 1 minute
+    try:
+        now = datetime.now(ZoneInfo("Asia/Kolkata"))
+        end_str = item.get("end_date_time")
+        if end_str:
+            end_time = datetime.fromisoformat(end_str).astimezone(ZoneInfo("Asia/Kolkata"))
+            if now <= end_time <= now + timedelta(minutes=1):
+                # ✅ Notify all users except seller
+                notify_auction_ending_soon(item)
+    except Exception as e:
+        print("⚠️ Error checking end_time for auction ending soon notification:", e)
+
     return jsonify({'status': 'success', 'message': 'Item posted successfully!'}), 201
 
+@app.route('/api/debug/items', methods=['GET'])
+def debug_items():
+    """Debug endpoint to check all items and their status"""
+    all_items = list(items_collection.find({}))
+    debug_data = []
+    for item in all_items:
+        debug_data.append({
+            'id': str(item['_id']),
+            'title': item.get('title', 'No title'),
+            'is_approved': item.get('is_approved', False),
+            'status': item.get('status', 'No status'),
+            'has_images': bool(item.get('images')),
+            'image_count': len(item.get('images', []))
+        })
+    return jsonify({'items': debug_data, 'total': len(debug_data)}), 200
 
 @app.route('/api/place-bid', methods=['POST'])
 def place_bid():
@@ -429,6 +511,8 @@ def place_bid():
             return jsonify({'status': 'fail', 'message': 'Bid must be higher than current highest bid'}), 400
 
         user_doc = users_collection.find_one({'email': bidder_email})
+        bidder_name = user_doc.get('UserName', '') if user_doc else ''
+
         # Prepare bid data
         bid_data = {
             'bid_amount': bid_amount,
@@ -447,6 +531,9 @@ def place_bid():
             {'item_id': item_id, 'bidder_email': {'$ne': bidder_email}},
             {'$set': {'outbid': True}}
         )
+
+        # ✅ Notify previous highest bidder
+        notify_outbid_user(item_id, bidder_email)
 
         # Save bid globally
         bids_collection.insert_one(bid_data)
@@ -640,6 +727,7 @@ def get_all_items():
     time_filter = request.args.get('time_filter', '').strip()  # New time filter
 
     query = {}
+    query['is_approved'] = True
 
     if search:
         search_base = re.escape(search.rstrip('s'))
@@ -718,7 +806,6 @@ def get_all_items():
 
     return jsonify({'status': 'success', 'items': items}), 200
 
-
 @app.route('/api/item/<item_id>', methods=['GET'])
 def get_single_item(item_id):
     try:
@@ -742,27 +829,68 @@ def get_single_item(item_id):
             items_collection.update_one({'_id': item['_id']}, {'$set': {'custom_item_id': custom_id}})
             item['custom_item_id'] = custom_id
 
+        # ✨ Set default values for missing fields to avoid frontend crash
+        default_fields = {
+            'title': '',
+            'description': '',
+            'category': '',
+            'tags': '',
+            'images': [],
+            'video': '',
+            'starting_price': '',
+            'minimum_increment': '',
+            'buy_now_price': '',
+            'start_date_time': '',
+            'end_date_time': '',
+            'duration': '',
+            'seller_id': '',
+            'location': '',
+            'pickup_method': '',
+            'delivery_charge': '',
+            'return_policy': '',
+            'terms_accepted': False,
+            'report_reason': '',
+            'highlights': '',
+            'item_condition': '',
+            'warranty': '',
+            'warranty_duration': '',
+            'damage_description': '',
+            'limitedCollection': False,
+            'timestamp': '',
+            'custom_item_id': '',
+            'contact_email': '',
+            'is_approved': False,
+            'status': 'Pending',
+            'is_rejected': False,
+            'approval_status': 'pending',
+            'bids': [],
+            'highest_bid': 0
+        }
+
+        for key, value in default_fields.items():
+            if key not in item:
+                item[key] = value
+
         # 🧹 Convert _id to string
         item['_id'] = str(item['_id'])
 
         # ✅ Convert nested ObjectIds (like in 'bids' field)
-        if 'bids' in item:
+        if 'bids' in item and isinstance(item['bids'], list):
             for bid in item['bids']:
-                if '_id' in bid:
+                if isinstance(bid, dict) and '_id' in bid:
                     bid['_id'] = str(bid['_id'])
 
-        # Add winner information for ended auctions
+        # 👑 Add winner info if auction has ended
         try:
             end_time = datetime.fromisoformat(item.get('end_date_time', '')).astimezone(ZoneInfo("Asia/Kolkata"))
             now = datetime.now(ZoneInfo("Asia/Kolkata"))
-            
-            if now > end_time:  # Auction has ended
+            if now > end_time:
                 winner_info = get_auction_winner(item['_id'])
                 if winner_info:
                     item['winner_info'] = {
-                        'winner_username': winner_info['winner_username'],
-                        'winning_amount': winner_info['winning_amount'],
-                        'winning_timestamp': winner_info['winning_timestamp']
+                        'winner_username': winner_info.get('winner_username', ''),
+                        'winning_amount': winner_info.get('winning_amount', 0),
+                        'winning_timestamp': winner_info.get('winning_timestamp', '')
                     }
         except Exception as e:
             print(f"❌ Error checking auction status for {item['_id']}: {e}")
@@ -1210,7 +1338,7 @@ Please contact the seller immediately at 📧 {seller_email} to arrange payment 
 If you have any questions, reply to this email or contact support.
 
 Happy shopping,  
-Team AuctionVerse 🌟
+Team AuctionVerse 💛
 """.strip()
 
                 msg = Message(subject=subject, recipients=[bidder_email], body=body)
@@ -1244,7 +1372,7 @@ Buyer Email: {bidder_email}
 Thank you for using AuctionVerse 🧡  
 
 Happy Selling!  
-Team AuctionVerse 🌟
+Team AuctionVerse 💛
 """.strip()
 
                     msg_seller = Message(subject=subject_seller, recipients=[seller_email], body=body_seller)
@@ -1293,6 +1421,620 @@ def get_auction_winner(item_id):
     except Exception as e:
         print(f"❌ Error determining auction winner for {item_id}: {e}")
         return None
+
+def notify_outbid_user(item_id, new_bidder_email):
+    """
+    Notify all users who have been outbid when a new bid is placed
+    """
+    item = items_collection.find_one({"_id": ObjectId(item_id)})
+    if not item:
+        return
+
+    # Get all unique bidders who are not the new bidder
+    outbid_emails = bids_collection.distinct(
+        "bidder_email",
+        {"item_id": str(item_id), "bidder_email": {"$ne": new_bidder_email}}
+    )
+
+    for outbid_email in outbid_emails:
+        # Check if notification already exists to avoid duplicates
+        existing = notifications_collection.find_one({
+            "email": outbid_email,
+            "item_id": str(item_id),
+            "type": "outbid",
+            "seen": False
+        })
+
+        if not existing:
+            send_notification_if_allowed(
+                email=outbid_email,
+                message=f"⚠️ You've been outbid on '{item.get('title')}'. Bid again to win!",
+                n_type="outbid",
+                extra_data={
+                    "item_id": str(item_id),
+                    "end_time": item.get("end_time") or item.get("end_date_time"),
+                    "actionable": True
+                }
+            )
+
+# Run this every 60 seconds to check for expired auctions and notify
+@scheduler.scheduled_job('interval', seconds=60)
+def check_and_notify_expired_auctions():
+    now = datetime.now(ZoneInfo("Asia/Kolkata"))
+    ended_items = items_collection.find({
+        'end_date_time': {'$lte': now.isoformat()},
+        'notified': {'$ne': True}  # Prevent duplicate notifications
+    })
+
+    for item in ended_items:
+        item_id = str(item['_id'])
+        success, message = notify_auction_win_logic(item_id)
+        if success:
+            # Mark item as notified so it's not processed again
+            items_collection.update_one({'_id': item['_id']}, {'$set': {'notified': True}})
+            print(f"✅ Auction win processed for item: {item.get('title')} - {message}")
+        else:
+            print(f"⚠️ Skip: {item.get('title')} - {message}")
+
+# Run this every 5 minutes to check for auctions ending soon
+@scheduler.scheduled_job('interval', minutes=5)
+def check_and_notify_auctions_ending_soon():
+    now = datetime.now(ZoneInfo("Asia/Kolkata"))
+    # Find auctions ending within the next 30 minutes
+    thirty_minutes_later = now + timedelta(minutes=30)
+
+    print(f"🔍 Checking for auctions ending between {now.isoformat()} and {thirty_minutes_later.isoformat()}")
+
+    ending_soon_items = items_collection.find({
+        'end_date_time': {
+            '$gte': now.isoformat(),
+            '$lte': thirty_minutes_later.isoformat()
+        },
+        'ending_soon_notified': {'$ne': True}  # Prevent duplicate notifications
+    })
+
+    items_list = list(ending_soon_items)
+    print(f"📦 Found {len(items_list)} auctions ending soon")
+
+    for item in items_list:
+        print(f"🔔 Processing item: {item.get('title')} (Ends: {item.get('end_date_time')})")
+        success = notify_auction_ending_soon_to_all_users(item)
+        if success:
+            # Mark item as notified so it's not processed again
+            items_collection.update_one({'_id': item['_id']}, {'$set': {'ending_soon_notified': True}})
+            print(f"✅ Auction ending soon notification sent for item: {item.get('title')}")
+        else:
+            print(f"⚠️ Failed to send auction ending soon notification for: {item.get('title')}")
+
+    if len(items_list) == 0:
+        print("📭 No auctions ending soon found")
+
+scheduler = BackgroundScheduler()
+scheduler.add_job(check_and_notify_expired_auctions, 'interval', minutes=1)
+scheduler.add_job(check_and_notify_auctions_ending_soon, 'interval', minutes=5)
+scheduler.start()
+
+def notify_auction_win_logic(item_id):
+    now = datetime.now(ZoneInfo("Asia/Kolkata"))
+    item = items_collection.find_one({"_id": ObjectId(item_id)})
+
+    if not item:
+        return False, "Item not found"
+
+    if item.get('notified'):
+        return False, "Already notified"
+
+    end_time_str = item.get("end_time") or item.get("end_date_time")
+    if not end_time_str:
+        return False, "Missing auction end time"
+
+    try:
+        end_time = datetime.fromisoformat(end_time_str).astimezone(ZoneInfo("Asia/Kolkata"))
+    except Exception as e:
+        return False, f"Invalid date format: {e}"
+
+    if now <= end_time:
+        return False, "Auction still ongoing"
+
+    # ✅ Use str(item_id) to match stored string format
+    highest_bid = bids_collection.find_one(
+        {"item_id": str(item_id)},
+        sort=[("bid_amount", -1), ("timestamp", -1)]
+    )
+
+    seller_email = item.get("contact_email", "")
+
+    if not highest_bid:
+        # No bids were placed - notify seller only
+        if seller_email:
+            send_notification_if_allowed(
+                email=seller_email,
+                message=f"📦 Your auction for '{item.get('title')}' ended with no bids.",
+                n_type="auction_end",
+                extra_data={"item_id": str(item_id), "actionable": False}
+            )
+
+        # Mark item as notified
+        items_collection.update_one(
+            {'_id': item['_id']},
+            {'$set': {'notified': True}}
+        )
+        return True, "Auction ended with no bids - seller notified"
+
+    bidder_email = highest_bid.get("bidder_email")
+    bid_amount = float(highest_bid.get("bid_amount", 0))
+
+    if not bidder_email:
+        return False, "Winning bidder email missing"
+
+    # Check if payment already exists
+    existing_payment = payments_collection.find_one({
+        "item_id": str(item_id),
+        "buyer_email": bidder_email
+    })
+
+    if not existing_payment:
+        # Create payment record for winner
+        payments_collection.insert_one({
+            "buyer_email": bidder_email,
+            "seller_email": seller_email,
+            "item_title": item.get("title", ""),
+            "item_id": str(item_id),
+            "amount": bid_amount,
+            "status": "Pending",
+            "timestamp": now.isoformat()
+        })
+
+    # Notify seller
+    if seller_email:
+        send_notification_if_allowed(
+            email=seller_email,
+            message=f"🎯 {bidder_email} won your item '{item.get('title')}' for ₹{bid_amount}. Payment is pending.",
+            n_type="payment_pending",
+            extra_data={"item_id": str(item_id), "actionable": True}
+        )
+
+    # Notify winner
+    send_notification_if_allowed(
+        email=bidder_email,
+        message=f"🎉 Congratulations! You have won the auction for '{item.get('title')}' for ₹{bid_amount}.",
+        n_type="winner",
+        extra_data={"item_id": str(item_id), "actionable": True}
+    )
+
+    # ✅ Notify all outbid users that they lost
+    outbid_emails = bids_collection.distinct(
+        "bidder_email",
+        {"item_id": str(item_id), "bidder_email": {"$ne": bidder_email}}
+    )
+
+    for outbid_email in outbid_emails:
+        send_notification_if_allowed(
+            email=outbid_email,
+            message=f"❌ You didn't win the auction for '{item.get('title')}'. Better luck next time!",
+            n_type="outbid",
+            extra_data={"item_id": str(item_id), "actionable": False}
+        )
+
+    # ✅ Mark item as notified
+    items_collection.update_one(
+        {'_id': item['_id']},
+        {'$set': {'notified': True}}
+    )
+
+    return True, "Winner, seller, and outbid users notified"
+
+@app.route('/api/notifications/winner/<email>', methods=['GET'])
+def get_winner_notifications(email):
+    winner_notifs = list(notifications_collection.find({
+        "email": email,
+        "type": "winner"
+    }).sort("timestamp", -1))
+
+    for notif in winner_notifs:
+        notif['_id'] = str(notif['_id'])
+    return jsonify({"status": "success", "notifications": winner_notifs}), 200
+
+def notify_auction_ending_soon(item):
+    title = item.get("title", "Unknown item")
+    item_id = str(item.get("_id"))
+    end_time = item.get("end_time") or item.get("end_date_time")
+    seller_email = item.get("contact_email")
+
+    if not end_time:
+        return
+
+    users = preferences_collection.find({})
+    for user in users:
+        user_email = user.get("email")
+        if not user_email or user_email.strip().lower() == seller_email.strip().lower():
+            continue
+
+        if user.get("enable_auction_ending", True):
+            send_notification_if_allowed(
+                email=user_email,
+                message=f"⏳ Auction for '{title}' is ending soon. Hurry up and place your bid!",
+                n_type='auction_ending',
+                extra_data={'end_time': end_time, 'item_id': item_id}
+            )
+
+def notify_auction_ending_soon_to_all_users(item):
+    """
+    Notify all users (except the seller) when an auction is ending soon
+    """
+    title = item.get("title", "Unknown item")
+    item_id = str(item.get("_id"))
+    end_time = item.get("end_time") or item.get("end_date_time")
+    seller_email = item.get("contact_email")
+
+    if not end_time:
+        print(f"❌ No end time found for item: {title}")
+        return False
+
+    try:
+        # Calculate remaining time
+        end_datetime = datetime.fromisoformat(end_time).astimezone(ZoneInfo("Asia/Kolkata"))
+        now = datetime.now(ZoneInfo("Asia/Kolkata"))
+        time_remaining = end_datetime - now
+
+        if time_remaining.total_seconds() <= 0:
+            print(f"❌ Auction already ended for item: {title}")
+            return False
+
+        # Format remaining time
+        hours = int(time_remaining.total_seconds() // 3600)
+        minutes = int((time_remaining.total_seconds() % 3600) // 60)
+
+        if hours > 0:
+            time_text = f"{hours}h {minutes}m"
+        else:
+            time_text = f"{minutes}m"
+
+        # Get all users from the users collection
+        all_users = users_collection.find({})
+        all_users_list = list(all_users)
+        print(f"👥 Found {len(all_users_list)} total users in database")
+        notified_count = 0
+
+        for user in all_users_list:
+            user_email = user.get("email")
+            print(f"🔍 Processing user: {user_email}")
+
+            # Skip if no email or if it's the seller
+            if not user_email:
+                print(f"  ❌ Skipping user with no email")
+                continue
+
+            if not seller_email:
+                # Optionally log or skip, but don't call .strip() on None
+                continue
+            if user_email.strip().lower() == seller_email.strip().lower():
+                print(f"  ❌ Skipping seller: {user_email}")
+                continue
+
+            # Check user preferences
+            prefs = preferences_collection.find_one({'email': user_email})
+            if prefs and prefs.get('enable_auction_ending', True) is False:
+                print(f"  ❌ User has disabled auction ending notifications: {user_email}")
+                continue  # User has disabled auction ending notifications
+
+            # Check if notification already exists to avoid duplicates
+            existing_notif = notifications_collection.find_one({
+                'email': user_email,
+                'item_id': item_id,
+                'type': 'auction_ending',
+                'timestamp': {
+                    '$gte': (now - timedelta(minutes=10)).isoformat()  # Within last 10 minutes
+                }
+            })
+
+            if existing_notif:
+                print(f"  ❌ Already notified recently: {user_email}")
+                continue  # Already notified recently
+
+            # Send notification
+            print(f"  ✅ Sending notification to: {user_email}")
+            success = send_notification_if_allowed(
+                email=user_email,
+                message=f"⏰ Auction for '{title}' is ending in {time_text}! Don't miss your chance to bid!",
+                n_type='auction_ending',
+                extra_data={
+                    'end_time': end_time,
+                    'item_id': item_id,
+                    'seller_email': seller_email,
+                    'actionable': True
+                }
+            )
+
+            if success:
+                notified_count += 1
+                print(f"  ✅ Notification sent successfully to: {user_email}")
+            else:
+                print(f"  ❌ Failed to send notification to: {user_email}")
+
+        print(f"✅ Sent auction ending soon notifications to {notified_count} users for item: {title}")
+        return True
+
+    except Exception as e:
+        print(f"❌ Error notifying users about auction ending soon for {title}: {e}")
+        return False
+
+@app.route('/api/notify-auctions-ending-soon', methods=['POST'])
+def notify_all_ended_auctions():
+    now = datetime.now(ZoneInfo("Asia/Kolkata"))
+    ended_items = items_collection.find({
+        'end_date_time': {'$lte': now.isoformat()}
+    })
+
+    notified = 0
+    for item in ended_items:
+        item_id = str(item['_id'])
+        success, _ = notify_auction_win_logic(item_id)
+        if success:
+            notified += 1
+
+    return f"✅ {notified} ended auctions processed"
+
+@app.route('/api/notify-auctions-ending-soon-manual', methods=['POST'])
+def manually_notify_auctions_ending_soon():
+    """
+    Manual endpoint to trigger auction ending soon notifications
+    Useful for testing and immediate notifications
+    """
+    try:
+        now = datetime.now(ZoneInfo("Asia/Kolkata"))
+        # Find auctions ending within the next 30 minutes
+        thirty_minutes_later = now + timedelta(minutes=30)
+
+        ending_soon_items = items_collection.find({
+            'end_date_time': {
+                '$gte': now.isoformat(),
+                '$lte': thirty_minutes_later.isoformat()
+            }
+        })
+
+        notified_items = []
+        for item in ending_soon_items:
+            success = notify_auction_ending_soon_to_all_users(item)
+            if success:
+                notified_items.append(item.get('title', 'Unknown'))
+
+        return jsonify({
+            'status': 'success',
+            'message': f'Processed {len(notified_items)} auctions ending soon',
+            'items': notified_items
+        }), 200
+
+    except Exception as e:
+        print(f"❌ Error in manual auction ending notification: {e}")
+        return jsonify({
+            'status': 'error',
+            'message': str(e)
+        }), 500
+
+@app.route('/api/debug/auction-status', methods=['GET'])
+def debug_auction_status():
+    """
+    Debug endpoint to check current auction and user status
+    """
+    try:
+        now = datetime.now(ZoneInfo("Asia/Kolkata"))
+        thirty_minutes_later = now + timedelta(minutes=30)
+
+        # Get all auctions
+        all_auctions = list(items_collection.find({}))
+
+        # Get auctions ending soon
+        ending_soon_auctions = list(items_collection.find({
+            'end_date_time': {
+                '$gte': now.isoformat(),
+                '$lte': thirty_minutes_later.isoformat()
+            }
+        }))
+
+        # Get all users
+        all_users = list(users_collection.find({}))
+
+        # Get user count with emails
+        users_with_emails = [u for u in all_users if u.get('email')]
+
+        return jsonify({
+            'status': 'success',
+            'current_time': now.isoformat(),
+            'thirty_minutes_later': thirty_minutes_later.isoformat(),
+            'total_auctions': len(all_auctions),
+            'auctions_ending_soon': len(ending_soon_auctions),
+            'total_users': len(all_users),
+            'users_with_emails': len(users_with_emails),
+            'ending_soon_auctions': [
+                {
+                    'title': auction.get('title'),
+                    'end_date_time': auction.get('end_date_time'),
+                    'ending_soon_notified': auction.get('ending_soon_notified', False),
+                    'seller_email': auction.get('contact_email')
+                }
+                for auction in ending_soon_auctions
+            ],
+            'sample_users': [
+                {
+                    'email': user.get('email'),
+                    'has_preferences': bool(preferences_collection.find_one({'email': user.get('email')}))
+                }
+                for user in users_with_emails[:5]  # Show first 5 users
+            ]
+        }), 200
+
+    except Exception as e:
+        print(f"❌ Error in debug auction status: {e}")
+        return jsonify({
+            'status': 'error',
+            'message': str(e)
+        }), 500
+
+@app.route('/api/notifications/outbid/<email>', methods=['GET'])
+def get_outbid_notifications(email):
+    try:
+        outbid_notifications = list(
+            notifications_collection.find({
+                'email': email,
+                'type': 'outbid'
+            }).sort('timestamp', -1)
+        )
+
+        for notif in outbid_notifications:
+            notif['_id'] = str(notif['_id'])
+
+        return jsonify({'status': 'success', 'notifications': outbid_notifications}), 200
+
+    except Exception as e:
+        print("❌ Error fetching outbid notifications:", e)
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+# ======================
+# Update user preferences
+# ======================
+@app.route('/api/notifications/preferences/update', methods=['POST'])
+@jwt_required()
+def update_notification_preferences():
+    data = request.get_json()
+    email = data.get('email')
+    updates = data.get('preferences', {})
+
+    if not email or not isinstance(updates, dict):
+        return jsonify({'status': 'fail', 'message': 'Invalid request'}), 400
+
+    preferences_collection.update_one(
+        {'email': email},
+        {'$set': updates},
+        upsert=True
+    )
+    return jsonify({'status': 'success', 'message': 'Preferences updated'}), 200
+
+# ======================
+# Get user preferences
+# ======================
+@app.route('/api/notifications/preferences/<email>', methods=['GET'])
+@jwt_required()
+def get_notification_preferences(email):
+    DEFAULT_PREFS = {
+        'enable_outbid': True,
+        'enable_auction_ending': True,
+        'enable_winner': True,
+        'enable_new_item': True,
+        'enable_payment': True,
+        'enable_admin_comment': True,
+        'enable_auction_end': True
+    }
+    prefs = preferences_collection.find_one({'email': email})
+    if not prefs:
+        prefs = DEFAULT_PREFS.copy()
+        preferences_collection.insert_one({"email": email, **prefs})
+    else:
+        # Ensure all keys are present
+        for key, value in DEFAULT_PREFS.items():
+            if key not in prefs:
+                prefs[key] = value
+        # Optionally update DB with missing keys
+        preferences_collection.update_one({'email': email}, {'$set': prefs})
+    prefs.pop('_id', None)
+    return jsonify({'status': 'success', 'preferences': prefs})
+
+# ======================
+# GET notifications for user
+# ======================
+@app.route('/api/notifications/<email>', methods=['GET'])
+def get_notifications(email):
+    user_notifications = list(
+        notifications_collection
+        .find({'email': email})
+        .sort('timestamp', -1)
+    )
+    for n in user_notifications:
+        n['_id'] = str(n['_id'])
+    return jsonify({'status': 'success', 'notifications': user_notifications}), 200
+
+# ======================
+# Add new notification manually
+# ======================
+@app.route('/api/notifications/add', methods=['POST'])
+def add_notification():
+    data = request.get_json()
+    email = data.get('email')
+    message = data.get('message')
+    n_type = data.get('type', 'general').lower()
+
+    if not email or not message:
+        return jsonify({'status': 'fail', 'message': 'Missing email or message'}), 400
+
+    prefs = preferences_collection.find_one({'email': email})
+    if prefs and not prefs.get(f'enable_{n_type}', True):
+        return jsonify({'status': 'skipped', 'message': f'{n_type} notifications disabled by user'}), 200
+
+    notif_data = {
+        'email': email,
+        'message': message,
+        'type': n_type,
+        'seen': False,
+        'timestamp': datetime.now(ZoneInfo("Asia/Kolkata")).isoformat()
+    }
+
+    # Attach end_time if provided (for auction_ending)
+    if n_type == 'auction_ending' and 'end_time' in data:
+        notif_data['end_time'] = data['end_time']
+
+    notifications_collection.insert_one(notif_data)
+
+    return jsonify({'status': 'success', 'message': 'Notification added'}), 200
+
+# ======================
+# Mark notification as seen
+# ======================
+@app.route('/api/notifications/mark_seen', methods=['POST'])
+def mark_notification_seen():
+    data = request.get_json()
+    notification_id = data.get('notification_id')
+
+    if not notification_id:
+        return jsonify({'status': 'fail', 'message': 'Missing notification_id'}), 400
+
+    notifications_collection.update_one(
+        {'_id': ObjectId(notification_id)},
+        {'$set': {'seen': True}}
+    )
+    return jsonify({'status': 'success', 'message': 'Notification marked as seen'}), 200
+
+# ======================
+# Send notification if allowed
+# ======================
+def send_notification_if_allowed(email, message, n_type='general', extra_data=None):
+    try:
+        n_type = n_type.lower()
+        prefs = preferences_collection.find_one({'email': email}) or {}
+
+        if prefs.get(f'enable_{n_type}', True) is False:
+            print(f"❌ Notification '{n_type}' skipped for {email} (disabled in prefs)")
+            return False
+
+        notif_data = {
+            'email': email,
+            'message': message,
+            'type': n_type,
+            'seen': False,
+            'timestamp': datetime.now(ZoneInfo("Asia/Kolkata")).isoformat()
+        }
+
+        if extra_data:
+            notif_data.update(extra_data)
+
+        print("👉 Inserting into notifications_collection:", notif_data)
+
+        result = notifications_collection.insert_one(notif_data)
+        print(f"✅ Notification of type '{n_type}' sent to {email}. ID: {result.inserted_id}")
+        return True
+
+    except Exception as e:
+        print(f"❌ Error sending notification to {email}: {e}")
+        return False
 
 @app.route('/api/payments/<buyer_email>', methods=['GET'])
 def get_user_payments(buyer_email):
@@ -1348,18 +2090,31 @@ def confirm_payment():
         return jsonify({"status": "error", "message": str(e)}), 500
 
 
+@app.route('/api/admin/items', methods=['GET'])
+def get_all_items_for_admin():
+    items = list(items_collection.find({}))
+    for item in items:
+        item['_id'] = str(item['_id'])  # Make ObjectId serializable
+    return jsonify(items)
+
+# ✅ Keep this one only!
 @app.route('/api/items/approve/<item_id>', methods=['PUT'])
 def approve_reject_item(item_id):
     try:
-        status = request.args.get('status')  # "Approved" or "Rejected"
-        is_approved = request.args.get('is_approved')  # "true" or "false"
+        is_approved = request.args.get('is_approved', '').lower() == 'true'
+        is_rejected = request.args.get('is_rejected', '').lower() == 'true'
 
-        if not status or is_approved is None:
-            return jsonify({'message': 'Missing status or is_approved param'}), 400
+        if is_approved and not is_rejected:
+            status = 'Approved'
+        elif is_rejected and not is_approved:
+            status = 'Rejected'
+        else:
+            return jsonify({'message': 'Invalid approval/rejection combination'}), 400
 
         update_fields = {
-            "status": status,
-            "is_approved": is_approved.lower() == "true"
+            "is_approved": is_approved,
+            "is_rejected": is_rejected,
+            "status": status
         }
 
         result = items_collection.update_one(
@@ -1370,51 +2125,54 @@ def approve_reject_item(item_id):
         if result.matched_count == 0:
             return jsonify({'message': 'Item not found'}), 404
 
-        # 📨 Fetch item and notify seller
         item = items_collection.find_one({"_id": ObjectId(item_id)})
         seller_email = item.get("seller_id")
         item_title = item.get("title")
 
-        # 💌 Prepare message
+        print(f"📧 Sending email to: {seller_email}")
+
+        if not seller_email or '@' not in seller_email:
+            print("❌ Invalid seller email. Email not sent.")
+            return jsonify({'message': 'Item updated, but email not sent'}), 200
+
         subject = f"📝 Your item has been {status}"
-        
-        if status.lower() == "approved":
+        if is_approved:
             body = f"""
 Hello {seller_email},
 
-🎉 Great news! Your item "{item_title}" has been successfully reviewed and APPROVED by the admin. 🟢
+🎉 Good news! Your item titled "{item_title}" has been APPROVED by the admin ✅
 
-It is now visible to all users and open for bidding on AuctionVerse! 🚀
+It is now LIVE on AuctionVerse and visible to all users for bidding! 🛍️
 
-Best of luck with your auction!  
-- Team AuctionVerse 💛
+Thank you for using AuctionVerse 🌟
+
+Team AuctionVerse 💛
 """.strip()
         else:
             body = f"""
 Hello {seller_email},
 
-Unfortunately, your item "{item_title}" has been REJECTED by the admin. 🔴
+We regret to inform you that your item titled "{item_title}" has been REJECTED ❌ by the admin.
 
-This could be due to missing details, inappropriate content, or rule violations.
+This could be due to incomplete details or a policy violation.
 
-You can edit and resubmit your item anytime.
+You can edit and resubmit the item for reapproval.
 
-Thanks for understanding,  
-- Team AuctionVerse 💛
+Thank you for understanding  
+Team AuctionVerse 💛
 """.strip()
 
-        # ✉️ Send the email
         try:
             msg = Message(subject=subject, recipients=[seller_email], body=body)
             mail.send(msg)
-            print(f"✅ Email sent to seller ({seller_email}) about {status}")
+            print(f"✅ Email sent to {seller_email} about {status}")
         except Exception as e:
-            print(f"❌ Failed to send email to seller: {e}")
+            print(f"❌ Email failed: {e}")
 
-        return jsonify({'message': f'Item {status} successfully'}), 200
+        return jsonify({'message': f'Item {status.lower()} successfully'}), 200
 
     except Exception as e:
-        print("❌ Error in approval route:", e)
+        print("❌ Error during approval/rejection:", e)
         return jsonify({'message': 'Internal server error'}), 500
 
 @app.route('/api/admin/comment', methods=['POST'])
@@ -1437,126 +2195,6 @@ def send_admin_comment():
     })
 
     return jsonify({"status": "success", "message": "Comment sent to seller"}), 200
-
-# ======================
-# GET notifications for user
-# ======================
-@app.route('/api/notifications/<email>', methods=['GET'])
-def get_notifications(email):
-    user_notifications = list(
-        notifications_collection
-        .find({'email': email})
-        .sort('timestamp', -1)
-    )
-    for n in user_notifications:
-        n['_id'] = str(n['_id'])
-    return jsonify({'status': 'success', 'notifications': user_notifications}), 200
-
-
-# ======================
-# Add new notification
-# ======================
-@app.route('/api/notifications/add', methods=['POST'])
-def add_notification():
-    data = request.get_json()
-    email = data.get('email')
-    message = data.get('message')
-    n_type = data.get('type', 'general')
-
-    if not email or not message:
-        return jsonify({'status': 'fail', 'message': 'Missing email or message'}), 400
-
-    # Respect user preferences
-    prefs = preferences_collection.find_one({'email': email})
-    if prefs and not prefs.get(f'enable_{n_type}', True):
-        return jsonify({'status': 'skipped', 'message': f'{n_type} notifications disabled by user'}), 200
-
-    notifications_collection.insert_one({
-        'email': email,
-        'message': message,
-        'type': n_type,
-        'seen': False,
-        'timestamp': datetime.now(ZoneInfo("Asia/Kolkata")).isoformat()
-    })
-    return jsonify({'status': 'success', 'message': 'Notification added'}), 200
-
-
-# ======================
-# Mark notification as seen
-# ======================
-@app.route('/api/notifications/mark_seen', methods=['POST'])
-def mark_notification_seen():
-    data = request.get_json()
-    notification_id = data.get('notification_id')
-
-    if not notification_id:
-        return jsonify({'status': 'fail', 'message': 'Missing notification_id'}), 400
-
-    notifications_collection.update_one(
-        {'_id': ObjectId(notification_id)},
-        {'$set': {'seen': True}}
-    )
-    return jsonify({'status': 'success', 'message': 'Notification marked as seen'}), 200
-
-
-# ======================
-# Get user preferences
-# ======================
-@app.route('/api/notifications/preferences/<email>', methods=['GET'])
-@jwt_required()
-def get_notification_preferences(email):
-    prefs = preferences_collection.find_one({'email': email})
-    if not prefs:
-        prefs = {
-            'enable_outbid': True,
-            'enable_auction_end': True,
-            'enable_winner': True,
-            'enable_new_item': True,
-            'enable_payment': True,
-            'enable_admin_comment': True  # ✅ include this
-        }
-        preferences_collection.insert_one({"email": email, **prefs})
-    prefs.pop('_id', None)
-    return jsonify({'status': 'success', 'preferences': prefs})
-
-
-# ======================
-# Update user preferences
-# ======================
-@app.route('/api/notifications/preferences/update', methods=['POST'])
-@jwt_required()
-def update_notification_preferences():
-    data = request.get_json()
-    email = data.get('email')
-    updates = data.get('preferences', {})
-
-    if not email or not isinstance(updates, dict):
-        return jsonify({'status': 'fail', 'message': 'Invalid request'}), 400
-
-    preferences_collection.update_one(
-        {'email': email},
-        {'$set': updates},
-        upsert=True
-    )
-    return jsonify({'status': 'success', 'message': 'Preferences updated'}), 200
-
-
-# ======================
-# Reusable helper to send notification
-# ======================
-def send_notification_if_allowed(email, message, n_type='general'):
-    prefs = preferences_collection.find_one({'email': email})
-    if prefs and not prefs.get(f'enable_{n_type}', True):
-        return False
-
-    notifications_collection.insert_one({
-        'email': email,
-        'message': message,
-        'type': n_type,
-        'seen': False,
-        'timestamp': datetime.now(ZoneInfo("Asia/Kolkata")).isoformat()
-    })
-    return True
 
 # ------------------ Forgot/Reset Password Routes ------------------
 
@@ -1692,6 +2330,273 @@ def delete_account():
     reset_tokens_collection.delete_many({'email': email})
 
     return jsonify({'status': 'success', 'message': 'Account and all related data deleted.'}), 200
+
+# User Recent Activities Routes
+@app.route('/api/user-activities/<email>', methods=['GET'])
+def get_user_activities(email):
+    """Get all activities for a specific user"""
+    try:
+        activities = user_activities.get(email, [])
+        return jsonify({
+            'status': 'success',
+            'activities': activities
+        })
+    except Exception as e:
+        return jsonify({
+            'status': 'error',
+            'message': str(e)
+        }), 500
+
+@app.route('/api/log-activity', methods=['POST'])
+def log_activity():
+    """Log a new user activity"""
+    try:
+        data = request.get_json()
+        email = data.get('email')
+        activity_type = data.get('type')
+        action = data.get('action')
+        item = data.get('item', '')
+        amount = data.get('amount', 0)
+        category = data.get('category', 'Other')
+        status = data.get('status', 'completed')
+        
+        if not email or not activity_type or not action:
+            return jsonify({
+                'status': 'error',
+                'message': 'Missing required fields'
+            }), 400
+        
+        activity = {
+            'id': f"{email}_{datetime.now().timestamp()}",
+            'type': activity_type,
+            'action': action,
+            'item': item,
+            'amount': amount,
+            'category': category,
+            'status': status,
+            'timestamp': datetime.now().isoformat(),
+            'email': email
+        }
+        
+        if email not in user_activities:
+            user_activities[email] = []
+        
+        user_activities[email].append(activity)
+        
+        # Keep only last 100 activities per user
+        if len(user_activities[email]) > 100:
+            user_activities[email] = user_activities[email][-100:]
+        
+        return jsonify({
+            'status': 'success',
+            'message': 'Activity logged successfully',
+            'activity': activity
+        })
+        
+    except Exception as e:
+        return jsonify({
+            'status': 'error',
+            'message': str(e)
+        }), 500
+
+@app.route('/api/clear-activities/<email>', methods=['DELETE'])
+def clear_user_activities(email):
+    """Clear all activities for a user"""
+    try:
+        if email in user_activities:
+            user_activities[email] = []
+        
+        return jsonify({
+            'status': 'success',
+            'message': 'Activities cleared successfully'
+        })
+        
+    except Exception as e:
+        return jsonify({
+            'status': 'error',
+            'message': str(e)
+        }), 500
+
+@app.route('/api/activity-stats/<email>', methods=['GET'])
+def get_activity_stats(email):
+    """Get activity statistics for a user"""
+    try:
+        activities = user_activities.get(email, [])
+        
+        stats = {
+            'total_activities': len(activities),
+            'by_type': {},
+            'by_category': {},
+            'by_status': {},
+            'recent_activity': None
+        }
+        
+        for activity in activities:
+            # Count by type
+            activity_type = activity.get('type', 'unknown')
+            stats['by_type'][activity_type] = stats['by_type'].get(activity_type, 0) + 1
+            
+            # Count by category
+            category = activity.get('category', 'Other')
+            stats['by_category'][category] = stats['by_category'].get(category, 0) + 1
+            
+            # Count by status
+            status = activity.get('status', 'unknown')
+            stats['by_status'][status] = stats['by_status'].get(status, 0) + 1
+        
+        # Get most recent activity
+        if activities:
+            stats['recent_activity'] = max(activities, key=lambda x: x.get('timestamp', ''))
+        
+        return jsonify({
+            'status': 'success',
+            'stats': stats
+        })
+        
+    except Exception as e:
+        return jsonify({
+            'status': 'error',
+            'message': str(e)
+        }), 500
+
+@app.route('/api/populate-activities/<email>', methods=['POST'])
+def populate_existing_activities(email):
+    """Populate activities from existing user data (posts, bids, etc.)"""
+    try:
+        # Check if user exists
+        user = users_collection.find_one({'email': email})
+        if not user:
+            return jsonify({
+                'status': 'error',
+                'message': 'User not found'
+            }), 404
+
+        # Initialize user activities if not exists
+        if email not in user_activities:
+            user_activities[email] = []
+
+        activities_added = 0
+
+        # 1. Get all posts by this user
+        user_posts = items_collection.find({'seller_id': email})
+        for post in user_posts:
+            activity = {
+                'id': f"{email}_post_{post['_id']}",
+                'type': 'post',
+                'action': 'posted item',
+                'item': post.get('title', 'Untitled Item'),
+                'amount': int(post.get('starting_price', 0)),
+                'category': post.get('category', 'Other'),
+                'status': post.get('status', 'active'),
+                'timestamp': post.get('timestamp', post.get('created_at', datetime.now().isoformat())),
+                'email': email
+            }
+            
+            # Check if activity already exists
+            if not any(a['id'] == activity['id'] for a in user_activities[email]):
+                user_activities[email].append(activity)
+                activities_added += 1
+
+        # 2. Get all bids by this user
+        user_bids = bids_collection.find({'bidder_email': email})
+        for bid in user_bids:
+            # Get the item details for the bid
+            item = items_collection.find_one({'_id': ObjectId(bid.get('item_id'))})
+            if item:
+                activity = {
+                    'id': f"{email}_bid_{bid['_id']}",
+                    'type': 'bid',
+                    'action': 'placed bid',
+                    'item': item.get('title', 'Unknown Item'),
+                    'amount': int(bid.get('bid_amount', 0)),
+                    'category': item.get('category', 'Other'),
+                    'status': bid.get('auction_result', 'active'),
+                    'timestamp': bid.get('timestamp', datetime.now().isoformat()),
+                    'email': email
+                }
+                
+                # Check if activity already exists
+                if not any(a['id'] == activity['id'] for a in user_activities[email]):
+                    user_activities[email].append(activity)
+                    activities_added += 1
+
+        # 3. Get profile activities
+        profile = profiles_collection.find_one({'email': email})
+        if profile:
+            # Profile creation/update activity
+            if profile.get('createdAt') or profile.get('timestamp'):
+                activity = {
+                    'id': f"{email}_profile_creation",
+                    'type': 'profile',
+                    'action': 'updated profile',
+                    'item': 'Profile Information',
+                    'amount': 0,
+                    'category': 'Profile',
+                    'status': 'completed',
+                    'timestamp': profile.get('createdAt', profile.get('timestamp', datetime.now().isoformat())),
+                    'email': email
+                }
+                
+                if not any(a['id'] == activity['id'] for a in user_activities[email]):
+                    user_activities[email].append(activity)
+                    activities_added += 1
+
+            # Profile image activity
+            if profile.get('profileImage'):
+                activity = {
+                    'id': f"{email}_profile_image",
+                    'type': 'profile',
+                    'action': 'added profile picture',
+                    'item': 'Profile Image',
+                    'amount': 0,
+                    'category': 'Profile',
+                    'status': 'completed',
+                    'timestamp': profile.get('createdAt', profile.get('timestamp', datetime.now().isoformat())),
+                    'email': email
+                }
+                
+                if not any(a['id'] == activity['id'] for a in user_activities[email]):
+                    user_activities[email].append(activity)
+                    activities_added += 1
+
+        # 4. Get payment activities
+        payments = db.payments.find({'buyer_email': email})
+        for payment in payments:
+            activity = {
+                'id': f"{email}_payment_{payment['_id']}",
+                'type': 'payment',
+                'action': 'completed payment' if payment.get('status') == 'Completed' else 'pending payment',
+                'item': payment.get('item_title', 'Auction Item'),
+                'amount': int(payment.get('amount', 0)),
+                'category': 'Payment',
+                'status': payment.get('status', 'pending'),
+                'timestamp': payment.get('timestamp', datetime.now().isoformat()),
+                'email': email
+            }
+            
+            if not any(a['id'] == activity['id'] for a in user_activities[email]):
+                user_activities[email].append(activity)
+                activities_added += 1
+
+        # Sort activities by timestamp (newest first)
+        user_activities[email].sort(key=lambda x: x.get('timestamp', ''), reverse=True)
+
+        # Keep only last 100 activities
+        if len(user_activities[email]) > 100:
+            user_activities[email] = user_activities[email][:100]
+
+        return jsonify({
+            'status': 'success',
+            'message': f'Successfully populated {activities_added} activities from existing data',
+            'total_activities': len(user_activities[email]),
+            'activities_added': activities_added
+        })
+
+    except Exception as e:
+        return jsonify({
+            'status': 'error',
+            'message': str(e)
+        }), 500
 
 @app.route('/')
 def home():

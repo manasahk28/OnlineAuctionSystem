@@ -29,10 +29,11 @@
   font-size: 2rem;
   font-weight: bold;
   margin-left: 55px;
+  color: #fff;
 }
 
 /* Buttons */
-.logt-button {
+.logt-but {
   background-color: #f29109;
   color: white;
   padding: 0.6rem 1.1rem;
@@ -44,7 +45,7 @@
   transition: background 0.3s ease;
 }
 
-.logt-button:hover {
+.logt-but:hover {
   background-color: #e8ba74;
 }
 
@@ -145,14 +146,21 @@
 }
 
 /* Left: Image */
-.custom-left img {
-  width: 90px;
+.custom-left {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 90px;
   height: 100px;
-  object-fit: contain;
 }
 
-
-
+.custom-left img {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
 
 /* Middle: Title, Price, View Link, Approve/Reject */
 .custom-middle {
@@ -420,4 +428,51 @@
   body {
     background-color: white;
   }
+}
+
+.dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.main-tab-button {
+  background-color: #f29109;
+  color: #f8f6f6;
+  padding: 8px 14px;
+  font-size: 16px;
+  border: 2px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: #f1f1f1;
+  min-width: 140px;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  border-radius: 8px;
+  z-index: 1;
+}
+
+.dropdown-content button {
+  color: black;
+  padding: 10px 14px;
+  text-align: left;
+  text-decoration: none;
+  display: block;
+  background: none;
+  border: none;
+  width: 100%;
+  cursor: pointer;
+  font-size: 15px;
+}
+
+.dropdown-content button:hover {
+  background-color: #dddddd;
+}
+
+.dropdown:hover .dropdown-content {
+  display: block;
 }

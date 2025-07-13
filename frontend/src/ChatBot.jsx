@@ -287,7 +287,7 @@ const ChatBot = () => {
         <div className="chat-header">
           <span>👩‍💻 Noa - Auction Assistant</span>
 <button
-  className="clos-btn"
+  className="closs-btn"
   onClick={() => {
     setIsOpen(false);
     setMessages([]);

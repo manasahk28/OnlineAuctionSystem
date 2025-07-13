@@ -35,24 +35,68 @@ const EditItem = ({ itemId, setActiveSection }) => {
 
   const [initialFormData, setInitialFormData] = useState({});
 
-  useEffect(() => {
-    const fetchItem = async () => {
-      try {
-        const res = await fetch(`http://localhost:5000/api/items/${itemId}`);
-        const data = await res.json();
-        if (data.status === 'success') {
-          const imageList = Array.isArray(data.item.images) ? data.item.images : [];
-          const fullItem = { ...data.item, images: imageList };
-          setFormData(fullItem);
-          setInitialFormData(fullItem);
-        }
-      } catch (error) {
-        console.error("Error fetching item:", error);
-      }
-    };
+useEffect(() => {
+  const defaultForm = {
+    title: '',
+    description: '',
+    category: '',
+    tags: '',
+    images: [],
+    video: null,
+    starting_price: '',
+    minimum_increment: '',
+    buy_now_price: '',
+    start_date_time: '',
+    end_date_time: '',
+    duration: '',
+    seller_id: '',
+    contact_email: '',
+    location: '',
+    pickup_method: '',
+    delivery_charge: '',
+    return_policy: '',
+    is_approved: false,
+    status: 'Draft',
+    terms_accepted: false,
+    report_reason: '',
+    highlights: '',
+    item_condition: '',
+    warranty: '',
+    warranty_duration: '',
+    damage_description: '',
+    limitedCollection: false
+  };
 
-    if (itemId) fetchItem();
-  }, [itemId]);
+  const fetchItem = async () => {
+    try {
+      const res = await fetch(`http://localhost:5000/api/item/${itemId}`);
+      const data = await res.json();
+
+      if (data.status === 'success') {
+        const item = data.item;
+
+        const mergedData = {
+          ...defaultForm,
+          ...item,
+          images: Array.isArray(item.images) ? item.images : [],
+          video: item.video || null,
+          limitedCollection: !!item.limitedCollection,
+          terms_accepted: !!item.terms_accepted,
+          is_approved: !!item.is_approved
+        };
+
+        setFormData(mergedData);
+        setInitialFormData(mergedData);
+      } else {
+        console.warn("Item fetch failed:", data.message);
+      }
+    } catch (error) {
+      console.error("Error fetching item:", error);
+    }
+  };
+
+  if (itemId) fetchItem();
+}, [itemId]);
 
   const handleChange = (e) => {
     const { name, value, type, checked, files } = e.target;

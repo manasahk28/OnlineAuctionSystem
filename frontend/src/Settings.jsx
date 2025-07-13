@@ -19,14 +19,43 @@ import { useTheme } from './ThemeContext';
     const [showCurrent, setShowCurrent] = useState(false);
     const [showNew, setShowNew] = useState(false);
     const [showConfirm, setShowConfirm] = useState(false);
+    const [step, setStep] = useState(1); // 1: verify old password, 2: set new password
+    const [success, setSuccess] = useState(false);
+
+    const verifyCurrentPassword = async (e) => {
+        e.preventDefault();
+        setError('');
+        setLoading(true);
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch('http://localhost:5000/api/auth/verify-password', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ current_password: currentPassword })
+            });
+            const data = await res.json();
+            if (res.ok && data.status === 'success') {
+                setStep(2);
+                setMessage('');
+            } else {
+                setError(data.message || 'Incorrect password.');
+            }
+        } catch (err) {
+            setError('An error occurred. Please try again.');
+        }
+        setLoading(false);
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setMessage('');
         setError('');
         if (newPassword !== confirmPassword) {
-        setError('New passwords do not match.');
-        return;
+            setError('New passwords do not match.');
+            return;
         }
         setLoading(true);
         try {
@@ -48,11 +77,13 @@ import { useTheme } from './ThemeContext';
             setCurrentPassword('');
             setNewPassword('');
             setConfirmPassword('');
+            setStep(1);
+            setSuccess(true);
         } else {
             setError(data.message || 'Failed to change password.');
         }
         } catch (err) {
-        setError(err.message || 'An error occurred. Please try again.');
+            setError(err.message || 'An error occurred. Please try again.');
         }
         setLoading(false);
     };
@@ -61,34 +92,46 @@ import { useTheme } from './ThemeContext';
     const eyeStyle = { position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', cursor: 'pointer', fontSize: 18, color: '#888' };
 
     return (
-        <div className="settings-section">
-        <h3>Change Password</h3>
-        <form onSubmit={handleSubmit}>
-            <div>
-            <label>Current Password:</label>
-            <div style={inputWrapper}>
-                <input type={showCurrent ? 'text' : 'password'} value={currentPassword} onChange={e => setCurrentPassword(e.target.value)} required disabled={loading} style={{ width: '100%' }} />
-                <span style={eyeStyle} onClick={() => setShowCurrent(v => !v)}><EyeIcon visible={showCurrent} /></span>
-            </div>
-            </div>
-            <div>
-            <label>New Password:</label>
-            <div style={inputWrapper}>
-                <input type={showNew ? 'text' : 'password'} value={newPassword} onChange={e => setNewPassword(e.target.value)} required disabled={loading} style={{ width: '100%' }} />
-                <span style={eyeStyle} onClick={() => setShowNew(v => !v)}><EyeIcon visible={showNew} /></span>
-            </div>
-            </div>
-            <div>
-            <label>Confirm New Password:</label>
-            <div style={inputWrapper}>
-                <input type={showConfirm ? 'text' : 'password'} value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} required disabled={loading} style={{ width: '100%' }} />
-                <span style={eyeStyle} onClick={() => setShowConfirm(v => !v)}><EyeIcon visible={showConfirm} /></span>
-            </div>
-            </div>
-            <button type="submit" disabled={loading}>{loading ? 'Changing...' : 'Change Password'}</button>
-            {message && <div style={{ color: 'green', marginTop: '10px' }}>{message}</div>}
-            {error && <div style={{ color: 'red', marginTop: '10px' }}>{error}</div>}
-        </form>
+        <div className="settings-section change-password-section">
+            <h3>Change Password</h3>
+            {success ? (
+                <div style={{textAlign: 'center', color: 'green', fontWeight: 600, margin: '1.2rem 0'}}>
+                    <div style={{fontSize: '1.1rem', marginBottom: '1rem'}}>{message || 'Your password has been changed successfully!'}</div>
+                    <button onClick={() => setSuccess(false)} style={{marginTop: '0.5rem'}}>Change Again</button>
+                </div>
+            ) : step === 1 ? (
+                <form onSubmit={verifyCurrentPassword}>
+                    <div>
+                        <label>Current Password:</label>
+                        <div style={inputWrapper}>
+                            <input type={showCurrent ? 'text' : 'password'} value={currentPassword} onChange={e => setCurrentPassword(e.target.value)} required disabled={loading} style={{ width: '100%' }} placeholder="Enter current password" />
+                            <span style={eyeStyle} onClick={() => setShowCurrent(v => !v)}><EyeIcon visible={showCurrent} /></span>
+                        </div>
+                    </div>
+                    <button type="submit" disabled={loading}>{loading ? 'Verifying...' : 'Next'}</button>
+                    {error && <div style={{ color: 'red', marginTop: '10px' }}>{error}</div>}
+                </form>
+            ) : (
+                <form onSubmit={handleSubmit}>
+                    <div>
+                        <label>New Password:</label>
+                        <div style={inputWrapper}>
+                            <input type={showNew ? 'text' : 'password'} value={newPassword} onChange={e => setNewPassword(e.target.value)} required disabled={loading} style={{ width: '100%' }} placeholder="New password" />
+                            <span style={eyeStyle} onClick={() => setShowNew(v => !v)}><EyeIcon visible={showNew} /></span>
+                        </div>
+                    </div>
+                    <div>
+                        <label>Confirm New Password:</label>
+                        <div style={inputWrapper}>
+                            <input type={showConfirm ? 'text' : 'password'} value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} required disabled={loading} style={{ width: '100%' }} placeholder="Confirm new password" />
+                            <span style={eyeStyle} onClick={() => setShowConfirm(v => !v)}><EyeIcon visible={showConfirm} /></span>
+                        </div>
+                    </div>
+                    <button type="submit" disabled={loading}>{loading ? 'Changing...' : 'Change Password'}</button>
+                    {message && <div style={{ color: 'green', marginTop: '10px' }}>{message}</div>}
+                    {error && <div style={{ color: 'red', marginTop: '10px' }}>{error}</div>}
+                </form>
+            )}
         </div>
     );
     };

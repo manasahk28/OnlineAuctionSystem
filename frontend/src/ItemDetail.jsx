@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import './ItemDetail.css';
 import Layout from './Layout';
 import axios from 'axios';
+import { logBidActivity } from './utils/activityLogger';
 
 // Utility function to capitalize first letter of username
 const capitalizeUsername = (username) => {
@@ -175,6 +176,14 @@ const ItemDetail = () => {
     });
 
     if (res.data.status === 'success') {
+      // Log the bid activity
+      await logBidActivity(
+        item.title,
+        numericBid,
+        item.category || 'Other',
+        'active'
+      );
+      
       alert('🎉 Bid placed successfully!');
       setShowModal(false);
       setBidAmount('');

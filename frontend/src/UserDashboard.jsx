@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import './Userdashboard.css';
 import Layout from './Layout';
+import { logProfileActivity, ActivityActions } from './utils/activityLogger';
 
 import ProfilePage from './Profile';
 import MyListings from './MyListings';
@@ -17,7 +18,7 @@ import {
   BarChart, Bar, XAxis, YAxis, Tooltip, Legend,
   ResponsiveContainer
 } from 'recharts';
-
+import { FaTimes } from 'react-icons/fa';
 const UserDashboard = () => {
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem('user'));
@@ -143,6 +144,12 @@ if (data.status === 'success') {
 
         const result = await res.json();
         if (result.status === 'success') {
+          // Log the profile image activity
+          await logProfileActivity(
+            ActivityActions.ADDED_PROFILE_PICTURE,
+            'Profile Image'
+          );
+          
           localStorage.setItem('user', JSON.stringify({ ...user, profileImage: updatedImage }));
           setProfile(updatedProfile);
         } else {
@@ -186,6 +193,13 @@ if (data.status === 'success') {
         setProfileImage(null);
         setProfile(updatedProfile);
         localStorage.setItem('user', JSON.stringify({ ...user, profileImage: null }));
+        
+        // Log the profile image deletion activity
+        await logProfileActivity(
+          ActivityActions.DELETED_PROFILE_PICTURE,
+          'Profile Image'
+        );
+        
         alert('✅ Profile image deleted successfully!');
       } else {
         alert('❌ Failed to delete profile image: ' + result.message);
@@ -260,12 +274,19 @@ if (data.status === 'success') {
                   }
                 }}
               >
-                <div className="image-modal-content">
+                <div className="image-modal-content" style={{ position: 'relative' }}>
+                  <button
+                    onClick={() => setShowImageModal(false)}
+                    className="image-modal-close-btn"
+                    aria-label="Close"
+                  >
+                    <FaTimes />
+                  </button>
                   <img src={profileImage} alt="Full View" />
                 </div>
-              </div>            
-            )}
-            <h3 className="username">{profile.UserName || user.UserName || 'Your Name'}</h3>
+              </div>            
+            )}            
+              <h3 className="username">{profile.UserName || user.UserName || 'Your Name'}</h3>
 
             <div className="sidebar-buttons">
               <button onClick={() => setActiveSection('ProfilePage')}>Account</button>

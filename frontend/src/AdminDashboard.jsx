@@ -9,29 +9,54 @@ const AdminDashboard = () => {
   const [showCommentBox, setShowCommentBox] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
   const [commentText, setCommentText] = useState('');
+  const [activeTab, setActiveTab] = useState('pending');
   const navigate = useNavigate();
 
-  const fetchItems = async () => {
+  const refreshItems = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/items');
-      const pendingItems = res.data.items.filter(item => !item.is_approved);
-      setItems(pendingItems);
-    } catch (error) {
-      console.error('Error fetching items:', error);
-    } finally {
-      setLoading(false);
+      const res = await axios.get(`/api/admin/items/${activeTab}`);
+      console.log("📦 Refreshed items:", res.data);
+      if (Array.isArray(res.data)) {
+        setItems(res.data);
+      } else {
+        console.warn("⚠️ Items not an array. Fix server response?", res.data);
+        setItems(res.data.items || []);
+      }
+    } catch (err) {
+      console.error("Error refreshing items:", err);
     }
   };
+
+  useEffect(() => {
+    const fetchItems = async () => {
+      setLoading(true);
+      try {
+        const res = await axios.get(`/api/admin/items/${activeTab}`);
+        console.log("📦 Items fetched from backend:", res.data);
+        if (Array.isArray(res.data)) {
+          setItems(res.data);
+        } else {
+          setItems(res.data.items || []);
+        }
+      } catch (error) {
+        console.error('Error fetching items:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchItems();
+  }, [activeTab]);
 
   const handleApproval = async (id, status) => {
     try {
       await axios.put(`http://localhost:5000/api/items/approve/${id}`, null, {
         params: {
           is_approved: status === 'Approved',
-          status: status
-        }
+          is_rejected: status === 'Rejected',
+        },
       });
-      setItems(prev => prev.filter(item => item._id !== id));
+      setItems((prev) => prev.filter((item) => item._id !== id));
       alert(`Item ${status.toLowerCase()} successfully.`);
     } catch (err) {
       console.error('Error updating item:', err);
@@ -44,7 +69,7 @@ const AdminDashboard = () => {
       await axios.post('http://localhost:5000/api/admin/comment', {
         itemId: selectedItem._id,
         sellerId: selectedItem.seller_id,
-        comment: commentText
+        comment: commentText,
       });
       alert('Comment sent to seller.');
       setShowCommentBox(false);
@@ -54,28 +79,30 @@ const AdminDashboard = () => {
     }
   };
 
-  useEffect(() => {
-    fetchItems();
-  }, []);
-
   return (
     <div className="admin-dashboard">
       {/* Navbar */}
       <div className="admin-navbar">
         <div className="admin-navbar-left">
-          <h2>Online Auction</h2>
+          <h2>Auction Verse</h2>
         </div>
         <div className="admin-navbar-centre">Admin Panel</div>
         <div className="admin-navbar-right">
           <div className="dropdown">
-            <button className="dropdown-button">Reviewed Items ▾</button>
+            <button className="main-tab-button">
+              {activeTab === 'pending' && '⏳ Pending ▾'}
+              {activeTab === 'approved' && '✅ Approved ▾'}
+              {activeTab === 'rejected' && '❌ Rejected ▾'}
+            </button>
+
             <div className="dropdown-content">
-              <div onClick={() => navigate('/reviewed/approved')}>✅ Accepted</div>
-              <div onClick={() => navigate('/reviewed/rejected')}>❌ Rejected</div>
+              <button onClick={() => setActiveTab('pending')}>⏳ Pending</button>
+              <button onClick={() => setActiveTab('approved')}>✅ Approved</button>
+              <button onClick={() => setActiveTab('rejected')}>❌ Rejected</button>
             </div>
           </div>
           <button
-            className="logt-button"
+            className="logt-but"
             onClick={() => {
               localStorage.clear();
               window.location.href = '/login';
@@ -89,15 +116,27 @@ const AdminDashboard = () => {
       {/* Item List */}
       <div className="item-list">
         {loading ? (
-          <div className="loader-wrapper"><div className="loading-spinner"></div></div>
+          <div className="loader-wrapper">
+            <div className="loading-spinner"></div>
+          </div>
         ) : items.length === 0 ? (
-          <p className="empty-msg">No pending items to review.</p>
+          <p className="empty-msg">
+            {activeTab === 'approved'
+              ? 'No approved items found.'
+              : activeTab === 'rejected'
+              ? 'No rejected items found.'
+              : 'No pending items to review.'}
+          </p>
         ) : (
           items.map((item) => (
             <div className="custom-item-card" key={item._id}>
               <div className="custom-left">
                 <img
-                  src={item.thumbnail || 'https://via.placeholder.com/150'}
+                  src={item.images?.[0] || 'https://dummyimage.com/150x150/cccccc/000000&text=No+Image'}
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = 'https://dummyimage.com/150x150/cccccc/000000&text=No+Image';
+                  }}
                   alt={item.title}
                 />
               </div>
@@ -116,12 +155,16 @@ const AdminDashboard = () => {
               </div>
 
               <div className="middle-right">
-                <button className="approve" onClick={() => handleApproval(item._id, 'Approved')}>
-                  Approve
-                </button>
-                <button className="reject" onClick={() => handleApproval(item._id, 'Rejected')}>
-                  Reject
-                </button>
+                {activeTab === 'pending' && (
+                  <>
+                    <button className="approve" onClick={() => handleApproval(item._id, 'Approved')}>
+                      Approve
+                    </button>
+                    <button className="reject" onClick={() => handleApproval(item._id, 'Rejected')}>
+                      Reject
+                    </button>
+                  </>
+                )}
               </div>
 
               <div className="custom-right">
@@ -147,7 +190,9 @@ const AdminDashboard = () => {
           <div className="comment-popup">
             <div className="popup-content">
               <h3>Send Comment to Seller</h3>
-              <p><strong>Seller Email:</strong> {selectedItem.seller_id}</p>
+              <p>
+                <strong>Seller Email:</strong> {selectedItem.seller_id}
+              </p>
               <textarea
                 placeholder="Write your comment..."
                 value={commentText}

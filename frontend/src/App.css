@@ -1051,11 +1051,11 @@ h2.preview {
 
 .dark-theme .login-container h2,
 .dark-theme .registration-container h2 {
-  color: #111 !important;
+  color: var(--color-text) !important;
 }
 
 .dark-theme .login-link span {
-  color: #111 !important;
+  color: var(--color-text) !important;
 }
 
 .login-container input, .registration-container input, .registration-container select {

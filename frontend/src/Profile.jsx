@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './Profile.css';
+import { logProfileActivity, ActivityActions } from './utils/activityLogger';
 
 const Profile = () => {
   const [profile, setProfile] = useState({
@@ -94,6 +95,12 @@ const Profile = () => {
     alert(result.message);
 
     if (result.status === 'success') {
+      // Log the profile update activity
+      await logProfileActivity(
+        ActivityActions.UPDATED_PROFILE,
+        'Profile Information'
+      );
+      
       localStorage.setItem("user", JSON.stringify(updatedProfile));
       setEditMode(false);
     }
@@ -102,7 +109,6 @@ const Profile = () => {
     alert('Failed to update profile.');
   }
 };
-
 
   const fields = [
     { label: 'Email :', name: 'email', readOnly: true },

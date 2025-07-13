@@ -8,34 +8,7 @@ listings_bp = Blueprint('listings_bp', __name__)
 # --------------------------
 # POST - Add a new item
 # --------------------------
-@listings_bp.route('/post-item', methods=['POST'])
-@jwt_required()
-def post_item():
-    data = request.get_json()
-    db = current_app.config["DB"]
-    items_collection = db["items"]
 
-    required_fields = [
-        'title', 'description', 'category', 'startingPrice',
-        'condition', 'auctionEnd', 'userEmail', 'userName'
-    ]
-    for field in required_fields:
-        if not data.get(field):
-            return jsonify({'status': 'fail', 'message': f'Missing field: {field}'}), 400
-
-    images = data.get('images', [])
-    if not isinstance(images, list) or len(images) > 3:
-        return jsonify({'status': 'fail', 'message': 'Max 3 images allowed'}), 400
-
-    for img in images:
-        if not isinstance(img, str) or not img.startswith('data:image'):
-            return jsonify({'status': 'fail', 'message': 'Invalid image format'}), 400
-
-    data['timestamp'] = datetime.datetime.now().isoformat()
-    data['bids'] = []
-    items_collection.insert_one(data)
-
-    return jsonify({'status': 'success', 'message': 'Item posted successfully'}), 201
 
 
 # --------------------------

@@ -688,3 +688,15 @@ video.product-image {
   font-size: 0.9rem;
   font-style: italic;
 }
+
+.dark-theme .item-description-expanded {
+  background-color: var(--color-bg-card) !important;
+  color: var(--color-text) !important;
+}
+.dark-theme .item-desc {
+  color: var(--color-text) !important;
+}
+
+.dark-theme .collapse-text {
+  color: var(--color-text) !important;
+}
