@@ -19,6 +19,9 @@ from werkzeug.exceptions import RequestEntityTooLarge
 from App.routes.auth import auth_bp
 import threading
 from apscheduler.schedulers.background import BackgroundScheduler
+import razorpay
+import hmac
+import hashlib
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True, allow_headers=["Content-Type", "Authorization"], methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"])
@@ -27,6 +30,14 @@ load_dotenv()
 MONGO_URI = os.getenv("MONGO_URI")
 print("MONGO_URI Loaded:", MONGO_URI)
 JWT_SECRET = os.getenv("JWT_SECRET", "super-secret")
+
+
+# Razorpay credentials
+RAZORPAY_KEY_ID = os.getenv("RAZORPAY_KEY_ID")
+RAZORPAY_KEY_SECRET = os.getenv("RAZORPAY_KEY_SECRET")
+
+# Razorpay client setup
+razorpay_client = razorpay.Client(auth=(RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET))
 
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16 MB
 
@@ -246,39 +257,6 @@ def send_auction_emails(item):
             # Admin email
             admin_user = db.users.find_one({"is_admin": True})
             admin_email = admin_user['email'] if admin_user else None
-
-            # Send to all users except seller and admin
-            user_emails = [
-                user['email'] for user in db.users.find({}, {"email": 1})
-                if "@" in user.get("email", "")
-                and user['email'] != seller_email
-                and user['email'] != admin_email
-            ]
-
-            subject_all = "📢 New Auction Live Now!"
-            body_all = f"""
-Hello there! 👋
-
-A new auction item has just gone live on AuctionVerse! 🛍️
-
-🆕 Item: {item_title}
-📂 Category: {item_category}
-💰 Starting Price: ₹{starting_price}
-⏰ Ends On: {end_time}
-
-🔥 Head over to the platform and place your bids before time runs out!
-
-Cheers,  
-Team AuctionVerse 💛
-""".strip()
-
-            for email in user_emails:
-                try:
-                    msg = Message(subject=subject_all, recipients=[email], body=body_all)
-                    mail.send(msg)
-                    print(f"📧 Auction alert sent to {email}")
-                except Exception as e:
-                    print(f"❌ Failed to send to {email}: {e}")
 
             # 📬 Email to Admin
             if admin_email:
@@ -1390,6 +1368,9 @@ Team AuctionVerse 💛
         print("❌ Error in handle_auction_win:", e)
         return jsonify({"status": "error", "message": str(e)}), 500
 
+
+
+
 def get_auction_winner(item_id):
     """Determine the winner of an auction based on highest bid"""
     try:
@@ -2036,60 +2017,6 @@ def send_notification_if_allowed(email, message, n_type='general', extra_data=No
         print(f"❌ Error sending notification to {email}: {e}")
         return False
 
-@app.route('/api/payments/<buyer_email>', methods=['GET'])
-def get_user_payments(buyer_email):
-    try:
-        payments = list(db.payments.find({'buyer_email': buyer_email}))
-        for p in payments:
-            p['_id'] = str(p['_id'])
-        return jsonify({'status': 'success', 'payments': payments}), 200
-    except Exception as e:
-        return jsonify({'status': 'error', 'message': str(e)}), 500
-
-@app.route('/api/confirm-payment', methods=['POST'])
-def confirm_payment():
-    try:
-        data = request.get_json()
-        item_id = data.get("item_id")
-        seller_email = data.get("seller_email")
-
-        if not item_id or not seller_email:
-            return jsonify({"status": "fail", "message": "Missing item_id or seller_email"}), 400
-
-        # Find the pending payment record
-        payment = db.payments.find_one({
-            "item_id": item_id,
-            "seller_email": seller_email,
-            "status": "Pending"
-        })
-
-        if not payment:
-            return jsonify({"status": "fail", "message": "No pending payment found"}), 404
-
-        # Mark the payment as paid
-        db.payments.update_one(
-            {"_id": payment["_id"]},
-            {"$set": {"status": "Paid", "confirmed_at": datetime.now(ZoneInfo("Asia/Kolkata")).isoformat()}}
-        )
-
-        # Send notification to buyer
-        db.notifications.insert_one({
-            "email": payment["buyer_email"],
-            "type": "payment_confirmed",
-            "message": f"Your payment for '{payment['item_title']}' has been confirmed by the seller.",
-            "item_id": item_id,
-            "read": False,
-            "timestamp": datetime.now(ZoneInfo("Asia/Kolkata")).isoformat(),
-            "actionable": False
-        })
-
-        return jsonify({"status": "success", "message": "Payment confirmed and buyer notified"}), 200
-
-    except Exception as e:
-        print("❌ Error in confirm_payment:", e)
-        return jsonify({"status": "error", "message": str(e)}), 500
-
-
 @app.route('/api/admin/items', methods=['GET'])
 def get_all_items_for_admin():
     items = list(items_collection.find({}))
@@ -2128,6 +2055,10 @@ def approve_reject_item(item_id):
         item = items_collection.find_one({"_id": ObjectId(item_id)})
         seller_email = item.get("seller_id")
         item_title = item.get("title")
+        item_title = item.get("title")
+        item_category = item.get("category", "N/A")
+        starting_price = item.get("starting_price", "N/A")
+        end_time = item.get("end_time", "N/A")
 
         print(f"📧 Sending email to: {seller_email}")
 
@@ -2168,6 +2099,41 @@ Team AuctionVerse 💛
             print(f"✅ Email sent to {seller_email} about {status}")
         except Exception as e:
             print(f"❌ Email failed: {e}")
+
+        # ✅ Send email to all users if approved
+        if is_approved:
+            admin_email = "admin@auctionverse.com"  # Replace with actual admin email if stored
+            user_emails = [
+                user['email'] for user in db.users.find({}, {"email": 1})
+                if "@" in user.get("email", "")
+                and user['email'] != seller_email
+                and user['email'] != admin_email
+            ]
+
+            subject_all = "📢 New Auction Live Now!"
+            body_all = f"""
+Hello there! 👋
+
+A new auction item has just gone live on AuctionVerse! 🛍️
+
+🆕 Item: {item_title}
+📂 Category: {item_category}
+💰 Starting Price: ₹{starting_price}
+⏰ Ends On: {end_time}
+
+🔥 Head over to the platform and place your bids before time runs out!
+
+Cheers,  
+Team AuctionVerse 💛
+""".strip()
+
+            for email in user_emails:
+                try:
+                    msg = Message(subject=subject_all, recipients=[email], body=body_all)
+                    mail.send(msg)
+                    print(f"📧 Auction alert sent to {email}")
+                except Exception as e:
+                    print(f"❌ Failed to send to {email}: {e}")
 
         return jsonify({'message': f'Item {status.lower()} successfully'}), 200
 
@@ -2301,14 +2267,172 @@ def reset_password():
         'email': email
     }), 200
 
+# ------------------ ✅ Payment ROUTE ------------------
+@app.route('/api/payments/<buyer_email>', methods=['GET'])
+def get_user_payment(buyer_email):
+    try:
+        payments = list(db.payments.find({'buyer_email': buyer_email}))
+        for p in payments:
+            p['_id'] = str(p['_id'])
+        return jsonify({'status': 'success', 'payments': payments}), 200
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+@app.route('/api/confirm-payment', methods=['POST'])
+def confirm_payment():
+    try:
+        data = request.get_json()
+        item_id = data.get("item_id")
+        seller_email = data.get("seller_email")
+
+        if not item_id or not seller_email:
+            return jsonify({"status": "fail", "message": "Missing item_id or seller_email"}), 400
+
+        # Find the pending payment record
+        payment = db.payments.find_one({
+            "item_id": item_id,
+            "seller_email": seller_email,
+            "status": "Pending"
+        })
+
+        if not payment:
+            return jsonify({"status": "fail", "message": "No pending payment found"}), 404
+
+        # Mark the payment as paid
+        db.payments.update_one(
+            {"_id": payment["_id"]},
+            {"$set": {"status": "Paid", "confirmed_at": datetime.now(ZoneInfo("Asia/Kolkata")).isoformat()}}
+        )
+
+        # Send notification to buyer
+        db.notifications.insert_one({
+            "email": payment["buyer_email"],
+            "type": "payment_confirmed",
+            "message": f"Your payment for '{payment['item_title']}' has been confirmed by the seller.",
+            "item_id": item_id,
+            "read": False,
+            "timestamp": datetime.now(ZoneInfo("Asia/Kolkata")).isoformat(),
+            "actionable": False
+        })
+
+        return jsonify({"status": "success", "message": "Payment confirmed and buyer notified"}), 200
+
+    except Exception as e:
+        print("❌ Error in confirm_payment:", e)
+        return jsonify({"status": "error", "message": str(e)}), 500
+    
+@app.route('/api/create-order', methods=['POST'])
+def create_order():
+    data = request.get_json()
+    amount = data.get('amount')
+    email = data.get('email')
+    item_id = data.get('itemId')
+
+    # Basic validation
+    if not amount or not email or not item_id:
+        return jsonify({'status': 'fail', 'message': 'Amount, email, and itemId are required'}), 400
+
+    try:
+        amount_paise = int(amount) * 100
+
+        order = razorpay_client.order.create({
+            "amount": amount_paise,
+            "currency": "INR",
+            "payment_capture": 1
+        })
+
+        return jsonify({
+            'status': 'success',
+            'order_id': order['id'],
+            'amount': amount_paise,
+            'currency': 'INR',
+            'razorpay_key': RAZORPAY_KEY_ID
+        }), 200
+
+    except Exception as e:
+        return jsonify({'status': 'fail', 'message': f"Error creating order: {str(e)}"}), 500
+
+
+@app.route('/api/payments/<email>', methods=['GET'])
+def get_user_payments(email):
+    try:
+        if not email:
+            return jsonify({"status": "fail", "message": "Email is required"}), 400
+
+        user_payments = list(db.payments.find({"email": email}))
+        for payment in user_payments:
+            payment['_id'] = str(payment['_id'])  # Convert ObjectId to string
+
+        return jsonify({"status": "success", "payments": user_payments}), 200
+
+    except Exception as e:
+        return jsonify({"status": "error", "message": f"Server error: {str(e)}"}), 500
+
+@app.route('/api/verify-payment', methods=['POST'])
+def verify_payment():
+    data = request.get_json()
+    order_id = data.get('razorpay_order_id')
+    payment_id = data.get('razorpay_payment_id')
+    signature = data.get('razorpay_signature')
+    email = data.get('email')
+    item_id = data.get('itemId')
+    amount = data.get('amount')
+
+    # Step 1: Verify Razorpay signature
+    generated_signature = hmac.new(
+        bytes(RAZORPAY_KEY_SECRET, 'utf-8'),
+        msg=bytes(order_id + "|" + payment_id, 'utf-8'),
+        digestmod=hashlib.sha256
+    ).hexdigest()
+
+    if generated_signature != signature:
+        return jsonify({'status': 'fail', 'message': 'Payment signature verification failed'}), 400
+
+    # Step 2: Get item info
+    item = db.items.find_one({"_id": ObjectId(item_id)})
+    item_title = item.get('title', 'Unknown') if item else 'Unknown'
+    seller_email = item.get('posted_by', 'Unknown') if item else 'Unknown'
+
+    # Step 3: Try to update existing pending payment
+    updated = db.payments.update_one(
+        {
+            "item_id": item_id,
+            "email": email,
+            "status": "Pending"
+        },
+        {
+            "$set": {
+                "status": "Paid",
+                "razorpay_order_id": order_id,
+                "razorpay_payment_id": payment_id,
+                "confirmed_at": datetime.now(ZoneInfo("Asia/Kolkata")).isoformat()
+            }
+        }
+    )
+
+    if updated.modified_count == 0:
+        # No existing pending record, so insert new
+        payment_data = {
+            'email': email,
+            'item_id': item_id,
+            'amount': amount,
+            'razorpay_order_id': order_id,
+            'razorpay_payment_id': payment_id,
+            'item_title': item_title,
+            'seller_email': seller_email,
+            'status': 'Paid',
+            'confirmed_at': datetime.now(ZoneInfo("Asia/Kolkata")).isoformat()
+        }
+        db.payments.insert_one(payment_data)
+
+    return jsonify({'status': 'success', 'message': 'Payment verified and updated'}), 200
+
 # ------------------ ✅ PROTECTED ROUTE ------------------
 @app.route('/api/protected/dashboard', methods=['GET'])
 @jwt_required()
 def dashboard():
     user_email = get_jwt_identity()
     return jsonify({'message': f'Welcome {user_email}, this is a protected route!'}), 200
-
-
     
 # ------------------ Delete Account Endpoint ------------------
 

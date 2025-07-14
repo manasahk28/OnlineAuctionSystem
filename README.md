@@ -71,6 +71,8 @@ pip install bcrypt
 pip install python-dotenv 
 pip install werkzeug 
 pip install tzdata
+pip install APScheduler
+pip install razorpay
 
 python app.py  # Start the Flask server
 

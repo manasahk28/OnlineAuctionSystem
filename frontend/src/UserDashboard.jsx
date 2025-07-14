@@ -19,6 +19,8 @@ import {
   ResponsiveContainer
 } from 'recharts';
 import { FaTimes } from 'react-icons/fa';
+import ReactDOM from 'react-dom';
+
 const UserDashboard = () => {
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem('user'));
@@ -265,7 +267,7 @@ if (data.status === 'success') {
               />
             </div>
 
-            {showImageModal && (
+            {showImageModal && ReactDOM.createPortal(
               <div
                 className="image-modal"
                 onClick={(e) => {
@@ -275,16 +277,10 @@ if (data.status === 'success') {
                 }}
               >
                 <div className="image-modal-content" style={{ position: 'relative' }}>
-                  <button
-                    onClick={() => setShowImageModal(false)}
-                    className="image-modal-close-btn"
-                    aria-label="Close"
-                  >
-                    <FaTimes />
-                  </button>
                   <img src={profileImage} alt="Full View" />
                 </div>
-              </div>            
+              </div>,
+              document.body
             )}            
               <h3 className="username">{profile.UserName || user.UserName || 'Your Name'}</h3>
 

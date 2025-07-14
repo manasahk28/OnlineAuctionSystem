@@ -192,6 +192,29 @@ const NotificationsPage = () => {
         <h2>🔔 Notifications</h2>
       </div>
       <div className="notifications-container">
+        <div className="right-section">
+          <h4>Manage Notifications</h4>
+          {Object.keys(preferences)
+            .filter(
+              key =>
+                !key.toLowerCase().includes('email') &&
+                key !== 'enable_new_item'
+            )
+            .map((key) => (
+              <div key={key} className="toggle-item">
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={preferences[key]}
+                    onChange={() => togglePreference(key)}
+                  />{' '}
+                  {key === 'enable_payment'
+                    ? 'Payment Pending'
+                    : key.replace('enable_', '').replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())}
+                </label>
+              </div>
+            ))}
+        </div>
         <div className="left-section">
           {loading ? (
             <p>Loading...</p>
@@ -320,29 +343,7 @@ const NotificationsPage = () => {
             <p className="no-alerts">🎉 You're all caught up!</p>
           )}
         </div>
-        <div className="right-section">
-          <h4>Manage Notifications</h4>
-          {Object.keys(preferences)
-            .filter(
-              key =>
-                !key.toLowerCase().includes('email') &&
-                key !== 'enable_new_item'
-            )
-            .map((key) => (
-              <div key={key} className="toggle-item">
-                <label>
-                  <input
-                    type="checkbox"
-                    checked={preferences[key]}
-                    onChange={() => togglePreference(key)}
-                  />{' '}
-                  {key === 'enable_payment'
-                    ? 'Payment Pending'
-                    : key.replace('enable_', '').replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())}
-                </label>
-              </div>
-            ))}
-        </div>
+
       </div>
     </div>
   );
