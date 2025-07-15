@@ -143,7 +143,9 @@ const handleSubmit = async (e) => {
 
   const payload = {
     ...form,
-    category: form.category === 'Other' ? customCategory : form.category,
+    category: form.category === 'Other' ? 'Other' : form.category, // Always save as 'Other' in DB
+    // Optionally, you can send the customCategory as a separate field if backend wants to store/display it
+    custom_category: form.category === 'Other' ? customCategory : undefined
   };
 
   try {

@@ -73,6 +73,8 @@ pip install werkzeug 
 pip install tzdata
 pip install APScheduler
 pip install razorpay
+pip install --upgrade setuptools
+pip install watchdog
 
 python app.py  # Start the Flask server
 
