@@ -172,7 +172,13 @@ input[name="newBid"]:focus {
 }
 @media (max-width: 900px) {
   .my-bid-card {
-    width: 100%;
-    aspect-ratio: unset;
+    width: 80vw !important;
+    max-width: 80vw !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    padding: 10px 8px !important;
+    border-radius: 8px !important;
+    box-sizing: border-box !important;
+    min-width: 0 !important;
   }
 } 

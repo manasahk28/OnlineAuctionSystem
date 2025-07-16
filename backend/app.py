@@ -50,9 +50,7 @@ app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USERNAME'] = 'manasahk736@gmail.com'
-app.config['MAIL_PASSWORD'] = 'tcrzievvdexxowqp'
-app.config['MAIL_DEFAULT_SENDER'] = 'manasahk736@gmail.com'
+app.config['MAIL_DEFAULT_SENDER'] = 'onlineauction25@gmail.com'
 
 mail = Mail(app)
 

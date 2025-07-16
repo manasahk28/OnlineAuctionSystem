@@ -136,6 +136,12 @@
   }
 }
 
+@media (max-width: 768px) {
+  .dark-theme .menu-icon {
+    color: #111 !important;
+  }
+}
+
 /* Sidebar Blur Overlay */
 .sidebar-overlay {
   position: fixed;
@@ -155,7 +161,8 @@
   left: -300px;
   width: 260px;
   height: 100vh;
-  background-color: #f58220;
+  background-color: #fff !important;
+  color: #222 !important;
   display: flex;
   flex-direction: column;
   padding: 2rem 1rem;
@@ -357,7 +364,7 @@
   max-width: 700px;
   margin: 40px auto;
   background: #fff;
-  border-radius: 18px;
+  /* border-radius: ; */
   box-shadow: 0 6px 32px rgba(255, 107, 0, 0.1);
   position: relative;
   overflow: hidden;
@@ -374,9 +381,7 @@
 .about-header h2,
 .contact-header h2,
 .help-header h2 {
-  color: #e36414;
-  font-weight: 700;
-  margin: 0;
+  color: var(--color-secondary) !important;
 }
 
 .contact-subtitle {
@@ -491,6 +496,11 @@ main {
   color: var(--color-text) !important;
 }
 
+.about-content {
+  padding-left: 2.5rem !important;
+  padding-bottom: 2.5rem !important;
+}
+
 .contact-form input, .contact-form textarea {
   background: var(--color-bg-card) !important;
   color: var(--color-text) !important;
@@ -532,4 +542,39 @@ main {
 .dark-theme .navbar-right a:hover {
   color: #fff !important;
   text-decoration: none;
+}
+
+.mobile-sidebar {
+  background-color: #fff !important;
+  color: #222 !important;
+}
+
+.dark-theme .mobile-sidebar {
+  background-color: #111 !important;
+  color: #fff !important;
+}
+
+.back-btn {
+  background: var(--color-secondary) !important;
+  color: #fff !important;
+  border: none !important;
+}
+
+.back-btn svg, .back-btn i, .back-btn span {
+  color: #fff !important;
+}
+
+.dark-theme .back-btn {
+  background: var(--color-secondary) !important;
+  color: #111 !important;
+}
+
+.dark-theme .back-btn svg, .dark-theme .back-btn i, .dark-theme .back-btn span {
+  color: #111 !important;
+}
+
+.about-header, .contact-header, .help-header {
+  background: rgba(255, 153, 0, 0.08) !important;
+  /* border-radius: 0 0 24px 24px !important; */
+  padding-bottom: 1.5rem !important;
 }

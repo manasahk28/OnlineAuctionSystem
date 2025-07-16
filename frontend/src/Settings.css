@@ -156,9 +156,17 @@
         min-width: unset;
         width: 100%;
         justify-content: center;
+        flex-wrap: wrap;
+        box-sizing: border-box;
+        overflow-x: auto;
+        margin: 0 auto 1rem auto;
+        max-width: 100%;
     }
     .settings-content-card {
         padding: 1.2rem 0 0 0;
+        box-sizing: border-box;
+        width: 100%;
+        min-width: 0;
     }
     }
 

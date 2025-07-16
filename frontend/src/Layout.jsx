@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import ChatBot from './ChatBot';
 import './Layout.css';
 
-const Layout = ({ children, hideFooter }) => {
+const Layout = ({ children, hideFooter, hideChatBot }) => {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [showLogoutPopup, setShowLogoutPopup] = useState(false);
@@ -53,7 +53,7 @@ const Layout = ({ children, hideFooter }) => {
 
   return (
     <>
-      <ChatBot />
+      <ChatBot hide={hideChatBot} />
       {sidebarOpen && <div className="sidebar-overlay" onClick={closeSidebar} />} {/* Blur background */}
       <nav className="navbar">
 <div className="navbar-left">
@@ -98,7 +98,7 @@ const Layout = ({ children, hideFooter }) => {
 
 <div className={`layout-content ${sidebarOpen ? 'blurred' : ''}`}>
 
-      <ChatBot />
+      <ChatBot hide={hideChatBot} />
 
       {showLogoutPopup && (
         <div className="popup-overlay">
@@ -268,7 +268,7 @@ export const Help = () => {
   return (
     <Layout hideFooter>
       <div className="help-card">
-        <button onClick={() => navigate(-1)} className="back-btn">
+        <button onClick={() => navigate(-1)} className="backk-btn">
           <FaArrowLeft />
         </button>
         <div className="help-header">

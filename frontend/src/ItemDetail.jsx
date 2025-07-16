@@ -213,6 +213,25 @@ if (!item) {
   const content = (
       <div className="item-detail-container">
         <div className="left-panel">
+        {/* ===== Title & Status - FOR MOBILE ONLY ===== */}
+        <div className="title-status-mobile">
+          <h1 className="item-title">{item.title}</h1>
+          <div className="item-status-row">
+            {item.status && (
+              <span className={`status-badge ${item.status.toLowerCase()}`}>{item.status}</span>
+            )}
+            {isAuctionUpcoming && (
+              <span className="status-badge upcoming">⏰ Upcoming Auction</span>
+            )}
+            {isAuctionLive && (
+              <span className="status-badge live">🔥 Auction Live</span>
+            )}
+            {isAuctionEnded && (
+              <span className="status-badge ended">⏳ Auction Ended</span>
+            )}
+          </div>
+        </div>
+
 
         <div className="carousel-wrapper">
         {mediaList.length > 1 && (
@@ -261,6 +280,7 @@ if (!item) {
         </div>
 
         <div className="right-panel">
+        <div className="title-status-desktop">
           <h1 className="item-title">{item.title}</h1>
           <div className="item-status-row">
             {item.status && (
@@ -276,6 +296,7 @@ if (!item) {
               <span className="status-badge ended">⏳ Auction Ended</span>
             )}
           </div>
+        </div>
 
         {/* Show winner information for ended auctions */}
         {isAuctionEnded && item.winner_info && (

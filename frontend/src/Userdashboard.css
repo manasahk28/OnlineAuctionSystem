@@ -490,6 +490,14 @@ body, html{
   .chart-card {
     margin-bottom: 20px;
   }
+
+  .sidebar-right,
+  .scroll-container {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
 }
 
 /* Medium screen responsive design */

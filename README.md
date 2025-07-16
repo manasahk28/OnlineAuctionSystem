@@ -1,6 +1,6 @@
 # Online Auction System
 
-Welcome to the **Online Auction System**, a full-stack web app for managing campus-based product auctions.  
+Welcome to the *Online Auction System* - **Auction Verse**, a full-stack web app for managing campus-based product auctions.  
 Users can register, log in, list items for auction, and place bids in real-time!
 
 ---
@@ -46,9 +46,17 @@ from pymongo import MongoClient
 
 MONGO_URI = "mongodb+srv://<username>:<password>@cluster0.mongodb.net/?retryWrites=true&w=majority"
 client = MongoClient(MONGO_URI)
-db = client["auctionDB"]
+db = client["auction_db"]
 users_collection = db["users"]
+user_emails = [user['email'] for user in users_collection.find({}, {"email": 1}) if "@" in user.get("email", "")]
+profiles_collection = db["profiles"]
 items_collection = db["items"]
+bids_collection = db["bids"]
+notifications_collection = db["notifications"]
+payments_collection = db['payments']
+notifications_collection.create_index('email')
+reset_tokens_collection = db["reset_tokens"]
+preferences_collection = db["preferences"]
 ```
 
 ---
@@ -85,7 +93,8 @@ The backend runs at: http://localhost:5000/
 ```text
 cd frontend  # Navigate to frontend folder
 
-npm install  # Install React dependencies
+# Install React dependencies
+npm install axios react-router-dom react-icons recharts @fortawesome/react-fontawesome @fortawesome/free-brands-svg-icons
 
 npm start  # Start the React app
 
@@ -100,11 +109,17 @@ The frontend runs at: http://localhost:3000/
 Online-Auction-System/
 ├── backend/
 │   ├── app.py
-│   ├── database.py (optional)
+│   ├── .env
 │   └── routes/
 │       ├── auth.py
 │       └── auctions.py
 ├── frontend/
+|   ├── public/
+|   |   ├── assets
+|   |   ├── images
+|   |   ├── favicon.ico
+|   |   ├── index.html
+|   |   ├── manifest.json
 │   ├── src/
 │   │   ├── pages
 │   │   └── App.js

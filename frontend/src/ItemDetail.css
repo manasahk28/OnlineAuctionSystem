@@ -320,6 +320,18 @@ video.product-image {
   letter-spacing: 0.5px;
 }
 
+@media screen and (max-width: 1024px) and (min-width: 600px) {
+  .item-id {
+    background-color: #e6f0ff; /* Light blue shade or your brand color */
+    color: #191a1b;
+    font-size: 1.1rem;
+    padding: 5px 10px;
+    border-radius: 20px;
+    width: fit-content;
+    max-width: 100%;
+    margin-inline: auto;
+  }
+}
 .approval-status {
   font-weight: bold;
   margin: 8px 0;
@@ -552,6 +564,7 @@ video.product-image {
   padding: 0.5rem 1rem;
   border-radius: 20px;
   font-weight: bold;
+  margin-top: 13px;
   font-size: 0.95rem;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -699,4 +712,121 @@ video.product-image {
 
 .dark-theme .collapse-text {
   color: var(--color-text) !important;
+}
+
+@media screen and (max-width: 1024px) {
+  .item-detail-container {
+    flex-direction: column;
+    padding: 2rem 1rem;
+    gap: 2rem;
+    margin-right: 10px;
+  }
+
+  .carousel-wrapper {
+    width: 100%;
+    height: auto;
+  }
+
+  .right-panel {
+    width: 100%;
+    padding: 1rem;
+  }
+
+  .action-buttons {
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .bid-button,
+  .back-button {
+    width: 100%;
+    height: 50px;
+    margin-right: 25px;
+    margin-bottom: 15px;
+  }
+}
+
+@media screen and (max-width: 600px) {
+  .item-detail-container {
+    padding: 1rem;
+  }
+
+  .carousel-wrapper {
+    height: 250px;
+    padding: 10px;
+  }
+
+  .thumbnail {
+    width: 50px;
+    height: 50px;
+  }
+
+  .winner-section {
+    padding: 16px;
+  }
+
+  .right-panel p,
+  .right-panel h1 {
+    font-size: 0.95rem;
+  }
+
+  .highest-bid {
+    font-size: 18px;
+  }
+
+  .upcoming-bid-button {
+    width: 100%;
+    height: auto;
+    padding: 1rem;
+    font-size: 1rem;
+    margin-right: 25px;
+  }
+
+  .status-badge {
+    font-size: 0.85rem;
+    padding: 0.3rem 0.6rem;
+  }
+
+  .item-id {
+    font-size: 0.9rem;
+  }
+
+  .item-title {
+    font-size: 1.25rem;
+  }
+}
+
+/* Hide mobile version on big screens */
+.title-status-mobile {
+  display: none;
+}
+
+@media screen and (max-width: 1024px) {
+  .title-status-desktop {
+    display: none;
+  }
+
+  .title-status-mobile {
+    display: block;
+    margin-bottom: 1rem;
+    text-align: center;
+  }
+
+  .title-status-mobile .item-title {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .item-status-row {
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .status-badge {
+    font-size: 0.9rem;
+    padding: 6px 10px;
+    border-radius: 12px;
+  }
 }

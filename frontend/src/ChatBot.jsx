@@ -2,7 +2,8 @@ import { useState, useEffect, useRef } from 'react';
 import './ChatBot.css';
 import noaPic from './assets/girl-avatar.png';
 
-const ChatBot = () => {
+const ChatBot = ({ hide }) => {
+  // All hooks must be called first, always
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([]);
   const [showCategories, setShowCategories] = useState(true);
@@ -269,6 +270,8 @@ const ChatBot = () => {
   const unaskedOptions = selectedCategory
     ? categories[selectedCategory].filter(opt => !(askedQuestions[selectedCategory] || []).includes(opt.text))
     : [];
+
+  if (hide) return null;
 
   return (
     <>

@@ -364,9 +364,13 @@ const handleRemoveImage = (index) => {
     accept="image/*"
     onChange={handleChange}
   />
-  <p className="image-count">
-  {form.images.length} of 3 images selected
-</p>
+  {form.images.length > 0 && (
+    <p className="image-count">
+      {form.images.length} of 3 images selected
+    </p>
+  )}
+
+
 
 </div>
 

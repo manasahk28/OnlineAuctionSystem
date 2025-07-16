@@ -330,7 +330,7 @@ const RecentActivity = () => {
   return (
     <div className="recent-activity-wrapper">
         <div className="profile-header">
-          <h2 style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#444', marginLeft:'30px'}}>
+          <h2 style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#444', marginLeft:'-40px', marginTop: '-20px' }}>
             <span role="img" aria-label="recent activity">🗒️</span>Recent Activity
           </h2>
         
@@ -354,7 +354,8 @@ const RecentActivity = () => {
             display: 'flex',
             alignItems: 'center',
             gap: '5px',
-            marginRight: '10px'
+            marginRight: '10px',
+            marginLeft: '-60px',
           }}
         >
           {filterLoading ? '⏳' : '🔄'} Refresh

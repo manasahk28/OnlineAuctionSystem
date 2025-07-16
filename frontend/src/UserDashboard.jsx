@@ -37,6 +37,12 @@ const UserDashboard = () => {
   const [categoryData, setCategoryData] = useState([]);       // For pie chart
   const [biddedCategoryData, setBiddedCategoryData] = useState([]); // For bar chart
 
+  const sortedCategories = categoryData.length > 0
+  ? [...categoryData].sort((a, b) => b.value - a.value)
+  : [];
+
+  const topCategory = sortedCategories.length > 0 ? sortedCategories[0] : null;
+
   // Define the predefined categories that should be shown in the graph (matching the dropdown exactly)
   const predefinedCategories = [
     "Books", "Electronics", "Clothing", "Stationery", "Lab Equipment", 
@@ -321,14 +327,14 @@ if (data.status === 'success') {
                         </ResponsiveContainer>
                         {categoryData.length > 0 && (
                           <p style={{ fontWeight: 'bold', color: '#FF6B00', marginTop: '10px' }}>
-                            🔝 Most Auctioned Category: {categoryData[0].name} ({categoryData[0].value} items)
+                            🔝 Most Auctioned Category: {topCategory.name} ({topCategory.value} items)
                           </p>
                         )}
                       </div>
 
                       {/* Bar Chart: Bidded items per category */}
                       <div className="chart-card">
-                        <h4>Bids Placed by Category</h4>
+                        <h4>My Bids by Category</h4>
                         <ResponsiveContainer width="100%" height={250}>
                           <BarChart data={biddedCategoryData}>
                             <XAxis dataKey="category" />

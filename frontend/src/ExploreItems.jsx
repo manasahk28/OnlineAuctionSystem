@@ -179,7 +179,7 @@ const ExploreItems = () => {
   
 
   return (
-      <Layout>
+      <Layout hideChatBot={sidebarOpen}>
         <div className="explore-container">
           <div className="explore-header">
             <h2 className="explore-heading">🧭 Hunt & Win</h2>
