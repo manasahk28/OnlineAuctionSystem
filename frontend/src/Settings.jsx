@@ -142,38 +142,51 @@ import { useTheme } from './ThemeContext';
     const [message, setMessage] = useState('');
     const [error, setError] = useState('');
 
-    const handleDelete = async () => {
-        if (!window.confirm('Are you sure you want to delete your account? This action cannot be undone.')) return;
-        setLoading(true);
-        setMessage('');
-        setError('');
-        try {
-            const token = localStorage.getItem('token');
-            console.log('JWT token:', token); // Debug: log the token
-            const res = await fetch('http://localhost:5000/api/delete-account', {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-            const data = await res.json();
-            if (res.ok && data.status === 'success') {
-                setMessage('Account deleted successfully. Redirecting...');
-                localStorage.removeItem('token');
-                localStorage.removeItem('user'); // Remove user info
-                sessionStorage.removeItem('loggedIn'); // Remove login session
-                setTimeout(() => {
-                    window.location.href = '/login';
-                }, 2000);
-            } else {
-                setError(data.message || 'Failed to delete account.');
+const handleDelete = async () => {
+    if (!window.confirm('Are you sure you want to delete your account? This action cannot be undone.')) return;
+    
+    setLoading(true);
+    setMessage('');
+    setError('');
+
+    try {
+        const token = localStorage.getItem('token');
+        console.log('JWT token:', token); // Debugging
+
+        const res = await fetch('http://localhost:5000/api/delete-account', {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
             }
-        } catch (err) {
-            setError(err.message || 'An error occurred. Please try again.');
+        });
+
+        const data = await res.json();
+
+        if (res.ok && data.status === 'success') {
+            setMessage('Account deleted successfully. Opening feedback form...');
+
+            // Clear local/session storage
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            sessionStorage.removeItem('loggedIn');
+
+            // 🪄 Open Google Form in new tab
+            window.open('https://forms.gle/nQiwGfyxE7q8YNpf6', '_blank');
+
+            // Optional: Redirect to login/home in current tab
+            setTimeout(() => {
+                window.location.href = '/login'; // Or maybe a thank-you page
+            }, 1000);
+        } else {
+            setError(data.message || 'Failed to delete account.');
         }
-        setLoading(false);
-    };
+    } catch (err) {
+        setError(err.message || 'An error occurred. Please try again.');
+    }
+
+    setLoading(false);
+};
 
     return (
         <div className="settings-section">
