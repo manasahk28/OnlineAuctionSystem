@@ -7,3 +7,8 @@ bcrypt==4.1.2
 dnspython
 gunicorn
 flask-jwt-extended
+apscheduler
+razorpay
+requests
+setuptools
+dnspython
