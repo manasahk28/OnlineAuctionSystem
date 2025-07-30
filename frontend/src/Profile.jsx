@@ -15,6 +15,7 @@ const Profile = () => {
 
   const [editMode, setEditMode] = useState(false);
   const [completionPercent, setCompletionPercent] = useState(0); // 🆕 State for % completed
+  const backend = process.env.REACT_APP_BACKEND_URL;
 
   useEffect(() => {
     const userData = JSON.parse(localStorage.getItem('user') || '{}');
@@ -22,7 +23,7 @@ const Profile = () => {
 
     const fetchProfileData = async () => {
       try {
-        const res = await fetch(`http://localhost:5000/api/get-profile?email=${userData.email}`);
+        const res = await fetch(`${backend}/api/get-profile?email=${userData.email}`);
         const data = await res.json();
         if (data.status === 'success') {
           const p = data.profile;
@@ -65,50 +66,50 @@ const Profile = () => {
   };
 
   const handleSave = async () => {
-  try {
-    // Step 1: Get the latest profile data from the DB
-    const res1 = await fetch(`http://localhost:5000/api/get-profile?email=${profile.email}`);
-    const data1 = await res1.json();
+    try {
+      // Step 1: Get the latest profile data from the DB
+      const res1 = await fetch(`${backend}/api/get-profile?email=${profile.email}`);
+      const data1 = await res1.json();
 
-    if (data1.status !== 'success') {
-      alert('Failed to fetch latest profile info');
-      return;
+      if (data1.status !== 'success') {
+        alert('Failed to fetch latest profile info');
+        return;
+      }
+
+      const existingProfile = data1.profile;
+
+      // Step 2: Merge existing with newly edited fields
+      const updatedProfile = {
+        ...existingProfile,
+        ...profile,
+        email: profile.email  // make sure email stays consistent
+      };
+
+      // Step 3: Save merged data
+      const res = await fetch(`${backend}/api/update-profile`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedProfile)
+      });
+
+      const result = await res.json();
+      alert(result.message);
+
+      if (result.status === 'success') {
+        // Log the profile update activity
+        await logProfileActivity(
+          ActivityActions.UPDATED_PROFILE,
+          'Profile Information'
+        );
+
+        localStorage.setItem("user", JSON.stringify(updatedProfile));
+        setEditMode(false);
+      }
+    } catch (err) {
+      console.error('Profile update error:', err);
+      alert('Failed to update profile.');
     }
-
-    const existingProfile = data1.profile;
-
-    // Step 2: Merge existing with newly edited fields
-    const updatedProfile = {
-      ...existingProfile,
-      ...profile,
-      email: profile.email  // make sure email stays consistent
-    };
-
-    // Step 3: Save merged data
-    const res = await fetch('http://localhost:5000/api/update-profile', {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(updatedProfile)
-    });
-
-    const result = await res.json();
-    alert(result.message);
-
-    if (result.status === 'success') {
-      // Log the profile update activity
-      await logProfileActivity(
-        ActivityActions.UPDATED_PROFILE,
-        'Profile Information'
-      );
-      
-      localStorage.setItem("user", JSON.stringify(updatedProfile));
-      setEditMode(false);
-    }
-  } catch (err) {
-    console.error('Profile update error:', err);
-    alert('Failed to update profile.');
-  }
-};
+  };
 
   const fields = [
     { label: 'Email :', name: 'email', readOnly: true },

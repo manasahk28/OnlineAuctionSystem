@@ -14,6 +14,7 @@ const Layout = ({ children, hideFooter, hideChatBot }) => {
   const [showFarewell, setShowFarewell] = useState(false);
   const [fadePopup, setFadePopup] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const backend = process.env.REACT_APP_BACKEND_URL;
 
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
@@ -56,10 +57,10 @@ const Layout = ({ children, hideFooter, hideChatBot }) => {
       <ChatBot hide={hideChatBot} />
       {sidebarOpen && <div className="sidebar-overlay" onClick={closeSidebar} />} {/* Blur background */}
       <nav className="navbar">
-<div className="navbar-left">
-  <button className="menu-icon" onClick={toggleSidebar}>☰</button>
-  <h2 className="site-title">Auction Verse</h2>
-</div>
+        <div className="navbar-left">
+          <button className="menu-icon" onClick={toggleSidebar}>☰</button>
+          <h2 className="site-title">Auction Verse</h2>
+        </div>
         <div className="navbar-right desktop-only">
           {user ? (
             <>
@@ -96,54 +97,54 @@ const Layout = ({ children, hideFooter, hideChatBot }) => {
         </div>
       </nav>
 
-<div className={`layout-content ${sidebarOpen ? 'blurred' : ''}`}>
+      <div className={`layout-content ${sidebarOpen ? 'blurred' : ''}`}>
 
-      <ChatBot hide={hideChatBot} />
+        <ChatBot hide={hideChatBot} />
 
-      {showLogoutPopup && (
-        <div className="popup-overlay">
-          <div className={`popup-box ${fadePopup ? 'fade-out' : ''}`}>
-            {!showFarewell ? (
-              <>
-                <p>Are you sure you want to logout?</p>
-                <div className="popup-actions">
-                  <button className="btn confirm" onClick={confirmLogout}>Yes</button>
-                  <button className="btn cancel" onClick={cancelLogout}>No</button>
-                </div>
-              </>
-            ) : (
-              <p className="farewell-text">We'll miss you! Come back soon ❤️</p>
-            )}
-          </div>
-        </div>
-      )}
-
-      <main>{children}</main>
-
-      {!hideFooter && (
-        <footer className="footer">
-          <div className="footer-content">
-            <h3>Auction Verse</h3>
-            <p>© 2025 Campus Auction System · All rights reserved</p>
-            <div className="footer-links">
-              <a href="/about">About</a>
-              <a href="/contact">Contact</a>
-              <a href="/help">Help</a>
+        {showLogoutPopup && (
+          <div className="popup-overlay">
+            <div className={`popup-box ${fadePopup ? 'fade-out' : ''}`}>
+              {!showFarewell ? (
+                <>
+                  <p>Are you sure you want to logout?</p>
+                  <div className="popup-actions">
+                    <button className="btn confirm" onClick={confirmLogout}>Yes</button>
+                    <button className="btn cancel" onClick={cancelLogout}>No</button>
+                  </div>
+                </>
+              ) : (
+                <p className="farewell-text">We'll miss you! Come back soon ❤️</p>
+              )}
             </div>
           </div>
-          <div className="social-icons">
-            <a href="https://www.instagram.com" target="_blank" rel="noreferrer">
-              <FontAwesomeIcon icon={faInstagram} />
-            </a>
-            <a href="https://www.linkedin.com" target="_blank" rel="noreferrer">
-              <FontAwesomeIcon icon={faLinkedin} />
-            </a>
-            <a href="https://www.twitter.com" target="_blank" rel="noreferrer">
-              <FontAwesomeIcon icon={faTwitter} />
-            </a>
-          </div>
-        </footer>
-      )}
+        )}
+
+        <main>{children}</main>
+
+        {!hideFooter && (
+          <footer className="footer">
+            <div className="footer-content">
+              <h3>Auction Verse</h3>
+              <p>© 2025 Campus Auction System · All rights reserved</p>
+              <div className="footer-links">
+                <a href="/about">About</a>
+                <a href="/contact">Contact</a>
+                <a href="/help">Help</a>
+              </div>
+            </div>
+            <div className="social-icons">
+              <a href="https://www.instagram.com" target="_blank" rel="noreferrer">
+                <FontAwesomeIcon icon={faInstagram} />
+              </a>
+              <a href="https://www.linkedin.com" target="_blank" rel="noreferrer">
+                <FontAwesomeIcon icon={faLinkedin} />
+              </a>
+              <a href="https://www.twitter.com" target="_blank" rel="noreferrer">
+                <FontAwesomeIcon icon={faTwitter} />
+              </a>
+            </div>
+          </footer>
+        )}
       </div>
     </>
   );
@@ -189,7 +190,7 @@ export const Contact = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch('http://localhost:5000/api/contact', {
+      const response = await fetch('${backend}/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),

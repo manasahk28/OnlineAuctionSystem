@@ -4,43 +4,44 @@ import './MyListings.css';
 const MyListings = ({ setEditingItemId, setActiveSection }) => {
   const [listings, setListings] = useState([]);
   const [loading, setLoading] = useState(true);
+  const backend = process.env.REACT_APP_BACKEND_URL;
 
   const user = JSON.parse(localStorage.getItem('user'));
 
   // 📦 Fetch all items listed by the user
-const fetchListings = async () => {
-      if (!user?.email) {
-        console.error("No user email found. Cannot fetch listings.");
-        setLoading(false);
-        return;
-      }
+  const fetchListings = async () => {
+    if (!user?.email) {
+      console.error("No user email found. Cannot fetch listings.");
+      setLoading(false);
+      return;
+    }
 
-      try {
-        const res = await fetch(`http://localhost:5000/api/items/user/${user.email}`);
-        const data = await res.json();
+    try {
+      const res = await fetch(`${backend}/api/items/user/${user.email}`);
+      const data = await res.json();
 
-        if (data.status === 'success') {
-          const formatted = data.items.map(item => ({
-            _id: item._id,
-            title: item.title || 'No Title',
-            description: item.description || 'No description provided.',
-            startingPrice: item.starting_price || 'N/A',
-            endTime: item.end_date_time || '',
-            imageUrl: item.images?.[0] || null,
-            status: item.status || 'Draft',
-            /*new line below one*/
-            customId: item.custom_item_id || 'Not Assigned'
-          }));
-          setListings(formatted);
-        } else {
-          console.error("API error:", data.message);
-        }
-      } catch (err) {
-        console.error("Fetch failed:", err);
-      } finally {
-        setLoading(false);
+      if (data.status === 'success') {
+        const formatted = data.items.map(item => ({
+          _id: item._id,
+          title: item.title || 'No Title',
+          description: item.description || 'No description provided.',
+          startingPrice: item.starting_price || 'N/A',
+          endTime: item.end_date_time || '',
+          imageUrl: item.images?.[0] || null,
+          status: item.status || 'Draft',
+          /*new line below one*/
+          customId: item.custom_item_id || 'Not Assigned'
+        }));
+        setListings(formatted);
+      } else {
+        console.error("API error:", data.message);
       }
-    };
+    } catch (err) {
+      console.error("Fetch failed:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     fetchListings();
@@ -49,10 +50,10 @@ const fetchListings = async () => {
   return (
     <div className="my-listings-wrapper">
       <div className="profile-header">
-      <h2 style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        🧾 My Listings
-      </h2>
-    </div>
+        <h2 style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          🧾 My Listings
+        </h2>
+      </div>
       {loading ? (
         <p className="loading-text">⏳ Loading your listings...</p>
       ) : listings.length === 0 ? (
@@ -97,7 +98,7 @@ const fetchListings = async () => {
                       className="delete-btn"
                       onClick={async () => {
                         console.log('🗑️ Delete button clicked for item:', item._id);
-                        
+
                         const confirmDelete = window.confirm(
                           `Are you sure you want to delete "${item.title}"?\n\n` +
                           `⚠️ This will also delete:\n` +
@@ -107,38 +108,38 @@ const fetchListings = async () => {
                           `• All uploaded images and videos\n\n` +
                           `This action cannot be undone!`
                         );
-                        
+
                         if (!confirmDelete) {
                           console.log('❌ Delete cancelled by user');
                           return;
                         }
 
                         console.log('✅ Delete confirmed, sending request...');
-                        
+
                         try {
-                          const deleteUrl = `http://localhost:5000/api/items/${item._id}`;
+                          const deleteUrl = `${backend}/api/items/${item._id}`;
                           console.log('🗑️ Sending DELETE request to:', deleteUrl);
-                          
+
                           const res = await fetch(deleteUrl, {
                             method: 'DELETE',
                             headers: {
                               'Content-Type': 'application/json'
                             }
                           });
-                          
+
                           console.log('📡 Response status:', res.status);
-                          
+
                           if (!res.ok) {
                             throw new Error(`HTTP ${res.status}: ${res.statusText}`);
                           }
-                          
+
                           const data = await res.json();
                           console.log('📦 Response data:', data);
 
                           if (data.status === 'success') {
                             // Remove from state
                             setListings(prev => prev.filter(i => i._id !== item._id));
-                            
+
                             // Show detailed deletion summary
                             const deletedCounts = data.deleted_counts || {};
                             const summary = [
@@ -151,7 +152,7 @@ const fetchListings = async () => {
                               `• ${deletedCounts.admin_comments || 0} admin comment(s)`,
                               '• All uploaded media files'
                             ].join('\n');
-                            
+
                             alert(summary);
                           } else {
                             alert(`❌ Failed to delete item: ${data.message}`);

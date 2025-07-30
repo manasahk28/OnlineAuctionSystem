@@ -118,35 +118,45 @@
 .activity-card.bid {
   border-left-color: #fab44a;
 }
+
 .activity-card.bid.won {
   border-left-color: #38b000;
   background: linear-gradient(135deg, rgba(56, 176, 0, 0.05), transparent);
 }
+
 .activity-card.bid.lost {
   border-left-color: #ec2c3f;
   background: linear-gradient(135deg, rgba(220, 53, 69, 0.05), transparent);
 }
+
 .activity-card.post {
   border-left-color: #f6c605;
 }
+
 .activity-card.post.active {
   border-left-color: #28a745;
 }
+
 .activity-card.profile {
   border-left-color: #da6429;
 }
+
 .activity-card.payment {
   border-left-color: #f1cb09;
 }
+
 .activity-card.payment.completed {
   border-left-color: #28a745;
 }
+
 .activity-card.payment.pending {
   border-left-color: #f73e22;
 }
+
 .activity-card.notification {
   border-left-color: #fd7e14;
 }
+
 .activity-card.notification.unread {
   background: linear-gradient(135deg, rgba(253, 126, 20, 0.05), transparent);
 }
@@ -155,15 +165,19 @@
 .activity-card.won::after {
   content: '🏆';
 }
+
 .activity-card.lost::after {
   content: '❌';
 }
+
 .activity-card.completed::after {
   content: '✅';
 }
+
 .activity-card.pending::after {
   content: '⏳';
 }
+
 .activity-card.won::after,
 .activity-card.lost::after,
 .activity-card.completed::after,
@@ -187,26 +201,32 @@
 .dark-theme .activity-message {
   color: var(--color-text) !important;
 }
+
 .dark-theme .filter-btn {
   background: #2d3748;
   color: #e2e8f0;
   border-color: #4a5568;
 }
+
 .dark-theme .filter-btn:hover {
   border-color: #ff6b00;
   color: #ff6b00;
 }
+
 .dark-theme .filter-btn.active {
   background: #ff6b00;
   color: white;
 }
+
 .dark-theme .activity-card {
   background: #2d3748;
   border-color: #4a5568;
 }
+
 .dark-theme .activity-time {
   color: #a0aec0;
 }
+
 .dark-theme .activity-category {
   background: rgba(255, 107, 0, 0.2);
 }
@@ -216,15 +236,18 @@
 .refresh-filter-btn {
   transition: all 0.3s ease;
 }
+
 .refresh-btn:hover:not(:disabled),
 .refresh-filter-btn:hover:not(:disabled) {
   background-color: #218838 !important;
   transform: translateY(-1px);
 }
+
 .refresh-btn:active:not(:disabled),
 .refresh-filter-btn:active:not(:disabled) {
   transform: translateY(0);
 }
+
 .refresh-btn:disabled,
 .refresh-filter-btn:disabled {
   opacity: 0.6;

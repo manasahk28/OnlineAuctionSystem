@@ -34,69 +34,70 @@ const EditItem = ({ itemId, setActiveSection }) => {
   });
 
   const [initialFormData, setInitialFormData] = useState({});
+  const backend = process.env.REACT_APP_BACKEND_URL;
 
-useEffect(() => {
-  const defaultForm = {
-    title: '',
-    description: '',
-    category: '',
-    tags: '',
-    images: [],
-    video: null,
-    starting_price: '',
-    minimum_increment: '',
-    buy_now_price: '',
-    start_date_time: '',
-    end_date_time: '',
-    duration: '',
-    seller_id: '',
-    contact_email: '',
-    location: '',
-    pickup_method: '',
-    delivery_charge: '',
-    return_policy: '',
-    is_approved: false,
-    status: 'Draft',
-    terms_accepted: false,
-    report_reason: '',
-    highlights: '',
-    item_condition: '',
-    warranty: '',
-    warranty_duration: '',
-    damage_description: '',
-    limitedCollection: false
-  };
+  useEffect(() => {
+    const defaultForm = {
+      title: '',
+      description: '',
+      category: '',
+      tags: '',
+      images: [],
+      video: null,
+      starting_price: '',
+      minimum_increment: '',
+      buy_now_price: '',
+      start_date_time: '',
+      end_date_time: '',
+      duration: '',
+      seller_id: '',
+      contact_email: '',
+      location: '',
+      pickup_method: '',
+      delivery_charge: '',
+      return_policy: '',
+      is_approved: false,
+      status: 'Draft',
+      terms_accepted: false,
+      report_reason: '',
+      highlights: '',
+      item_condition: '',
+      warranty: '',
+      warranty_duration: '',
+      damage_description: '',
+      limitedCollection: false
+    };
 
-  const fetchItem = async () => {
-    try {
-      const res = await fetch(`http://localhost:5000/api/item/${itemId}`);
-      const data = await res.json();
+    const fetchItem = async () => {
+      try {
+        const res = await fetch(`${backend}/api/item/${itemId}`);
+        const data = await res.json();
 
-      if (data.status === 'success') {
-        const item = data.item;
+        if (data.status === 'success') {
+          const item = data.item;
 
-        const mergedData = {
-          ...defaultForm,
-          ...item,
-          images: Array.isArray(item.images) ? item.images : [],
-          video: item.video || null,
-          limitedCollection: !!item.limitedCollection,
-          terms_accepted: !!item.terms_accepted,
-          is_approved: !!item.is_approved
-        };
+          const mergedData = {
+            ...defaultForm,
+            ...item,
+            images: Array.isArray(item.images) ? item.images : [],
+            video: item.video || null,
+            limitedCollection: !!item.limitedCollection,
+            terms_accepted: !!item.terms_accepted,
+            is_approved: !!item.is_approved
+          };
 
-        setFormData(mergedData);
-        setInitialFormData(mergedData);
-      } else {
-        console.warn("Item fetch failed:", data.message);
+          setFormData(mergedData);
+          setInitialFormData(mergedData);
+        } else {
+          console.warn("Item fetch failed:", data.message);
+        }
+      } catch (error) {
+        console.error("Error fetching item:", error);
       }
-    } catch (error) {
-      console.error("Error fetching item:", error);
-    }
-  };
+    };
 
-  if (itemId) fetchItem();
-}, [itemId]);
+    if (itemId) fetchItem();
+  }, [itemId]);
 
   const handleChange = (e) => {
     const { name, value, type, checked, files } = e.target;
@@ -126,63 +127,63 @@ useEffect(() => {
     setFormData(initialFormData);
   };
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-  // 🛑 Require at least 1 image
-  if (!formData.images || formData.images.length === 0) {
-    alert('📸 Please upload at least one image before saving!');
-    return;
-  }
-
-  // 🔍 Check for changes
-  const isEqual = (a, b) => {
-    for (const key in a) {
-      if (key === 'images') {
-        if (a.images.length !== b.images.length) return false;
-        // You can go deeper here if needed, comparing filenames or base64s
-        continue;
-      }
-      if (a[key] !== b[key]) return false;
+    // 🛑 Require at least 1 image
+    if (!formData.images || formData.images.length === 0) {
+      alert('📸 Please upload at least one image before saving!');
+      return;
     }
-    return true;
-  };
 
-  if (isEqual(formData, initialFormData)) {
-    alert('⚠️ No changes detected! Please make some updates before saving.');
-    return;
-  }
-
-  const form = new FormData();
-  for (const key in formData) {
-    if (key === 'images') {
-      formData.images.forEach(img => {
-        if (img instanceof File) {
-          form.append('images', img);
+    // 🔍 Check for changes
+    const isEqual = (a, b) => {
+      for (const key in a) {
+        if (key === 'images') {
+          if (a.images.length !== b.images.length) return false;
+          // You can go deeper here if needed, comparing filenames or base64s
+          continue;
         }
-      });
-    } else {
-      form.append(key, formData[key]);
-    }
-  }
+        if (a[key] !== b[key]) return false;
+      }
+      return true;
+    };
 
-  try {
-    const res = await fetch(`http://localhost:5000/api/items/${itemId}`, {
-      method: 'PUT',
-      body: form
-    });
-    const result = await res.json();
-    if (result.status === 'success') {
-      alert('✅ Item updated successfully!');
-      setActiveSection('My Listings');
-    } else {
-      alert('❌ Update failed. Please try again.');
+    if (isEqual(formData, initialFormData)) {
+      alert('⚠️ No changes detected! Please make some updates before saving.');
+      return;
     }
-  } catch (error) {
-    console.error("Error updating item:", error);
-    alert("❌ Something went wrong while saving.");
-  }
-};
+
+    const form = new FormData();
+    for (const key in formData) {
+      if (key === 'images') {
+        formData.images.forEach(img => {
+          if (img instanceof File) {
+            form.append('images', img);
+          }
+        });
+      } else {
+        form.append(key, formData[key]);
+      }
+    }
+
+    try {
+      const res = await fetch(`${backend}/api/items/${itemId}`, {
+        method: 'PUT',
+        body: form
+      });
+      const result = await res.json();
+      if (result.status === 'success') {
+        alert('✅ Item updated successfully!');
+        setActiveSection('My Listings');
+      } else {
+        alert('❌ Update failed. Please try again.');
+      }
+    } catch (error) {
+      console.error("Error updating item:", error);
+      alert("❌ Something went wrong while saving.");
+    }
+  };
 
 
 
@@ -195,21 +196,21 @@ const handleSubmit = async (e) => {
       <form className="edit-item-form" onSubmit={handleSubmit} encType="multipart/form-data">
 
         {[{ label: 'Title', name: 'title' },
-          { label: 'Description', name: 'description', type: 'textarea' },
-          { label: 'Tags', name: 'tags' },
-          { label: 'Starting Price', name: 'starting_price', type: 'number' },
-          { label: 'Minimum Increment', name: 'minimum_increment', type: 'number' },
-          { label: 'Buy Now Price', name: 'buy_now_price', type: 'number' },
-          { label: 'Start Date Time', name: 'start_date_time', type: 'datetime-local' },
-          { label: 'End Date Time', name: 'end_date_time', type: 'datetime-local' },
-          { label: 'Duration', name: 'duration' },
-          { label: 'Contact Email', name: 'contact_email' },
-          { label: 'Location', name: 'location' },
-          { label: 'Delivery Charge', name: 'delivery_charge', type: 'number' },
-          { label: 'Return Policy', name: 'return_policy', type: 'textarea' },
-          { label: 'Highlights', name: 'highlights' },
-          { label: 'Damage Description', name: 'damage_description', type: 'textarea' },
-          { label: 'Report Reason', name: 'report_reason', type: 'textarea' }
+        { label: 'Description', name: 'description', type: 'textarea' },
+        { label: 'Tags', name: 'tags' },
+        { label: 'Starting Price', name: 'starting_price', type: 'number' },
+        { label: 'Minimum Increment', name: 'minimum_increment', type: 'number' },
+        { label: 'Buy Now Price', name: 'buy_now_price', type: 'number' },
+        { label: 'Start Date Time', name: 'start_date_time', type: 'datetime-local' },
+        { label: 'End Date Time', name: 'end_date_time', type: 'datetime-local' },
+        { label: 'Duration', name: 'duration' },
+        { label: 'Contact Email', name: 'contact_email' },
+        { label: 'Location', name: 'location' },
+        { label: 'Delivery Charge', name: 'delivery_charge', type: 'number' },
+        { label: 'Return Policy', name: 'return_policy', type: 'textarea' },
+        { label: 'Highlights', name: 'highlights' },
+        { label: 'Damage Description', name: 'damage_description', type: 'textarea' },
+        { label: 'Report Reason', name: 'report_reason', type: 'textarea' }
         ].map(({ label, name, type }) => (
           <div className="edit-form-row" key={name}>
             <label>{label}:</label>
@@ -271,7 +272,7 @@ const handleSubmit = async (e) => {
           </div>
         )}
 
-                <div className="edit-form-row">
+        <div className="edit-form-row">
           <label>Upload Images:</label>
           <input name="images" type="file" multiple accept="image/png, image/jpeg" onChange={handleChange} />
         </div>

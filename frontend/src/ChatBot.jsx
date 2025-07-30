@@ -111,113 +111,113 @@ const ChatBot = ({ hide }) => {
       }
     ],
 
-      "Selling & Listings": [
-    {
-      text: "How do I list an item for auction?",
-      next: [
-        "Go to 'Post Items' page in the top.",
-        "Fill in all details — title, description, price, category, and media.",
-        "Set the auction duration, and submit!",
-        "Wait for admin approval and you're live. 🚀"
-      ]
-    },
-    {
-      text: "Can I edit a listing after posting?",
-      next: [
-        "Yes! Go to 'My Listings' from your dashboard.",
-        "Click 'Edit' on the item you want to change.",
-        "Make your changes and hit 'Update'.",
-        "Note: Some fields may lock after first bid. 🔒"
-      ]
-    },
-    {
-      text: "How do I delete a listing?",
-      next: [
-        "Head to 'My Listings'.",
-        "Click the delete 🗑️ icon next to the item.",
-        "Confirm the action. That's it!"
-      ]
-    }
-  ],
+    "Selling & Listings": [
+      {
+        text: "How do I list an item for auction?",
+        next: [
+          "Go to 'Post Items' page in the top.",
+          "Fill in all details — title, description, price, category, and media.",
+          "Set the auction duration, and submit!",
+          "Wait for admin approval and you're live. 🚀"
+        ]
+      },
+      {
+        text: "Can I edit a listing after posting?",
+        next: [
+          "Yes! Go to 'My Listings' from your dashboard.",
+          "Click 'Edit' on the item you want to change.",
+          "Make your changes and hit 'Update'.",
+          "Note: Some fields may lock after first bid. 🔒"
+        ]
+      },
+      {
+        text: "How do I delete a listing?",
+        next: [
+          "Head to 'My Listings'.",
+          "Click the delete 🗑️ icon next to the item.",
+          "Confirm the action. That's it!"
+        ]
+      }
+    ],
 
-  "Account & Settings": [
-    {
-      text: "How do I change my password?",
-      next: [
-        "Go to your profile (top-right corner).",
-        "Click on 'Account' → 'Change Password'.",
-        "Enter your current password, then the new one.",
-        "Click save — and don't forget to keep it strong! 🔐"
-      ]
-    },
-    {
-      text: "How can I update my contact info?",
-      next: [
-        "In 'Profile Settings', you can edit your phone, username, and address.",
-        "Click save to update.",
-        "We use this info to send important updates, so keep it fresh. 📲"
-      ]
-    },
-    {
-      text: "I forgot my password. What now?",
-      next: [
-        "Click on 'Forgot Password' on the login screen.",
-        "Enter your registered email.",
-        "You'll get a reset link — click it and set a new password. 🔁"
-      ]
-    }
-  ],
+    "Account & Settings": [
+      {
+        text: "How do I change my password?",
+        next: [
+          "Go to your profile (top-right corner).",
+          "Click on 'Account' → 'Change Password'.",
+          "Enter your current password, then the new one.",
+          "Click save — and don't forget to keep it strong! 🔐"
+        ]
+      },
+      {
+        text: "How can I update my contact info?",
+        next: [
+          "In 'Profile Settings', you can edit your phone, username, and address.",
+          "Click save to update.",
+          "We use this info to send important updates, so keep it fresh. 📲"
+        ]
+      },
+      {
+        text: "I forgot my password. What now?",
+        next: [
+          "Click on 'Forgot Password' on the login screen.",
+          "Enter your registered email.",
+          "You'll get a reset link — click it and set a new password. 🔁"
+        ]
+      }
+    ],
 
-  "Shipping & Delivery": [
-    {
-      text: "Who handles the shipping?",
-      next: [
-        "For now, buyers and sellers coordinate shipping between themselves.",
-        "Some sellers offer delivery or pickup options — check item details. 🚚"
-      ]
-    },
-    {
-      text: "Is there any delivery charge?",
-      next: [
-        "If the seller has added a delivery charge, it'll be mentioned on the item page.",
-        "You can negotiate or confirm with the seller before finalizing. 💬"
-      ]
-    },
-    {
-      text: "Can I track my delivery?",
-      next: [
-        "Since shipping is manual, tracking depends on the courier used.",
-        "Ask your seller if they've provided a tracking number. 📦"
-      ]
-    }
-  ],
+    "Shipping & Delivery": [
+      {
+        text: "Who handles the shipping?",
+        next: [
+          "For now, buyers and sellers coordinate shipping between themselves.",
+          "Some sellers offer delivery or pickup options — check item details. 🚚"
+        ]
+      },
+      {
+        text: "Is there any delivery charge?",
+        next: [
+          "If the seller has added a delivery charge, it'll be mentioned on the item page.",
+          "You can negotiate or confirm with the seller before finalizing. 💬"
+        ]
+      },
+      {
+        text: "Can I track my delivery?",
+        next: [
+          "Since shipping is manual, tracking depends on the courier used.",
+          "Ask your seller if they've provided a tracking number. 📦"
+        ]
+      }
+    ],
 
-  "Technical Issues": [
-    {
-      text: "The site isn't loading properly. Help!",
-      next: [
-        "Try refreshing the page or switching to another browser.",
-        "Clear your cache or try incognito mode.",
-        "Still stuck? Contact support. 🚑"
-      ]
-    },
-    {
-      text: "I can't post a bid!",
-      next: [
-        "Ensure you're logged in and your internet is stable.",
-        "Check if bidding is still open for that item.",
-        "If problem persists, report it to support. 🛠️"
-      ]
-    },
-    // {
-    //   text: "I didn't get the confirmation email.",
-    //   next: [
-    //     "Check your spam/junk folder first.",
-    //     "Make sure your registered email is correct in settings.",
-    //     "If still missing, request a resend or contact support. 📧"
-    //   ]
-    // }
-  ]
+    "Technical Issues": [
+      {
+        text: "The site isn't loading properly. Help!",
+        next: [
+          "Try refreshing the page or switching to another browser.",
+          "Clear your cache or try incognito mode.",
+          "Still stuck? Contact support. 🚑"
+        ]
+      },
+      {
+        text: "I can't post a bid!",
+        next: [
+          "Ensure you're logged in and your internet is stable.",
+          "Check if bidding is still open for that item.",
+          "If problem persists, report it to support. 🛠️"
+        ]
+      },
+      // {
+      //   text: "I didn't get the confirmation email.",
+      //   next: [
+      //     "Check your spam/junk folder first.",
+      //     "Make sure your registered email is correct in settings.",
+      //     "If still missing, request a resend or contact support. 📧"
+      //   ]
+      // }
+    ]
 
   };
 
@@ -289,17 +289,17 @@ const ChatBot = ({ hide }) => {
       <div className={`chat-panel ${isOpen ? 'open' : ''}`}>
         <div className="chat-header">
           <span>👩‍💻 Noa - Auction Assistant</span>
-<button
-  className="closs-btn"
-  onClick={() => {
-    setIsOpen(false);
-    setMessages([]);
-    setShowCategories(true);
-    setSelectedCategory(null);
-    setShowOptions(false);
-    setAskedQuestions({});
-  }}
->×</button>
+          <button
+            className="closs-btn"
+            onClick={() => {
+              setIsOpen(false);
+              setMessages([]);
+              setShowCategories(true);
+              setSelectedCategory(null);
+              setShowOptions(false);
+              setAskedQuestions({});
+            }}
+          >×</button>
         </div>
 
         <div className="chat-content">

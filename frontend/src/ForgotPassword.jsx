@@ -9,19 +9,20 @@ const ForgotPassword = () => {
   const [msg, setMsg] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const backend = process.env.REACT_APP_BACKEND_URL;
 
   const handleForgot = async (e) => {
     e.preventDefault();
     setMsg('');
     setError('');
-  
+
     try {
-      const res = await fetch('http://localhost:5000/api/forgot-password', {
+      const res = await fetch(`${backend}/api/forgot-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),
       });
-  
+
       const data = await res.json();
       if (data.status === 'success') {
         navigate('/reset-password', { state: { email, token: data.reset_token } });
@@ -57,7 +58,7 @@ const ForgotPassword = () => {
     }
 
     try {
-      const res = await fetch('http://localhost:5000/api/reset-password', {
+      const res = await fetch(`${backend}/api/reset-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, token, newPassword }),

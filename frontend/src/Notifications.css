@@ -4,7 +4,7 @@
   padding: 2rem;
   min-height: 100vh;
   color: #333;
-  top:-20px;
+  top: -20px;
   box-sizing: border-box;
   position: relative;
   margin-left: -30px;
@@ -39,7 +39,8 @@
 }
 
 .right-section::-webkit-scrollbar {
-  display: none; /* Chrome, Safari, Opera */
+  display: none;
+  /* Chrome, Safari, Opera */
   overflow: hidden;
 }
 
@@ -78,7 +79,8 @@
 }
 
 .left-section::-webkit-scrollbar {
-  display: none; /* Chrome, Safari, Opera */
+  display: none;
+  /* Chrome, Safari, Opera */
 }
 
 /* ====== Notification Cards ====== */
@@ -103,10 +105,13 @@
 }
 
 .notification-card.winner-notif {
-  background-color: #f3f3f3; /* Light green for winners */
+  background-color: #f3f3f3;
+  /* Light green for winners */
 }
+
 .notification-card.auction-ending-notif {
-  background-color: #f3f3f3; /* Light yellow for auction ending */
+  background-color: #f3f3f3;
+  /* Light yellow for auction ending */
 }
 
 /* ====== Type Color Themes ====== */
@@ -123,6 +128,7 @@
 .unseen {
   background-color: #fdfdfd;
 }
+
 .seen {
   opacity: 0.88;
 }
@@ -148,6 +154,7 @@
 .countdown.critical {
   color: #d32f2f;
 }
+
 .countdown.urgent {
   color: #e67c19;
 }
@@ -232,6 +239,7 @@
     opacity: 0;
     transform: translateY(8px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -244,9 +252,10 @@
     min-width: 320px;
     max-width: 98vw;
   }
+
   .notifications-container {
     min-width: unset;
-}
+  }
 }
 
 @media (max-width: 950px) {
@@ -415,7 +424,7 @@
   background-color: var(--color-bg-card) !important;
   color: var(--color-text) !important;
   border: 1.5px solid #444 !important;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.18) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18) !important;
 }
 
 .dark-theme .notif-title,
@@ -437,6 +446,7 @@
 .dark-theme .countdown.critical {
   color: #ff5252 !important;
 }
+
 .dark-theme .countdown.urgent {
   color: #ffb74d !important;
 }

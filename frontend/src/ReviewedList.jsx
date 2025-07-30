@@ -7,11 +7,12 @@ const ReviewedList = () => {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const backend = process.env.REACT_APP_BACKEND_URL;
 
   useEffect(() => {
     const fetchReviewed = async () => {
       try {
-        const res = await fetch('http://localhost:5000/api/items');
+        const res = await fetch(`${backend}/api/items`);
         const data = await res.json();
 
         const filtered = data.items.filter(

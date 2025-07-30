@@ -7,12 +7,13 @@ const RecentActivity = () => {
   const [filterLoading, setFilterLoading] = useState(false);
   const [filter, setFilter] = useState('all'); // all, posts, bids, profile, payments
   const user = JSON.parse(localStorage.getItem('user'));
+  const backend = process.env.REACT_APP_BACKEND_URL;
 
   const fetchActivities = async (showLoading = true) => {
     if (showLoading) setLoading(true);
     try {
       // Fetch activities from the new user activities API
-      const activitiesRes = await fetch(`http://localhost:5000/api/user-activities/${user.email}`);
+      const activitiesRes = await fetch(`${backend}/api/user-activities/${user.email}`);
       const activitiesData = await activitiesRes.json();
 
       if (activitiesData.status === 'success') {
@@ -20,11 +21,11 @@ const RecentActivity = () => {
       } else {
         // Fallback to old method if new API is not available
         const [postedRes, bidsRes, profileRes, paymentsRes, notificationsRes] = await Promise.all([
-          fetch(`http://localhost:5000/api/items/user/${user.email}`),
-          fetch(`http://localhost:5000/my-bids/email/${user.email}`),
-          fetch(`http://localhost:5000/api/get-profile?email=${user.email}`),
-          fetch(`http://localhost:5000/api/payments/${user.email}`),
-          fetch(`http://localhost:5000/api/notifications/${user.email}`)
+          fetch(`${backend}/api/items/user/${user.email}`),
+          fetch(`${backend}/my-bids/email/${user.email}`),
+          fetch(`${backend}/api/get-profile?email=${user.email}`),
+          fetch(`${backend}/api/payments/${user.email}`),
+          fetch(`${backend}/api/notifications/${user.email}`)
         ]);
 
         const postedData = await postedRes.json();
@@ -69,7 +70,7 @@ const RecentActivity = () => {
         if (profileData.status === 'success' && profileData.profile) {
           const profile = profileData.profile;
           const profileActivities = [];
-          
+
           // Profile creation/update
           if (profile.timestamp) {
             profileActivities.push({
@@ -161,7 +162,7 @@ const RecentActivity = () => {
     const emoji = getActivityEmoji(activity.type, activity.action);
     const amount = activity.amount > 0 ? ` for ₹${activity.amount.toLocaleString()}` : '';
     const status = getStatusText(activity.status);
-    
+
     return `${emoji} You ${activity.action}${amount} on "${activity.item}" ${status}`;
   };
 
@@ -209,7 +210,7 @@ const RecentActivity = () => {
 
   const formatTime = (timestamp) => {
     if (!timestamp) return 'Just now';
-    
+
     // Handle different timestamp formats
     let date;
     if (typeof timestamp === 'string') {
@@ -221,16 +222,16 @@ const RecentActivity = () => {
     } else {
       date = new Date(timestamp);
     }
-    
+
     if (isNaN(date.getTime())) {
       // If parsing fails, try to create a reasonable fallback
       const now = new Date();
       return now.toLocaleString();
     }
-    
+
     const now = new Date();
     const diffInHours = (now - date) / (1000 * 60 * 60);
-    
+
     if (diffInHours < 1) {
       const diffInMinutes = Math.floor((now - date) / (1000 * 60));
       if (diffInMinutes < 1) return 'Just now';
@@ -241,7 +242,7 @@ const RecentActivity = () => {
       const diffInDays = Math.floor(diffInHours / 24);
       return `${diffInDays} days ago`;
     } else {
-      return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+      return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     }
   };
 
@@ -255,21 +256,21 @@ const RecentActivity = () => {
   const handleFilterClick = async (newFilter) => {
     setFilterLoading(true);
     setFilter(newFilter);
-    
+
     try {
       // Always try to populate activities first when filter is clicked
-      const populateRes = await fetch(`http://localhost:5000/api/populate-activities/${user.email}`, {
+      const populateRes = await fetch(`${backend}/api/populate-activities/${user.email}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' }
       });
-      
+
       const populateData = await populateRes.json();
-      
+
       if (populateData.status === 'success') {
         // Fetch activities after populating
-        const activitiesRes = await fetch(`http://localhost:5000/api/user-activities/${user.email}`);
+        const activitiesRes = await fetch(`${backend}/api/user-activities/${user.email}`);
         const activitiesData = await activitiesRes.json();
-        
+
         if (activitiesData.status === 'success') {
           setActivities(activitiesData.activities);
         } else {
@@ -293,21 +294,21 @@ const RecentActivity = () => {
 
   const handleRefreshActivities = async () => {
     setFilterLoading(true);
-    
+
     try {
       // Always try to populate activities first when refresh is clicked
-      const populateRes = await fetch(`http://localhost:5000/api/populate-activities/${user.email}`, {
+      const populateRes = await fetch(`${backend}/api/populate-activities/${user.email}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' }
       });
-      
+
       const populateData = await populateRes.json();
-      
+
       if (populateData.status === 'success') {
         // Fetch activities after populating
-        const activitiesRes = await fetch(`http://localhost:5000/api/user-activities/${user.email}`);
+        const activitiesRes = await fetch(`${backend}/api/user-activities/${user.email}`);
         const activitiesData = await activitiesRes.json();
-        
+
         if (activitiesData.status === 'success') {
           setActivities(activitiesData.activities);
         } else {
@@ -329,16 +330,16 @@ const RecentActivity = () => {
 
   return (
     <div className="recent-activity-wrapper">
-        <div className="profile-header">
-          <h2 style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#444', marginLeft:'-40px', marginTop: '-20px' }}>
-            <span role="img" aria-label="recent activity">🗒️</span>Recent Activity
-          </h2>
-        
+      <div className="profile-header">
+        <h2 style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#444', marginLeft: '-40px', marginTop: '-20px' }}>
+          <span role="img" aria-label="recent activity">🗒️</span>Recent Activity
+        </h2>
+
       </div>
 
       {/* Activity Filter */}
       <div className="activity-filters" style={{ margin: '20px 30px' }}>
-        <button 
+        <button
           className="refresh-filter-btn"
           onClick={handleRefreshActivities}
           disabled={filterLoading}
@@ -360,35 +361,35 @@ const RecentActivity = () => {
         >
           {filterLoading ? '⏳' : '🔄'} Refresh
         </button>
-        <button 
+        <button
           className={`filter-btn ${filter === 'all' ? 'active' : ''}`}
           onClick={() => handleFilterClick('all')}
           disabled={filterLoading}
         >
           {filterLoading && filter === 'all' ? '⏳' : '📊'} All Activities
         </button>
-        <button 
+        <button
           className={`filter-btn ${filter === 'post' ? 'active' : ''}`}
           onClick={() => handleFilterClick('post')}
           disabled={filterLoading}
         >
           {filterLoading && filter === 'post' ? '⏳' : '📦'} Posts
         </button>
-        <button 
+        <button
           className={`filter-btn ${filter === 'bid' ? 'active' : ''}`}
           onClick={() => handleFilterClick('bid')}
           disabled={filterLoading}
         >
           {filterLoading && filter === 'bid' ? '⏳' : '💰'} Bids
         </button>
-        <button 
+        <button
           className={`filter-btn ${filter === 'profile' ? 'active' : ''}`}
           onClick={() => handleFilterClick('profile')}
           disabled={filterLoading}
         >
           {filterLoading && filter === 'profile' ? '⏳' : '👤'} Profile
         </button>
-        <button 
+        <button
           className={`filter-btn ${filter === 'payment' ? 'active' : ''}`}
           onClick={() => handleFilterClick('payment')}
           disabled={filterLoading}

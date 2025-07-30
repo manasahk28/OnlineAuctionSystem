@@ -1,7 +1,9 @@
 /* Profile Container */
-body, html{
-  overflow-y:auto;
+body,
+html {
+  overflow-y: auto;
 }
+
 .profile-container {
   max-width: 800px;
   padding: 10px;
@@ -18,7 +20,7 @@ body, html{
   color: var(--color-text);
 }
 
-.profile-description{
+.profile-description {
   width: auto;
   background-color: #f5f2ec;
   border-radius: 5px;
@@ -31,12 +33,14 @@ body, html{
   background-color: var(--color-bg-card);
 }
 
-.profile-input, .profile-text {
+.profile-input,
+.profile-text {
   background-color: #fff;
   color: #222;
 }
 
-.dark-theme .profile-input, .dark-theme .profile-text {
+.dark-theme .profile-input,
+.dark-theme .profile-text {
   background-color: var(--color-bg);
   color: var(--color-text);
   border: 1px solid #555;
@@ -65,7 +69,7 @@ body, html{
   display: flex;
   flex-direction: column;
   gap: 1px;
-  padding:20px;
+  padding: 20px;
 }
 
 /* Label and Input/Text */
@@ -106,7 +110,8 @@ body, html{
   background-color: #f9f9f9;
   color: #555;
   border: 1px solid #ccc;
-  cursor: not-allowed;  /* 👈 this gives the 🚫 cursor */
+  cursor: not-allowed;
+  /* 👈 this gives the 🚫 cursor */
   border: #f9f9f9;
 }
 
@@ -123,9 +128,9 @@ body, html{
   border-radius: 5px;
   /* border: 1px solid #ccc; */
   background-color: #fff;
-} 
+}
 
-.profile-input{
+.profile-input {
   flex: 1;
   padding: 8px 12px;
   font-size: 15px;
@@ -134,6 +139,7 @@ body, html{
   margin-left: 30px;
   background-color: #fff;
 }
+
 /* Button Area */
 .profile-actions {
   margin-top: 30px;
@@ -142,7 +148,7 @@ body, html{
 }
 
 /* Save and Logout Buttons */
-.save-btn{
+.save-btn {
   padding: 10px 20px;
   font-size: 15px;
   border: none;

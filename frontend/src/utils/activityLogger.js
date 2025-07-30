@@ -4,7 +4,7 @@ export const logActivity = async (activityData) => {
     const user = JSON.parse(localStorage.getItem('user'));
     if (!user?.email) return;
 
-    const response = await fetch('http://localhost:5000/api/log-activity', {
+    const response = await fetch('${backend}/api/log-activity', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

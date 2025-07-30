@@ -19,11 +19,12 @@
   display: none;
 }
 
-.navbar-right{
+.navbar-right {
   display: flex;
   align-items: center;
   gap: 2rem;
-  margin-right: 40px; /* Move the button group left from the edge */
+  margin-right: 40px;
+  /* Move the button group left from the edge */
 }
 
 .navbar-right .btn {
@@ -31,7 +32,7 @@
   color: white;
   border-radius: 2px;
   font-weight: bold;
-  box-shadow: 0 2px 8px rgba(255,107,0,0.08);
+  box-shadow: 0 2px 8px rgba(255, 107, 0, 0.08);
   padding: 0.2em 0.8em;
   margin-right: 8px;
   font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
@@ -114,7 +115,7 @@
 .nav-buttons .btn:hover {
   background-color: #ffffff;
   border-color: #ffe3d1;
-  color: #E5751F;
+  color: #E5751F;
 }
 
 .btn:hover {
@@ -151,7 +152,8 @@
   height: 100vh;
   backdrop-filter: blur(5px);
   background-color: rgba(0, 0, 0, 0.3);
-  z-index: 998; /* behind the sidebar */
+  z-index: 998;
+  /* behind the sidebar */
 }
 
 /* 📱 Mobile Sidebar */
@@ -191,7 +193,7 @@
 
 /* ❌ Close Button */
 .clos-btn {
-  background-color:#1bbd26;
+  background-color: #1bbd26;
   border: none;
   color: white;
   position: absolute;
@@ -205,12 +207,14 @@
 .layout-content {
   transition: filter 0.3s ease;
   position: relative;
-  z-index: 1; /* make sure it's under sidebar */
+  z-index: 1;
+  /* make sure it's under sidebar */
 }
 
 .layout-content.blurred {
   filter: blur(5px);
-  pointer-events: none; /* disable interactions when blurred */
+  pointer-events: none;
+  /* disable interactions when blurred */
 }
 
 
@@ -270,6 +274,7 @@
     opacity: 1;
     transform: scale(1);
   }
+
   100% {
     opacity: 0;
     transform: scale(0.95);
@@ -319,7 +324,7 @@
 }
 
 /* Make all footer text orange except copyright line */
-.footer .footer-content > *:not(p) {
+.footer .footer-content>*:not(p) {
   color: #f57c00 !important;
 }
 
@@ -447,12 +452,19 @@ main {
   padding-top: 80px;
 }
 
-.navbar, .popup-box, .popup-overlay, .about-card, .contact-card {
+.navbar,
+.popup-box,
+.popup-overlay,
+.about-card,
+.contact-card {
   background: var(--color-bg-card) !important;
   color: var(--color-text) !important;
 }
 
-.navbar a, .footer a, .navbar button, .footer button {
+.navbar a,
+.footer a,
+.navbar button,
+.footer button {
   color: var(--color-text) !important;
 }
 
@@ -472,27 +484,37 @@ main {
   color: white !important;
 }
 
-.about-card, .contact-card, .help-card {
+.about-card,
+.contact-card,
+.help-card {
   background: var(--color-bg-card) !important;
   color: var(--color-text) !important;
 }
 
-.dark-theme .about-card, .dark-theme .contact-card, .dark-theme .help-card {
+.dark-theme .about-card,
+.dark-theme .contact-card,
+.dark-theme .help-card {
   background: var(--color-bg-card) !important;
   color: var(--color-text) !important;
 }
 
-.about-header, .contact-header, .help-header {
+.about-header,
+.contact-header,
+.help-header {
   background: var(--color-bg) !important;
   color: var(--color-text) !important;
 }
 
-.dark-theme .about-header, .dark-theme .contact-header, .dark-theme .help-header {
+.dark-theme .about-header,
+.dark-theme .contact-header,
+.dark-theme .help-header {
   background: var(--color-bg) !important;
   color: var(--color-text) !important;
 }
 
-.about-content, .help-content, .contact-content {
+.about-content,
+.help-content,
+.contact-content {
   color: var(--color-text) !important;
 }
 
@@ -501,21 +523,29 @@ main {
   padding-bottom: 2.5rem !important;
 }
 
-.contact-form input, .contact-form textarea {
+.contact-form input,
+.contact-form textarea {
   background: var(--color-bg-card) !important;
   color: var(--color-text) !important;
 }
 
-.dark-theme .contact-form input, .dark-theme .contact-form textarea {
+.dark-theme .contact-form input,
+.dark-theme .contact-form textarea {
   background: var(--color-bg-card) !important;
   color: var(--color-text) !important;
 }
 
-.footer, .footer a, .footer p, .footer h3, .footer-links a {
+.footer,
+.footer a,
+.footer p,
+.footer h3,
+.footer-links a {
   color: #222 !important;
 }
 
-.navbar, .navbar-right a, .navbar-right .active {
+.navbar,
+.navbar-right a,
+.navbar-right .active {
   /* Remove color: white !important; and set color using CSS variable */
   color: var(--color-navbar-text, white) !important;
 }
@@ -560,7 +590,9 @@ main {
   border: none !important;
 }
 
-.back-btn svg, .back-btn i, .back-btn span {
+.back-btn svg,
+.back-btn i,
+.back-btn span {
   color: #fff !important;
 }
 
@@ -569,11 +601,15 @@ main {
   color: #111 !important;
 }
 
-.dark-theme .back-btn svg, .dark-theme .back-btn i, .dark-theme .back-btn span {
+.dark-theme .back-btn svg,
+.dark-theme .back-btn i,
+.dark-theme .back-btn span {
   color: #111 !important;
 }
 
-.about-header, .contact-header, .help-header {
+.about-header,
+.contact-header,
+.help-header {
   background: rgba(255, 153, 0, 0.08) !important;
   /* border-radius: 0 0 24px 24px !important; */
   padding-bottom: 1.5rem !important;

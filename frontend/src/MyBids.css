@@ -5,6 +5,7 @@
   gap: 24px;
   margin-top: 20px;
 }
+
 .my-bid-card {
   width: calc((100% - 48px) / 3);
   aspect-ratio: 1/1;
@@ -23,6 +24,7 @@
   height: 420px;
   box-sizing: border-box;
 }
+
 .my-bid-img-wrap {
   width: 75px;
   height: 75px;
@@ -34,6 +36,7 @@
   border: 0.8px solid #ffe0b2;
   background: #fff;
 }
+
 .my-bid-img {
   width: 70px;
   height: 70px;
@@ -41,17 +44,20 @@
   border-radius: 8px;
   margin-bottom: 0px;
 }
+
 .my-bid-info {
   flex: 1;
   color: #333;
   word-break: break-word;
 }
+
 .my-bid-info h4 {
   margin: 0 0 8px 0;
   color: #f57c00;
   font-size: 1.2rem;
   margin-top: 7px;
 }
+
 .outbid-notification {
   align-items: center;
   background: #ffeaea;
@@ -71,6 +77,7 @@
   margin-top: 10px;
   flex-wrap: wrap;
 }
+
 .increase-bid-form input[type='number'] {
   padding: 6px 10px;
   border: 1px solid #ffd180;
@@ -80,9 +87,10 @@
   width: 120px;
   min-width: 0;
   flex: 1 1 80px;
-    margin-top: auto;
+  margin-top: auto;
 
 }
+
 .increase-bid-form button {
   background: linear-gradient(90deg, #ff9800, #ff6d00);
   color: #fff;
@@ -94,6 +102,7 @@
   transition: background 0.2s;
   flex: 0 0 auto;
 }
+
 .increase-bid-form button:hover {
   background: linear-gradient(90deg, #ffb74d, #ff9800);
 }
@@ -113,14 +122,16 @@ input[name="newBid"] {
 
 input[name="newBid"]:focus {
   outline: none;
-  border-color: #ffa500; /* orange border on focus */
+  border-color: #ffa500;
+  /* orange border on focus */
   box-shadow: 0 0 5px rgba(255, 136, 0, 0.4);
 }
 
 .increaseBid {
   width: 100%;
   padding: 12px 16px;
-  background: linear-gradient(to right, #ed7709, #f1a605); /* gradient orange */
+  background: linear-gradient(to right, #ed7709, #f1a605);
+  /* gradient orange */
   color: white;
   font-weight: bold;
   font-size: 1rem;
@@ -170,6 +181,7 @@ input[name="newBid"]:focus {
     aspect-ratio: 1/1;
   }
 }
+
 @media (max-width: 900px) {
   .my-bid-card {
     width: 80vw !important;
@@ -181,4 +193,4 @@ input[name="newBid"]:focus {
     box-sizing: border-box !important;
     min-width: 0 !important;
   }
-} 
+}

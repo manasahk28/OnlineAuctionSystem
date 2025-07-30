@@ -5,16 +5,19 @@ body {
 
 .preview-grid {
   display: flex;
-  flex-wrap: nowrap; /* ✅ Prevent wrapping */
+  flex-wrap: nowrap;
+  /* ✅ Prevent wrapping */
   gap: 20px;
   justify-content: flex-start;
   padding: 20px;
-  overflow-x: auto; /* ✅ Enables horizontal scroll if screen is small */
+  overflow-x: auto;
+  /* ✅ Enables horizontal scroll if screen is small */
   background: var(--color-bg-card);
 }
 
 .listing-card {
-  flex: 0 0 220px; /* 5 cards in a row on desktop */
+  flex: 0 0 220px;
+  /* 5 cards in a row on desktop */
   position: relative;
   background: var(--color-bg-card);
   border: 1px solid #eee;

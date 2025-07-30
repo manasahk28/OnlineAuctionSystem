@@ -11,6 +11,7 @@ const AdminDashboard = () => {
   const [commentText, setCommentText] = useState('');
   const [activeTab, setActiveTab] = useState('pending');
   const navigate = useNavigate();
+  const backend = process.env.REACT_APP_BACKEND_URL;
 
   const refreshItems = async () => {
     try {
@@ -50,7 +51,7 @@ const AdminDashboard = () => {
 
   const handleApproval = async (id, status) => {
     try {
-      await axios.put(`http://localhost:5000/api/items/approve/${id}`, null, {
+      await axios.put(`${backend}/api/items/approve/${id}`, null, {
         params: {
           is_approved: status === 'Approved',
           is_rejected: status === 'Rejected',
@@ -66,7 +67,7 @@ const AdminDashboard = () => {
 
   const handleSendComment = async () => {
     try {
-      await axios.post('http://localhost:5000/api/admin/comment', {
+      await axios.post(`${backend}/api/admin/comment`, {
         itemId: selectedItem._id,
         sellerId: selectedItem.seller_id,
         comment: commentText,
@@ -124,8 +125,8 @@ const AdminDashboard = () => {
             {activeTab === 'approved'
               ? 'No approved items found.'
               : activeTab === 'rejected'
-              ? 'No rejected items found.'
-              : 'No pending items to review.'}
+                ? 'No rejected items found.'
+                : 'No pending items to review.'}
           </p>
         ) : (
           items.map((item) => (

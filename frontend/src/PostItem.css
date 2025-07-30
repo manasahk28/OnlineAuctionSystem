@@ -116,6 +116,7 @@ button[type='submit']:hover {
   cursor: pointer;
   font-weight: bold;
 }
+
 .estimate-btn:hover {
   background-color: #e65c00;
 }
@@ -129,7 +130,7 @@ button[type='submit']:hover {
 }
 
 .terms-link {
-  color:#007bff;
+  color: #007bff;
   text-decoration: underline;
   cursor: pointer;
 }
@@ -140,8 +141,10 @@ button[type='submit']:hover {
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(0, 0, 0, 0.4); /* semi-transparent grey */
-  backdrop-filter: blur(3px); /* soft blur magic */
+  background: rgba(0, 0, 0, 0.4);
+  /* semi-transparent grey */
+  backdrop-filter: blur(3px);
+  /* soft blur magic */
   display: flex;
   justify-content: center;
   align-items: center;
@@ -174,7 +177,7 @@ button[type='submit']:hover {
 }
 
 .terms-list {
-  list-style-type:none;
+  list-style-type: none;
   padding-left: 1.2rem;
   margin-bottom: 2rem;
 }
@@ -219,6 +222,7 @@ button[type='submit']:hover {
   border: 1px solid #ccc;
   font-size: 1rem;
 }
+
 .input-row {
   display: flex;
   align-items: center;
@@ -239,6 +243,7 @@ button[type='submit']:hover {
   border-radius: 6px;
   border: 1px solid #ccc;
 }
+
 /* For label and choose file input side by side */
 .input-row.side-by-side {
   display: flex;
@@ -276,6 +281,7 @@ button[type='submit']:hover {
   position: relative;
   display: inline-block;
 }
+
 .pre-image {
   width: 80px;
   height: 80px;
@@ -284,9 +290,10 @@ button[type='submit']:hover {
   border: 2px solid #ffa500;
   box-shadow: 0 0 5px rgba(255, 165, 0, 0.4);
 }
+
 .image-count {
   font-size: 0.7rem;
-  margin-top:0.25px;
+  margin-top: 0.25px;
   color: #666;
 }
 
@@ -306,6 +313,7 @@ button[type='submit']:hover {
   align-items: center;
   justify-content: center;
 }
+
 .post-items-form {
   max-width: 850px;
   margin: 2rem auto;
@@ -341,7 +349,7 @@ button[type='submit']:hover {
 .input-row #red-mark {
   color: red;
   margin-right: 4px;
-  font-weight: bold;
+  font-weight: bold;
 }
 
 .readonly-input {
@@ -441,10 +449,10 @@ button[type='submit']:hover {
     font-size: 14px;
   }
 
-  .input-textarea{
+  .input-textarea {
     font-size: 10px;
-    padding: 8px;
-}
+    padding: 8px;
+  }
 }
 
 .estimate-btn {
@@ -457,6 +465,7 @@ button[type='submit']:hover {
   cursor: pointer;
   font-weight: bold;
 }
+
 .estimate-btn:hover {
   background-color: #e65c00;
 }
@@ -482,8 +491,10 @@ button[type='submit']:hover {
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(0, 0, 0, 0.4); /* semi-transparent grey */
-  backdrop-filter: blur(3px); /* soft blur magic */
+  background: rgba(0, 0, 0, 0.4);
+  /* semi-transparent grey */
+  backdrop-filter: blur(3px);
+  /* soft blur magic */
   display: flex;
   justify-content: center;
   align-items: center;
@@ -515,7 +526,7 @@ button[type='submit']:hover {
 }
 
 .terms-list {
-  list-style-type:none;
+  list-style-type: none;
   padding-left: 1.2rem;
   margin-bottom: 2rem;
 }
@@ -560,6 +571,7 @@ button[type='submit']:hover {
   border: 1px solid #ccc;
   font-size: 1rem;
 }
+
 .input-row {
   display: flex;
   align-items: center;
@@ -580,6 +592,7 @@ button[type='submit']:hover {
   border-radius: 6px;
   border: 1px solid #ccc;
 }
+
 /* For label and choose file input side by side */
 .input-row.side-by-side {
   display: flex;
@@ -611,6 +624,7 @@ button[type='submit']:hover {
     display: flex;
   }
 }
+
 .pre-image {
   width: 80px;
   height: 80px;
@@ -724,13 +738,14 @@ button[type='submit']:hover {
 @media screen and (max-width: 768px) {
 
   .pre-image {
-  width: 90px;
-  height: 90px;
-  object-fit: cover;
-  border-radius: 8px;
-  border: 2px solid #ffa500;
-  box-shadow: 0 0 5px rgba(255, 165, 0, 0.4);
-}
+    width: 90px;
+    height: 90px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 2px solid #ffa500;
+    box-shadow: 0 0 5px rgba(255, 165, 0, 0.4);
+  }
+
   .remove-image-btn {
     position: absolute;
     top: 2px;
@@ -750,7 +765,7 @@ button[type='submit']:hover {
     border-radius: 6px;
   }
 
-  .estimate-btn{
+  .estimate-btn {
     background-color: #ff6f00
   }
 
@@ -812,35 +827,35 @@ button[type='submit']:hover {
   }
 
   .input-row {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: nowrap;
-  gap: 0.5rem;
-}
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: nowrap;
+    gap: 0.5rem;
+  }
 
-.input-row label {
-  white-space: nowrap;
-  width: 90px;
-  font-weight: 500;
-  font-size: 0.9rem;
-  margin-right: 0.5rem;
-  flex-shrink: 0;
-}
+  .input-row label {
+    white-space: nowrap;
+    width: 90px;
+    font-weight: 500;
+    font-size: 0.9rem;
+    margin-right: 0.5rem;
+    flex-shrink: 0;
+  }
 
-.input-row input,
-.input-row select,
-.input-row textarea {
-  flex: 1;
-  font-size: 0.95rem;
-  padding: 0.5rem;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-  width: 100%;
-}
+  .input-row input,
+  .input-row select,
+  .input-row textarea {
+    flex: 1;
+    font-size: 0.95rem;
+    padding: 0.5rem;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    width: 100%;
+  }
 
-.input-row select {
+  .input-row select {
     font-size: 0.7rem;
     max-height: 38px;
     overflow-y: auto;
@@ -857,31 +872,33 @@ button[type='submit']:hover {
   }
 
   .input-row.side-by-side {
-  display: flex;
-  flex-direction: row;
-  align-items: left;
-  gap: 0px;
-}
-.input-row.side-by-side label {
-  flex: 0 0 130px;
-  font-weight: 400;
-  font-size: 15px;
-}
+    display: flex;
+    flex-direction: row;
+    align-items: left;
+    gap: 0px;
+  }
 
-.input-row.side-by-side input[type="file"] {
-  flex: 1;
-  padding: 4px;
-  background-color: #ffffff;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-  cursor: pointer;
-  font-size: 10px;
-}
-.image-count{
-  font-size: 0.5rem;
-  margin-top: 7px;
-  color:#666;
-}
+  .input-row.side-by-side label {
+    flex: 0 0 130px;
+    font-weight: 400;
+    font-size: 15px;
+  }
+
+  .input-row.side-by-side input[type="file"] {
+    flex: 1;
+    padding: 4px;
+    background-color: #ffffff;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    cursor: pointer;
+    font-size: 10px;
+  }
+
+  .image-count {
+    font-size: 0.5rem;
+    margin-top: 7px;
+    color: #666;
+  }
 }
 
 .dark-theme .post-items-form {
@@ -945,7 +962,7 @@ button[type='submit']:hover {
     width: 95%;
     padding: 1rem;
     border-radius: 12px;
-    margin-left:-5px;
+    margin-left: -5px;
   }
 
   .input-row {
@@ -1005,4 +1022,3 @@ button[type='submit']:hover {
     max-height: 85vh;
   }
 }
-

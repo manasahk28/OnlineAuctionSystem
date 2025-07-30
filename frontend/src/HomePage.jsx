@@ -88,7 +88,7 @@ const HomePage = () => {
                   <h3 className="step-title orange">Step 3: Meet & Exchange</h3>
                   <img src="/images/step3.png" alt="Exchange" className="how-img" />
                   <p>🤝 Once the auction ends, the winner pays online</p>
-                  <p className="note">→Click on card to Know more.</p>               
+                  <p className="note">→Click on card to Know more.</p>
                 </div>
                 <div className="flip-card-back">
                   <h3>Why choose us?</h3>

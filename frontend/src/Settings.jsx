@@ -2,14 +2,16 @@ import { useState } from 'react';
 import './Settings.css';
 import { useTheme } from './ThemeContext';
 
-    // ChangePassword component
-    const EyeIcon = ({ visible }) => visible ? (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#555" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><ellipse cx="12" cy="12" rx="8" ry="5"/><circle cx="12" cy="12" r="2.5"/></svg>
-    ) : (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#555" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><ellipse cx="12" cy="12" rx="8" ry="5"/><circle cx="12" cy="12" r="2.5"/><line x1="3" y1="21" x2="21" y2="3" stroke="#555" strokeWidth="2"/></svg>
-    );
+const backend = process.env.REACT_APP_BACKEND_URL;
 
-    const ChangePassword = () => {
+// ChangePassword component
+const EyeIcon = ({ visible }) => visible ? (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#555" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><ellipse cx="12" cy="12" rx="8" ry="5" /><circle cx="12" cy="12" r="2.5" /></svg>
+) : (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#555" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><ellipse cx="12" cy="12" rx="8" ry="5" /><circle cx="12" cy="12" r="2.5" /><line x1="3" y1="21" x2="21" y2="3" stroke="#555" strokeWidth="2" /></svg>
+);
+
+const ChangePassword = () => {
     const [currentPassword, setCurrentPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
@@ -28,7 +30,7 @@ import { useTheme } from './ThemeContext';
         setLoading(true);
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch('http://localhost:5000/api/auth/verify-password', {
+            const res = await fetch(`${backend}/api/auth/verify-password`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -59,29 +61,29 @@ import { useTheme } from './ThemeContext';
         }
         setLoading(true);
         try {
-        const token = localStorage.getItem('token');
-        const res = await fetch('http://localhost:5000/api/auth/change-password', {
-            method: 'POST',
-            headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify({
-            current_password: currentPassword,
-            new_password: newPassword
-            })
-        });
-        const data = await res.json();
-        if (res.ok && data.status === 'success') {
-            setMessage('Password changed successfully!');
-            setCurrentPassword('');
-            setNewPassword('');
-            setConfirmPassword('');
-            setStep(1);
-            setSuccess(true);
-        } else {
-            setError(data.message || 'Failed to change password.');
-        }
+            const token = localStorage.getItem('token');
+            const res = await fetch(`${backend}/api/auth/change-password`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    current_password: currentPassword,
+                    new_password: newPassword
+                })
+            });
+            const data = await res.json();
+            if (res.ok && data.status === 'success') {
+                setMessage('Password changed successfully!');
+                setCurrentPassword('');
+                setNewPassword('');
+                setConfirmPassword('');
+                setStep(1);
+                setSuccess(true);
+            } else {
+                setError(data.message || 'Failed to change password.');
+            }
         } catch (err) {
             setError(err.message || 'An error occurred. Please try again.');
         }
@@ -95,9 +97,9 @@ import { useTheme } from './ThemeContext';
         <div className="settings-section change-password-section">
             <h3>Change Password</h3>
             {success ? (
-                <div style={{textAlign: 'center', color: 'green', fontWeight: 600, margin: '1.2rem 0'}}>
-                    <div style={{fontSize: '1.1rem', marginBottom: '1rem'}}>{message || 'Your password has been changed successfully!'}</div>
-                    <button onClick={() => setSuccess(false)} style={{marginTop: '0.5rem'}}>Change Again</button>
+                <div style={{ textAlign: 'center', color: 'green', fontWeight: 600, margin: '1.2rem 0' }}>
+                    <div style={{ fontSize: '1.1rem', marginBottom: '1rem' }}>{message || 'Your password has been changed successfully!'}</div>
+                    <button onClick={() => setSuccess(false)} style={{ marginTop: '0.5rem' }}>Change Again</button>
                 </div>
             ) : step === 1 ? (
                 <form onSubmit={verifyCurrentPassword}>
@@ -134,59 +136,59 @@ import { useTheme } from './ThemeContext';
             )}
         </div>
     );
-    };
+};
 
-    // AccountActions component
-    const AccountActions = () => {
+// AccountActions component
+const AccountActions = () => {
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState('');
     const [error, setError] = useState('');
 
-const handleDelete = async () => {
-    if (!window.confirm('Are you sure you want to delete your account? This action cannot be undone.')) return;
-    
-    setLoading(true);
-    setMessage('');
-    setError('');
+    const handleDelete = async () => {
+        if (!window.confirm('Are you sure you want to delete your account? This action cannot be undone.')) return;
 
-    try {
-        const token = localStorage.getItem('token');
-        console.log('JWT token:', token); // Debugging
+        setLoading(true);
+        setMessage('');
+        setError('');
 
-        const res = await fetch('http://localhost:5000/api/delete-account', {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
+        try {
+            const token = localStorage.getItem('token');
+            console.log('JWT token:', token); // Debugging
+
+            const res = await fetch(`${backend}/api/delete-account`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            const data = await res.json();
+
+            if (res.ok && data.status === 'success') {
+                setMessage('Account deleted successfully. Opening feedback form...');
+
+                // Clear local/session storage
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                sessionStorage.removeItem('loggedIn');
+
+                // 🪄 Open Google Form in new tab
+                window.open('https://forms.gle/nQiwGfyxE7q8YNpf6', '_blank');
+
+                // Optional: Redirect to login/home in current tab
+                setTimeout(() => {
+                    window.location.href = '/login'; // Or maybe a thank-you page
+                }, 1000);
+            } else {
+                setError(data.message || 'Failed to delete account.');
             }
-        });
-
-        const data = await res.json();
-
-        if (res.ok && data.status === 'success') {
-            setMessage('Account deleted successfully. Opening feedback form...');
-
-            // Clear local/session storage
-            localStorage.removeItem('token');
-            localStorage.removeItem('user');
-            sessionStorage.removeItem('loggedIn');
-
-            // 🪄 Open Google Form in new tab
-            window.open('https://forms.gle/nQiwGfyxE7q8YNpf6', '_blank');
-
-            // Optional: Redirect to login/home in current tab
-            setTimeout(() => {
-                window.location.href = '/login'; // Or maybe a thank-you page
-            }, 1000);
-        } else {
-            setError(data.message || 'Failed to delete account.');
+        } catch (err) {
+            setError(err.message || 'An error occurred. Please try again.');
         }
-    } catch (err) {
-        setError(err.message || 'An error occurred. Please try again.');
-    }
 
-    setLoading(false);
-};
+        setLoading(false);
+    };
 
     return (
         <div className="settings-section">
@@ -200,16 +202,16 @@ const handleDelete = async () => {
     );
 };
 
-    // PrivacySettings component
-    const toggleStyle = {
+// PrivacySettings component
+const toggleStyle = {
     position: 'relative',
     display: 'inline-block',
     width: '44px',
     height: '24px',
     marginRight: '12px',
     verticalAlign: 'middle',
-    };
-    const sliderStyle = {
+};
+const sliderStyle = {
     position: 'absolute',
     cursor: 'pointer',
     top: 0,
@@ -219,12 +221,12 @@ const handleDelete = async () => {
     backgroundColor: '#ccc',
     borderRadius: '24px',
     transition: '.4s',
-    };
-    const sliderCheckedStyle = {
+};
+const sliderCheckedStyle = {
     ...sliderStyle,
     backgroundColor: '#FF6B00',
-    };
-    const circleStyle = {
+};
+const circleStyle = {
     position: 'absolute',
     content: '',
     height: '18px',
@@ -234,106 +236,106 @@ const handleDelete = async () => {
     backgroundColor: 'white',
     borderRadius: '50%',
     transition: '.4s',
-    };
-    const circleCheckedStyle = {
+};
+const circleCheckedStyle = {
     ...circleStyle,
     transform: 'translateX(20px)',
-    };
+};
 
-    const PrivacySettings = () => {
+const PrivacySettings = () => {
     const [emailNotifications, setEmailNotifications] = useState(true);
     const [pushNotifications, setPushNotifications] = useState(false);
 
     return (
         <div className="settings-section">
-        <h3>Notification Preferences</h3>
-        <div style={{ display: 'flex', alignItems: 'center', marginBottom: '1.2rem' }}>
-            <span style={{ marginRight: '16px', minWidth: '120px' }}>Email Notifications</span>
-            <label style={toggleStyle}>
-            <input
-                type="checkbox"
-                checked={emailNotifications}
-                onChange={() => setEmailNotifications(!emailNotifications)}
-                style={{ display: 'none' }}
-            />
-            <span style={emailNotifications ? sliderCheckedStyle : sliderStyle}>
-                <span style={emailNotifications ? circleCheckedStyle : circleStyle}></span>
-            </span>
-            </label>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center' }}>
-            <span style={{ marginRight: '16px', minWidth: '120px' }}>Push Notifications</span>
-            <label style={toggleStyle}>
-            <input
-                type="checkbox"
-                checked={pushNotifications}
-                onChange={() => setPushNotifications(!pushNotifications)}
-                style={{ display: 'none' }}
-            />
-            <span style={pushNotifications ? sliderCheckedStyle : sliderStyle}>
-                <span style={pushNotifications ? circleCheckedStyle : circleStyle}></span>
-            </span>
-            </label>
-        </div>
+            <h3>Notification Preferences</h3>
+            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '1.2rem' }}>
+                <span style={{ marginRight: '16px', minWidth: '120px' }}>Email Notifications</span>
+                <label style={toggleStyle}>
+                    <input
+                        type="checkbox"
+                        checked={emailNotifications}
+                        onChange={() => setEmailNotifications(!emailNotifications)}
+                        style={{ display: 'none' }}
+                    />
+                    <span style={emailNotifications ? sliderCheckedStyle : sliderStyle}>
+                        <span style={emailNotifications ? circleCheckedStyle : circleStyle}></span>
+                    </span>
+                </label>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+                <span style={{ marginRight: '16px', minWidth: '120px' }}>Push Notifications</span>
+                <label style={toggleStyle}>
+                    <input
+                        type="checkbox"
+                        checked={pushNotifications}
+                        onChange={() => setPushNotifications(!pushNotifications)}
+                        style={{ display: 'none' }}
+                    />
+                    <span style={pushNotifications ? sliderCheckedStyle : sliderStyle}>
+                        <span style={pushNotifications ? circleCheckedStyle : circleStyle}></span>
+                    </span>
+                </label>
+            </div>
         </div>
     );
-    };
+};
 
-    // ThemeSettings component
-    const ThemeSettings = () => {
+// ThemeSettings component
+const ThemeSettings = () => {
     const { theme, toggleTheme } = useTheme();
 
     return (
         <div className="settings-section">
-        <h3>Theme / Appearance</h3>
-        <div style={{ display: 'flex', alignItems: 'center' }}>
-            <span style={{ marginRight: '16px', minWidth: '120px' }}>Dark Mode</span>
-            <label style={toggleStyle}>
-            <input
-                type="checkbox"
-                checked={theme === 'dark'}
-                onChange={toggleTheme}
-                style={{ display: 'none' }}
-            />
-            <span style={theme === 'dark' ? sliderCheckedStyle : sliderStyle}>
-                <span style={theme === 'dark' ? circleCheckedStyle : circleStyle}></span>
-            </span>
-            </label>
-        </div>
+            <h3>Theme / Appearance</h3>
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+                <span style={{ marginRight: '16px', minWidth: '120px' }}>Dark Mode</span>
+                <label style={toggleStyle}>
+                    <input
+                        type="checkbox"
+                        checked={theme === 'dark'}
+                        onChange={toggleTheme}
+                        style={{ display: 'none' }}
+                    />
+                    <span style={theme === 'dark' ? sliderCheckedStyle : sliderStyle}>
+                        <span style={theme === 'dark' ? circleCheckedStyle : circleStyle}></span>
+                    </span>
+                </label>
+            </div>
         </div>
     );
-    };
+};
 
-    const TABS = [
+const TABS = [
     { key: 'change', label: 'Change Password', component: <ChangePassword /> },
     { key: 'privacy', label: 'Privacy', component: <PrivacySettings /> },
     { key: 'theme', label: 'Theme', component: <ThemeSettings /> },
     { key: 'account', label: 'Account Actions', component: <AccountActions /> },
-    ];
+];
 
-    const Settings = () => {
+const Settings = () => {
     const [activeTab, setActiveTab] = useState('change');
 
     return (
         <div className="settings-main-container">
-        <div className="settings-flex-layout">
-            <nav className="settings-sidebar">
-            {TABS.map(tab => (
-            <button
-                key={tab.key}
-                className={`settings-tab-btn${activeTab === tab.key ? ' active' : ''}`}
-                onClick={() => setActiveTab(tab.key)}
-            >
-                {tab.label}
-            </button>
-            ))}
-            </nav>
-            <div className="settings-content-card">
-            {TABS.find(tab => tab.key === activeTab)?.component}
-        </div>
-        </div>
+            <div className="settings-flex-layout">
+                <nav className="settings-sidebar">
+                    {TABS.map(tab => (
+                        <button
+                            key={tab.key}
+                            className={`settings-tab-btn${activeTab === tab.key ? ' active' : ''}`}
+                            onClick={() => setActiveTab(tab.key)}
+                        >
+                            {tab.label}
+                        </button>
+                    ))}
+                </nav>
+                <div className="settings-content-card">
+                    {TABS.find(tab => tab.key === activeTab)?.component}
+                </div>
+            </div>
         </div>
     );
-    };
+};
 
 export default Settings; 

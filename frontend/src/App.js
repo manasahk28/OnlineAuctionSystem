@@ -42,7 +42,7 @@ function App() {
         <Route path="/register" element={<RedirectIfLoggedIn><Register /></RedirectIfLoggedIn>} />
         <Route path="/dashboard" element={<PrivateRoute><UserDashboard /></PrivateRoute>} />
         <Route path="/AdminDashboard" element={<PrivateRoute><AdminDashboard /></PrivateRoute>} />
-        <Route path="/reviewed/:type" element={<PrivateRoute><ReviewedList /></PrivateRoute>} />        
+        <Route path="/reviewed/:type" element={<PrivateRoute><ReviewedList /></PrivateRoute>} />
         <Route path="/explore" element={<PrivateRoute><ExploreItems /></PrivateRoute>} />
         <Route path="/post-item" element={<PrivateRoute><PostItems /></PrivateRoute>} />
         <Route path="/item/:id" element={<PrivateRoute><ItemDetail /></PrivateRoute>} />

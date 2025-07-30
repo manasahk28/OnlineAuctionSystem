@@ -37,7 +37,8 @@
 .listing-card {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;  /* ✅ Spread content evenly */
+  justify-content: space-between;
+  /* ✅ Spread content evenly */
   height: 85%;
   width: 85%;
   background: var(--color-bg-card);
@@ -75,8 +76,10 @@
   font-weight: 600;
   color: var(--color-text);
   margin: 0 0 8px;
-  white-space: normal;         /* ✅ Allows wrapping */
-  word-wrap: break-word;       /* ✅ Wrap long words */
+  white-space: normal;
+  /* ✅ Allows wrapping */
+  word-wrap: break-word;
+  /* ✅ Wrap long words */
 }
 
 .listing-description {
@@ -121,7 +124,8 @@
 }
 
 .listing-actions {
-  margin-top: auto;              /* ✅ Push to bottom */
+  margin-top: auto;
+  /* ✅ Push to bottom */
   padding-top: 10px;
   text-align: center;
 }

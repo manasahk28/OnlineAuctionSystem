@@ -6,6 +6,7 @@ const MyBids = () => {
   const [bids, setBids] = useState([]);
   const [now, setNow] = useState(Date.now());
   const [loading, setLoading] = useState(true);
+  const backend = process.env.REACT_APP_BACKEND_URL;
 
   const user = JSON.parse(localStorage.getItem('user'));
 
@@ -19,7 +20,7 @@ const MyBids = () => {
   useEffect(() => {
     const fetchBids = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/my-bids/email/${user.email}`);
+        const response = await axios.get(`${backend}/my-bids/email/${user.email}`);
         setBids(response.data);
       } catch (error) {
         console.error('Failed to fetch bids:', error);
@@ -39,7 +40,7 @@ const MyBids = () => {
       for (const bid of bids) {
         if (bid.auction_result === 'won') {
           try {
-            await axios.post('http://localhost:5000/api/handle-auction-win', {
+            await axios.post(`${backend}/api/handle-auction-win`, {
               item_id: bid._id,
               bidder_email: user.email
             });
@@ -58,7 +59,7 @@ const MyBids = () => {
   // Handle increasing the bid and send it to backend
   const handleIncreaseBid = async (itemId, newBid) => {
     try {
-      const res = await axios.post('http://localhost:5000/api/place-bid', {
+      const res = await axios.post(`${backend}/api/place-bid`, {
         item_id: itemId,
         bid_amount: Number(newBid),
         bidder_email: user?.email || '',
@@ -70,11 +71,11 @@ const MyBids = () => {
           prev.map((bid) =>
             bid._id === itemId
               ? {
-                  ...bid,
-                  your_bid: newBid,
-                  highest_bid: newBid,
-                  outbid: false
-                }
+                ...bid,
+                your_bid: newBid,
+                highest_bid: newBid,
+                outbid: false
+              }
               : bid
           )
         );
@@ -90,7 +91,7 @@ const MyBids = () => {
 
   // if (loading) return <div className="charts-section">Loading your bids...</div>;
 
-  
+
   return (
     <div className="charts-section">
       <div className="profile-header">

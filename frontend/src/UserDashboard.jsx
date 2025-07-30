@@ -32,33 +32,34 @@ const UserDashboard = () => {
   const [profile, setProfile] = useState({});
   const [activeSection, setActiveSection] = useState('Profile');
   const [now, setNow] = useState(Date.now());
+  const backend = process.env.REACT_APP_BACKEND_URL;
 
   // Dynamic chart states
   const [categoryData, setCategoryData] = useState([]);       // For pie chart
   const [biddedCategoryData, setBiddedCategoryData] = useState([]); // For bar chart
 
   const sortedCategories = categoryData.length > 0
-  ? [...categoryData].sort((a, b) => b.value - a.value)
-  : [];
+    ? [...categoryData].sort((a, b) => b.value - a.value)
+    : [];
 
   const topCategory = sortedCategories.length > 0 ? sortedCategories[0] : null;
 
   // Define the predefined categories that should be shown in the graph (matching the dropdown exactly)
   const predefinedCategories = [
-    "Books", "Electronics", "Clothing", "Stationery", "Lab Equipment", 
+    "Books", "Electronics", "Clothing", "Stationery", "Lab Equipment",
     "Sports Gear", "Hostel Essentials", "Cycle/Bike Accessories", "Art Supplies", "Other"
   ];
 
   // Helper to normalize category names (trim and case-insensitive)
   function normalizeCategory(name) {
-    return name ? name.trim().toLowerCase() : '';
+    return name ? name.trim().toLowerCase() : '';
   }
 
   useEffect(() => {
     const userData = JSON.parse(localStorage.getItem("user") || '{}');
     if (!userData.email) return;
 
-    fetch(`http://localhost:5000/api/get-profile?email=${userData.email}`)
+    fetch(`${backend}/api/get-profile?email=${userData.email}`)
       .then(res => res.json())
       .then(data => {
         if (data.status === 'success') {
@@ -83,10 +84,10 @@ const UserDashboard = () => {
 
   useEffect(() => {
     if (!user?.email) return;
-    fetch(`http://localhost:5000/api/user-category-stats/${user.email}`)
+    fetch(`${backend}/api/user-category-stats/${user.email}`)
       .then(res => res.json())
       .then(data => {
-if (data.status === 'success') {
+        if (data.status === 'success') {
           // Build a map of normalized category to count
           const pieMap = {};
           data.pie_data.forEach(d => {
@@ -134,7 +135,7 @@ if (data.status === 'success') {
       setProfileImage(updatedImage);
 
       try {
-        const res1 = await fetch(`http://localhost:5000/api/get-profile?email=${user.email}`);
+        const res1 = await fetch(`${backend}/api/get-profile?email=${user.email}`);
         const data1 = await res1.json();
         const existingProfile = data1.profile;
 
@@ -144,7 +145,7 @@ if (data.status === 'success') {
           profileImage: updatedImage
         };
 
-        const res = await fetch('http://localhost:5000/api/update-profile', {
+        const res = await fetch(`${backend}/api/update-profile`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(updatedProfile)
@@ -157,7 +158,7 @@ if (data.status === 'success') {
             ActivityActions.ADDED_PROFILE_PICTURE,
             'Profile Image'
           );
-          
+
           localStorage.setItem('user', JSON.stringify({ ...user, profileImage: updatedImage }));
           setProfile(updatedProfile);
         } else {
@@ -173,12 +174,12 @@ if (data.status === 'success') {
 
   const handleDeleteProfileImage = async () => {
     const confirmDelete = window.confirm('Are you sure you want to delete your profile image? This action cannot be undone.');
-    
+
     if (!confirmDelete) return;
 
     try {
       // Get current profile data
-      const res1 = await fetch(`http://localhost:5000/api/get-profile?email=${user.email}`);
+      const res1 = await fetch(`${backend}/api/get-profile?email=${user.email}`);
       const data1 = await res1.json();
       const existingProfile = data1.profile;
 
@@ -189,7 +190,7 @@ if (data.status === 'success') {
         profileImage: '' // Set to empty string to remove the image
       };
 
-      const res = await fetch('http://localhost:5000/api/update-profile', {
+      const res = await fetch(`${backend}/api/update-profile`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updatedProfile)
@@ -201,13 +202,13 @@ if (data.status === 'success') {
         setProfileImage(null);
         setProfile(updatedProfile);
         localStorage.setItem('user', JSON.stringify({ ...user, profileImage: null }));
-        
+
         // Log the profile image deletion activity
         await logProfileActivity(
           ActivityActions.DELETED_PROFILE_PICTURE,
           'Profile Image'
         );
-        
+
         alert('✅ Profile image deleted successfully!');
       } else {
         alert('❌ Failed to delete profile image: ' + result.message);
@@ -287,8 +288,8 @@ if (data.status === 'success') {
                 </div>
               </div>,
               document.body
-            )}            
-              <h3 className="username">{profile.UserName || user.UserName || 'Your Name'}</h3>
+            )}
+            <h3 className="username">{profile.UserName || user.UserName || 'Your Name'}</h3>
 
             <div className="sidebar-buttons">
               <button onClick={() => setActiveSection('ProfilePage')}>Account</button>
@@ -297,7 +298,7 @@ if (data.status === 'success') {
               <button onClick={() => setActiveSection('Payments')}>Payments</button>
               <button onClick={() => setActiveSection('Notifications')}>Notifications</button>
               <button onClick={() => setActiveSection('RecentActivity')}>Recent Activity</button>
-              <button onClick={() => setActiveSection('Settings')}>Settings</button>            
+              <button onClick={() => setActiveSection('Settings')}>Settings</button>
             </div>
           </div>
 
@@ -367,7 +368,7 @@ if (data.status === 'success') {
                     <h2 style={{ marginLeft: '24px', marginTop: '32px' }}>⚙️ Settings</h2>
                     <Settings />
                   </div>
-                )}       
+                )}
               </>
             )}
           </div>

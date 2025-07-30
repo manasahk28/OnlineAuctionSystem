@@ -10,6 +10,7 @@ const ResetPassword = () => {
   const [newPassword, setNewPassword] = useState('');
   const [message, setMessage] = useState('');
   const [passwordError, setPasswordError] = useState('');
+  const backend = process.env.REACT_APP_BACKEND_URL;
 
   // Reused password validation logic
   const validatePassword = (password) => {
@@ -38,7 +39,7 @@ const ResetPassword = () => {
     }
 
     try {
-      const res = await fetch('http://localhost:5000/api/reset-password', {
+      const res = await fetch(`${backend}/api/reset-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, reset_token: token, new_password: newPassword }),

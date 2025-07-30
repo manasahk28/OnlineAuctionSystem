@@ -6,6 +6,7 @@ const Payments = () => {
   const [payments, setPayments] = useState([]);
   const [loading, setLoading] = useState(true);
   const user = JSON.parse(localStorage.getItem('user'));
+  const backend = process.env.REACT_APP_BACKEND_URL;
 
   // ✅ Load Razorpay checkout.js once
   useEffect(() => {
@@ -24,7 +25,7 @@ const Payments = () => {
   useEffect(() => {
     const fetchPayments = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/api/payments/${user.email}`);
+        const res = await axios.get(`${backend}/api/payments/${user.email}`);
         setPayments(res.data.payments || []);
       } catch (error) {
         console.error('Error fetching payments:', error);
@@ -43,7 +44,7 @@ const Payments = () => {
   // ✅ Razorpay payment handler
   const handlePayment = async (amount, itemId) => {
     try {
-      const { data } = await axios.post('http://localhost:5000/api/create-order', {
+      const { data } = await axios.post(`${backend}/api/create-order`, {
         amount,
         itemId,
         email: user.email
@@ -57,7 +58,7 @@ const Payments = () => {
         description: 'Payment for item',
         order_id: data.order_id,
         handler: async (response) => {
-          const verifyRes = await axios.post('http://localhost:5000/api/verify-payment', {
+          const verifyRes = await axios.post(`${backend}/api/verify-payment`, {
             razorpay_order_id: response.razorpay_order_id,
             razorpay_payment_id: response.razorpay_payment_id,
             razorpay_signature: response.razorpay_signature,
@@ -69,7 +70,7 @@ const Payments = () => {
           alert(verifyRes.data.message);
 
           // Refresh updated payment status
-          const refreshed = await axios.get(`http://localhost:5000/api/payments/${user.email}`);
+          const refreshed = await axios.get(`${backend}/api/payments/${user.email}`);
           setPayments(refreshed.data.payments || []);
         },
         theme: { color: '#3399cc' }

@@ -7,6 +7,7 @@ const NotificationsPage = () => {
   const user = JSON.parse(localStorage.getItem('user') || '{}');
   const userEmail = user.email;
   const token = localStorage.getItem('token');
+  const backend = process.env.REACT_APP_BACKEND_URL;
 
   const [preferences, setPreferences] = useState({});
   const [notifications, setNotifications] = useState([]);
@@ -28,7 +29,7 @@ const NotificationsPage = () => {
     setPreferences(updatedPrefs);
     try {
       await axios.post(
-        'http://localhost:5000/api/notifications/preferences/update',
+        `${backend}/api/notifications/preferences/update`,
         {
           email: userEmail,
           preferences: updatedPrefs,
@@ -37,7 +38,7 @@ const NotificationsPage = () => {
       );
       // Re-fetch preferences to ensure UI matches DB
       const prefsRes = await axios.get(
-        `http://localhost:5000/api/notifications/preferences/${userEmail}`,
+        `{backend}/api/notifications/preferences/${userEmail}`,
         authHeader
       );
       setPreferences(prefsRes.data.preferences || {});
@@ -49,7 +50,7 @@ const NotificationsPage = () => {
 
   const markAsRead = async (notificationId) => {
     try {
-      await axios.post('http://localhost:5000/api/notifications/mark_seen', {
+      await axios.post(`${backend}/api/notifications/mark_seen`, {
         notification_id: notificationId,
       });
       setNotifications((prev) =>
@@ -70,9 +71,9 @@ const NotificationsPage = () => {
     const fetchData = async () => {
       try {
         const [notifRes, prefsRes] = await Promise.all([
-          axios.get(`http://localhost:5000/api/notifications/${userEmail}`),
+          axios.get(`${backend}/api/notifications/${userEmail}`),
           axios.get(
-            `http://localhost:5000/api/notifications/preferences/${userEmail}`,
+            `${backend}/api/notifications/preferences/${userEmail}`,
             authHeader
           ),
         ]);
@@ -155,9 +156,9 @@ const NotificationsPage = () => {
         const fetchData = async () => {
           try {
             const [notifRes, prefsRes] = await Promise.all([
-              axios.get(`http://localhost:5000/api/notifications/${userEmail}`),
+              axios.get(`${backend}/api/notifications/${userEmail}`),
               axios.get(
-                `http://localhost:5000/api/notifications/preferences/${userEmail}`,
+                `${backend}/api/notifications/preferences/${userEmail}`,
                 authHeader
               ),
             ]);
@@ -239,21 +240,20 @@ const NotificationsPage = () => {
               return (
                 <div
                   key={notifId}
-                  className={`notification-card ${n.seen ? 'seen' : 'unseen'} ${
-                    isWinner
+                  className={`notification-card ${n.seen ? 'seen' : 'unseen'} ${isWinner
                       ? 'winner-notif'
                       : isAuctionEnding
-                      ? 'auction-ending-notif'
-                      : isAuctionEnd
-                      ? 'auction-end-notif'
-                      : isOutbidDuringBidding
-                      ? 'outbid-notif'
-                      : isOutbidAuctionEnd
-                      ? 'auction-end-notif'
-                      : isPayment || isAdminComment
-                      ? 'auction-ending-notif'
-                      : ''
-                  }`}
+                        ? 'auction-ending-notif'
+                        : isAuctionEnd
+                          ? 'auction-end-notif'
+                          : isOutbidDuringBidding
+                            ? 'outbid-notif'
+                            : isOutbidAuctionEnd
+                              ? 'auction-end-notif'
+                              : isPayment || isAdminComment
+                                ? 'auction-ending-notif'
+                                : ''
+                    }`}
                   onClick={() => {
                     if (isWinner || isAuctionEnding || isOutbidDuringBidding) {
                       setExpandedNotificationId((prev) =>
@@ -269,10 +269,9 @@ const NotificationsPage = () => {
                     {n.message}
                     <span className="notif-time-inline"> {new Date(n.timestamp).toLocaleString()}</span>
                     {isAuctionEnding && endTime && (
-                      <span className={`countdown ${
-                        new Date(endTime) - currentTime < 60 * 1000 ? 'critical' :
-                        new Date(endTime) - currentTime < 5 * 60 * 1000 ? 'urgent' : ''
-                      }`}>
+                      <span className={`countdown ${new Date(endTime) - currentTime < 60 * 1000 ? 'critical' :
+                          new Date(endTime) - currentTime < 5 * 60 * 1000 ? 'urgent' : ''
+                        }`}>
                         {' '}{new Date(endTime) - currentTime < 60 * 1000 ? '🚨 ' : '⏰ '}
                         {calculateRemainingTime(endTime)}
                       </span>

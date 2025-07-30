@@ -1,7 +1,7 @@
 .edit-item-wrapper {
   padding: 1rem;
   border-radius: 12px;
-max-width: 900px;
+  max-width: 900px;
   background: #fff;
 }
 
@@ -153,7 +153,8 @@ max-width: 900px;
   margin-top: 2rem;
 }
 
-.save-btn, .can-btn {
+.save-btn,
+.can-btn {
   padding: 0.6rem 1.5rem;
   font-size: 1rem;
   border: none;

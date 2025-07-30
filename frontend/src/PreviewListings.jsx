@@ -19,11 +19,12 @@ const PreviewListings = () => {
   const navigate = useNavigate();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const backend = process.env.REACT_APP_BACKEND_URL;
 
   useEffect(() => {
     const fetchItems = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/items');
+        const response = await axios.get(`${backend}/api/items`);
         if (response.data.status === 'success') {
           const now = new Date();
           const allItems = response.data.items.filter(item => {

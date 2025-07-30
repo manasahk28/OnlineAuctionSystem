@@ -22,13 +22,42 @@ body {
   color: var(--color-text) !important;
 }
 
-body, .registration-container, .login-wrapper, .register-wrapper, .dashboard-container, .dashboard-card, .settings-main-container, .settings-section, .settings-sidebar, .settings-content-card, .homepage, .listing-card, .about-card, .contact-card, .footer, .navbar, .sidebar-left, .sidebar-right, .charts-section, .scroll-container {
+body,
+.registration-container,
+.login-wrapper,
+.register-wrapper,
+.dashboard-container,
+.dashboard-card,
+.settings-main-container,
+.settings-section,
+.settings-sidebar,
+.settings-content-card,
+.homepage,
+.listing-card,
+.about-card,
+.contact-card,
+.footer,
+.navbar,
+.sidebar-left,
+.sidebar-right,
+.charts-section,
+.scroll-container {
   background: var(--color-bg-card) !important;
   color: var(--color-text) !important;
 }
 
-h1, h2,h3, h4, h5, h6, label, p, span, a, button {
-  color: var(--color-text) ;
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+label,
+p,
+span,
+a,
+button {
+  color: var(--color-text);
 }
 
 /* Login Page - No scroll */
@@ -36,8 +65,10 @@ h1, h2,h3, h4, h5, h6, label, p, span, a, button {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh; /* Full screen height */
-  overflow: hidden; /* No scroll */
+  height: 100vh;
+  /* Full screen height */
+  overflow: hidden;
+  /* No scroll */
   background-color: #f0f0f0;
 }
 
@@ -45,7 +76,8 @@ h1, h2,h3, h4, h5, h6, label, p, span, a, button {
 .register-wrapper {
   min-height: 100vh;
   max-height: 100vh;
-  overflow-y: auto; /* Enable vertical scroll only */
+  overflow-y: auto;
+  /* Enable vertical scroll only */
   padding: 20px;
   background-color: #fefefe;
 }
@@ -59,13 +91,14 @@ h1, h2,h3, h4, h5, h6, label, p, span, a, button {
   text-align: center;
   padding: 24px 0 18px 0;
   letter-spacing: 1px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
   margin-bottom: 32px;
   position: fixed;
   top: 0;
   left: 0;
   z-index: 20;
 }
+
 .dark-theme .reg-header {
   color: #111 !important;
 }
@@ -138,6 +171,7 @@ h1, h2,h3, h4, h5, h6, label, p, span, a, button {
 .registration-container:hover {
   transform: translateY(-5px);
 }
+
 .back-button {
   margin-top: 1rem;
   padding: 10px 20px;
@@ -156,13 +190,16 @@ h1, h2,h3, h4, h5, h6, label, p, span, a, button {
   position: relative;
   display: flex;
   align-items: center;
-  width: 100%; /* fixed from 108% */
-  margin-bottom: 1px; /* unified spacing */
+  width: 100%;
+  /* fixed from 108% */
+  margin-bottom: 1px;
+  /* unified spacing */
 }
 
 .email-wrapper input[type="text"] {
   width: 100%;
-  padding: 12px 130px 12px 12px; /* consistent padding */
+  padding: 12px 130px 12px 12px;
+  /* consistent padding */
   font-size: 1rem;
   border: 1px solid #ccc;
   border-radius: 8px;
@@ -289,7 +326,7 @@ body {
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(45deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%);
+  background: linear-gradient(45deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 100%);
   pointer-events: none;
 }
 
@@ -339,9 +376,19 @@ body {
 }
 
 @keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-5px); }
-  75% { transform: translateX(5px); }
+
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  25% {
+    transform: translateX(-5px);
+  }
+
+  75% {
+    transform: translateX(5px);
+  }
 }
 
 .login-container input {
@@ -490,7 +537,9 @@ body {
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* Home page Css*/
@@ -533,10 +582,12 @@ body {
   text-align: left;
   margin-left: 20px;
 }
+
 .highlight {
   color: #f26522;
   font-family: 'Georgia', serif;
 }
+
 .subheading {
   font-size: 20px;
   color: #333;
@@ -566,14 +617,17 @@ body {
   .hero-left {
     margin-left: 10px;
   }
-  .hero-container .hero-right{
+
+  .hero-container .hero-right {
     padding: 0 0;
   }
-  .hero-image{
+
+  .hero-image {
     align-items: center;
     width: 95%;
   }
 }
+
 /* How it works */
 
 .how-it-works {
@@ -613,7 +667,8 @@ body {
 
 .step-content h3 {
   font-size: 20px;
-  color: #e67e22; /* orange shade */
+  color: #e67e22;
+  /* orange shade */
   font-weight: bold;
   margin-bottom: 10px;
 }
@@ -674,18 +729,21 @@ body {
 }
 
 .step-img {
-  width: 180px; /* or 150px, adjust as you like */
-  height: auto;
-    object-fit: contain;
-  flex-shrink: 0;
-}
-
-.step-img2 {
-  width: 160px; /* or 150px, adjust as you like */
+  width: 180px;
+  /* or 150px, adjust as you like */
   height: auto;
   object-fit: contain;
   flex-shrink: 0;
 }
+
+.step-img2 {
+  width: 160px;
+  /* or 150px, adjust as you like */
+  height: auto;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
 .step-row {
   display: flex;
   flex-direction: column;
@@ -743,7 +801,8 @@ body {
   display: flex;
 }
 
-.flip-card-front, .flip-card-back {
+.flip-card-front,
+.flip-card-back {
   position: absolute;
   width: 100%;
   height: 100%;
@@ -764,7 +823,8 @@ body {
   z-index: 3;
 }
 
-.flip-card-front, .flip-card-back {
+.flip-card-front,
+.flip-card-back {
   background-color: var(--color-bg-card) !important;
   color: var(--color-text) !important;
 }
@@ -794,14 +854,16 @@ body {
 }
 
 @media (max-width: 480px) {
-.how-title {
-  font-size: 100px;
-  margin-bottom: 20px;
+  .how-title {
+    font-size: 100px;
+    margin-bottom: 20px;
   }
+
   .step-img {
     width: 280px;
     height: auto;
   }
+
   .steps-horizontal {
     flex-direction: column;
     align-items: center;
@@ -886,14 +948,23 @@ h2.preview {
   margin: 0 12px 32px 12px;
   border: 2px solid #ffe0c3;
 }
+
 .listing-card:hover {
   transform: scale(1.04) translateY(-8px);
   box-shadow: 0 8px 32px rgba(255, 107, 0, 0.18), 0 0 16px #ffd699;
   border-color: #ffd699;
 }
+
 @keyframes previewCardFadeIn {
-  0% { opacity: 0; transform: translateY(40px); }
-  100% { opacity: 1; transform: translateY(0); }
+  0% {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Why Use */
@@ -949,23 +1020,52 @@ h2.preview {
 
 /* --- How it works Animation --- */
 @keyframes slideDownFadeIn {
-  0% { opacity: 0; transform: translateY(-40px); }
-  100% { opacity: 1; transform: translateY(0); }
+  0% {
+    opacity: 0;
+    transform: translateY(-40px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
+
 @keyframes slideUpFadeIn {
-  0% { opacity: 0; transform: translateY(40px); }
-  100% { opacity: 1; transform: translateY(0); }
+  0% {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
+
 .how-animate {
   animation: slideDownFadeIn 1s cubic-bezier(0.23, 1, 0.32, 1) both;
 }
+
 .how-step-animate {
   opacity: 0;
   animation: slideUpFadeIn 1s cubic-bezier(0.23, 1, 0.32, 1) both;
 }
-.steps-horizontal .how-step-animate:nth-child(1) { animation-delay: 0.2s; opacity: 1; }
-.steps-horizontal .how-step-animate:nth-child(2) { animation-delay: 0.5s; opacity: 1; }
-.steps-horizontal .how-step-animate:nth-child(3) { animation-delay: 0.8s; opacity: 1; }
+
+.steps-horizontal .how-step-animate:nth-child(1) {
+  animation-delay: 0.2s;
+  opacity: 1;
+}
+
+.steps-horizontal .how-step-animate:nth-child(2) {
+  animation-delay: 0.5s;
+  opacity: 1;
+}
+
+.steps-horizontal .how-step-animate:nth-child(3) {
+  animation-delay: 0.8s;
+  opacity: 1;
+}
 
 .how-title.how-animate {
   color: #ff6600;
@@ -983,6 +1083,7 @@ h2.preview {
   min-height: 370px;
   position: relative;
 }
+
 .flip-card-inner {
   position: relative;
   width: 100%;
@@ -990,10 +1091,13 @@ h2.preview {
   transition: transform 0.7s cubic-bezier(0.23, 1, 0.32, 1);
   transform-style: preserve-3d;
 }
+
 .flip-card.flipped .flip-card-inner {
   transform: rotateY(180deg);
 }
-.flip-card-front, .flip-card-back {
+
+.flip-card-front,
+.flip-card-back {
   position: absolute;
   width: 100%;
   height: 100%;
@@ -1007,12 +1111,14 @@ h2.preview {
   box-shadow: 0 4px 18px rgba(255, 107, 0, 0.13);
   padding: 1rem;
 }
+
 .flip-card-back {
   background: linear-gradient(135deg, #ffe0c3 0%, #fff7e6 100%);
   color: #ff6600;
   transform: rotateY(180deg);
   box-shadow: 0 8px 32px rgba(255, 107, 0, 0.18), 0 0 16px #ffd699;
 }
+
 .flip-hint {
   display: block;
   margin-top: 1.2rem;
@@ -1046,8 +1152,13 @@ h2.preview {
 }
 
 @keyframes carouselMove {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
+  0% {
+    transform: translateX(0);
+  }
+
+  100% {
+    transform: translateX(-50%);
+  }
 }
 
 .info-message {
@@ -1055,7 +1166,7 @@ h2.preview {
   color: #006064;
   padding: 10px;
   border-radius: 5px;
-  margin:10px 0;
+  margin: 10px 0;
 }
 
 .flip-card.flipped .flip-card-back {
@@ -1063,7 +1174,9 @@ h2.preview {
   color: var(--color-text) !important;
 }
 
-.login-wrapper, .login-container, .registration-container {
+.login-wrapper,
+.login-container,
+.registration-container {
   background: var(--color-bg-card) !important;
   color: var(--color-text) !important;
 }
@@ -1073,7 +1186,9 @@ h2.preview {
   color: #fff !important;
 }
 
-.dark-theme .login-wrapper, .dark-theme .login-container, .dark-theme .registration-container {
+.dark-theme .login-wrapper,
+.dark-theme .login-container,
+.dark-theme .registration-container {
   background: var(--color-bg-card) !important;
   color: var(--color-text) !important;
 }
@@ -1092,18 +1207,22 @@ h2.preview {
   color: var(--color-text) !important;
 }
 
-.login-container input, .registration-container input, .registration-container select {
+.login-container input,
+.registration-container input,
+.registration-container select {
   background: var(--color-bg) !important;
   color: var(--color-text) !important;
 }
 
-.dark-theme .login-container input, .dark-theme .registration-container input, .dark-theme .registration-container select {
+.dark-theme .login-container input,
+.dark-theme .registration-container input,
+.dark-theme .registration-container select {
   background: var(--color-bg) !important;
   color: var(--color-text) !important;
 }
 
 .dark-theme h2.preview,
-.dark-theme .how-title.how-animate ,
+.dark-theme .how-title.how-animate,
 .dark-theme .listing-card,
 .dark-theme .dashboard-card,
 .dark-theme .dashboard-heading,
@@ -1127,14 +1246,24 @@ h2.preview {
   border-color: #444 !important;
 }
 
-.dark-theme .footer, .dark-theme .footer *, .dark-theme .footer a, .dark-theme .footer span, .dark-theme .footer p, .dark-theme .footer h1, .dark-theme .footer h2, .dark-theme .footer h3, .dark-theme .footer h4, .dark-theme .footer h5, .dark-theme .footer h6 {
+.dark-theme .footer,
+.dark-theme .footer *,
+.dark-theme .footer a,
+.dark-theme .footer span,
+.dark-theme .footer p,
+.dark-theme .footer h1,
+.dark-theme .footer h2,
+.dark-theme .footer h3,
+.dark-theme .footer h4,
+.dark-theme .footer h5,
+.dark-theme .footer h6 {
   color: #fff !important;
 }
 
 .dark-theme .footer {
   background-color: #23272a !important;
   border-top: 2px solid #444 !important;
-  box-shadow: 0 -4px 24px 0 rgba(0,0,0,0.7), 0 -1.5px 0 #444;
+  box-shadow: 0 -4px 24px 0 rgba(0, 0, 0, 0.7), 0 -1.5px 0 #444;
 }
 
 .dark-theme h2.preview {

@@ -8,7 +8,7 @@
   padding: 16px 18px;
   font-size: 14px;
   border-radius: 16px;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   cursor: pointer;
   z-index: 1000;
   text-align: center;
@@ -25,7 +25,7 @@
   width: 34px;
   height: 34px;
   overflow: hidden;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 }
 
 .avatar-circle img {
@@ -42,7 +42,7 @@
   height: 100%;
   width: 340px;
   background-color: white;
-  box-shadow: -2px 0 10px rgba(0,0,0,0.2);
+  box-shadow: -2px 0 10px rgba(0, 0, 0, 0.2);
   transition: right 0.3s ease;
   z-index: 9999;
   display: flex;
@@ -89,7 +89,8 @@
 }
 
 .chat-content::-webkit-scrollbar {
-  display: none; /* Chrome, Safari */
+  display: none;
+  /* Chrome, Safari */
 }
 
 .message {
@@ -132,7 +133,7 @@
   font-size: 14px;
   text-align: left;
   cursor: pointer;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   white-space: nowrap;
   transition: background-color 0.3s ease;
 }
@@ -148,8 +149,10 @@
   left: 0;
   width: 100%;
   height: 100%;
-  backdrop-filter: blur(4px); /* ✨ optional blur */
-  background-color: rgba(0, 0, 0, 0.4); /* semi-dark */
+  backdrop-filter: blur(4px);
+  /* ✨ optional blur */
+  background-color: rgba(0, 0, 0, 0.4);
+  /* semi-dark */
   z-index: 9998;
 }
 
@@ -170,15 +173,25 @@
 .typing-indicator .dot:nth-child(2) {
   animation-delay: 0.2s;
 }
+
 .typing-indicator .dot:nth-child(3) {
   animation-delay: 0.4s;
 }
 
 @keyframes blink {
-  0% { opacity: 0.2; }
-  50% { opacity: 1; }
-  100% { opacity: 0.2; }
+  0% {
+    opacity: 0.2;
+  }
+
+  50% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0.2;
+  }
 }
+
 .nia-msg {
   font-size: 14px;
   margin-top: 8px;

@@ -33,6 +33,7 @@
 .payment-card.paid {
   border-left-color: #4caf50;
 }
+
 .payment-card.pending {
   border-left-color: #ff9800;
 }
