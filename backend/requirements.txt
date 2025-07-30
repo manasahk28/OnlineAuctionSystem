@@ -10,3 +10,5 @@ flask-jwt-extended
 apscheduler
 razorpay
 requests
+setuptools
+dnspython
