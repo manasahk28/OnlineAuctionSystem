@@ -17,6 +17,7 @@
   font-size: 1.6rem;
   cursor: pointer;
   display: none;
+  color: #fff;
 }
 
 .navbar-right {
@@ -29,7 +30,7 @@
 
 .navbar-right .btn {
   background: #e8700e;
-  color: white;
+  color:  #fff !important;
   border-radius: 2px;
   font-weight: bold;
   box-shadow: 0 2px 8px rgba(255, 107, 0, 0.08);
@@ -95,6 +96,11 @@
   color: #111 !important;
 }
 
+/* Dark theme: navbar buttons should be black */
+.dark-theme .navbar-right .btn {
+  color: #111 !important;
+}
+
 .logout-btn:hover {
   background-color: #c62828;
 }
@@ -126,6 +132,7 @@
 @media (max-width: 768px) {
   .navbar-left .menu-icon {
     display: block;
+    color: #fff !important;
   }
 
   .desktop-only {
@@ -585,14 +592,27 @@ main {
 }
 
 .back-btn {
-  background: var(--color-secondary) !important;
+  background: #ff9800 !important;
   color: #fff !important;
   border: none !important;
+  border-radius: 10px !important;
+  padding: 8px 14px !important;
+  font-size: 1.3rem !important;
+  font-weight: bold !important;
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  z-index: 2;
+  box-shadow: 0 2px 8px rgba(255, 107, 0, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .back-btn svg,
 .back-btn i,
 .back-btn span {
+  background: none !important;
   color: #fff !important;
 }
 
@@ -613,4 +633,14 @@ main {
   background: rgba(255, 153, 0, 0.08) !important;
   /* border-radius: 0 0 24px 24px !important; */
   padding-bottom: 1.5rem !important;
+}
+
+@media (max-width: 600px) {
+  .about-card,
+  .contact-card,
+  .help-card {
+    margin-left: 12px;
+    margin-right: 12px;
+    width: auto;
+  }
 }

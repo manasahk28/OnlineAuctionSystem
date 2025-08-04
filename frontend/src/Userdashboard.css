@@ -135,7 +135,7 @@ html {
   margin-left: 0;
   overflow-y: auto;
   padding: 20px;
-  padding-bottom: 120px;
+  padding-bottom: 20px;
   /* Space for footer */
   box-sizing: border-box;
   display: flex;
@@ -515,10 +515,136 @@ html {
 
   .sidebar-right,
   .scroll-container {
+    height: auto !important;
+    min-height: unset !important;
+    max-height: unset !important;
+    overflow: visible !important;
+  }
+
+  .sidebar-buttons {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+  }
+  .sidebar-buttons button {
+    width: 80%;
+    padding: 12px 0;
+    margin-left: 0;
+    margin-right: 0;
+    display: block;
+    font-size: 18px;
+  }
+  .sidebar-left {
+    padding-top: 24px;
+    padding-bottom: 16px;
+  }
+  .username {
+    margin-bottom: 10px;
+  }
+  .sidebar-buttons {
+    margin-top: 8px;
+    margin-bottom: 18px;
+  }
+  .sidebar-buttons button {
+    width: 80%;
+    padding: 14px 0;
+    margin: 8px 0;
+    font-size: 18px;
+  }
+  .dashboard-container {
+    padding: 0 8px;
+  }
+  .charts-section {
+    margin-top: 18px;
+    padding: 10px 4px;
+  }
+  .dashboard-card {
+    width: 94%;
+    max-width: 400px;
+    margin: 24px auto 0 auto;
+    padding: 18px 10px;
+    height: auto;
+    min-height: 320px;
+    box-sizing: border-box;
+  }
+  .chart-card {
+    width: 94%;
+    max-width: 400px;
+    margin: 18px auto;
+    padding: 12px 6px;
+    box-sizing: border-box;
+  }
+  .charts-section {
     padding-left: 0 !important;
     padding-right: 0 !important;
-    margin-left: 0 !important;
-    margin-right: 0 !important;
+  }
+  .charts-section h2 {
+    margin-left: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .sidebar-buttons {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+  }
+  .sidebar-buttons button {
+    width: 85%;
+    padding: 14px 0;
+    margin-left: 0;
+    margin-right: 0;
+    display: block;
+    font-size: 19px;
+  }
+  .sidebar-left {
+    padding-top: 16px;
+    padding-bottom: 10px;
+  }
+  .username {
+    margin-bottom: 8px;
+  }
+  .sidebar-buttons {
+    margin-top: 6px;
+    margin-bottom: 14px;
+  }
+  .sidebar-buttons button {
+    width: 85%;
+    padding: 13px 0;
+    margin: 7px 0;
+    font-size: 19px;
+  }
+  .dashboard-container {
+    padding: 0 4px;
+  }
+  .charts-section {
+    margin-top: 14px;
+    padding: 8px 2px;
+  }
+  .dashboard-card {
+    width: 96%;
+    max-width: 340px;
+    margin: 18px auto 0 auto;
+    padding: 12px 4px;
+    height: auto;
+    min-height: 260px;
+    box-sizing: border-box;
+  }
+  .chart-card {
+    width: 96%;
+    max-width: 340px;
+    margin: 12px auto;
+    padding: 8px 2px;
+    box-sizing: border-box;
+  }
+  .charts-section {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+  .charts-section h2 {
+    margin-left: 12px;
   }
 }
 

@@ -269,10 +269,10 @@ export const Help = () => {
   return (
     <Layout hideFooter>
       <div className="help-card">
-        <button onClick={() => navigate(-1)} className="backk-btn">
-          <FaArrowLeft />
-        </button>
         <div className="help-header">
+          <button onClick={() => navigate(-1)} className="back-btn">
+            <FaArrowLeft />
+          </button>
           <FaQuestionCircle size={38} color="#ff9800" style={{ marginBottom: 8 }} />
           <h2>Help & FAQ</h2>
           <div className="help-divider" />

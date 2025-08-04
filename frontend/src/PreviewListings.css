@@ -27,15 +27,63 @@ body {
   transition: transform 0.3s ease;
 }
 
-@media (max-width: 1200px) {
+@media (max-width: 1200px) { 
   .listing-card {
-    flex: 0 0 180px;
+    flex: 0 0 160px;
+    /* Remove fixed height */
   }
 }
 
 @media (max-width: 800px) {
   .listing-card {
-    flex: 0 0 150px;
+    flex: 0 0 140px;
+    /* Remove fixed height */
+  }
+}
+
+@media (max-width: 600px) {
+  .preview-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1px;
+    padding: 0;
+    justify-content: center;
+    height:auto;
+  }
+
+  .listing-card {
+    width: 100%;
+    max-width: 190px;
+    padding: 5px;
+    display: flex;
+    flex-direction: column;
+    background-color: #fff;
+    border-radius: 8px;
+    box-sizing: border-box;
+    height : auto; /* Remove fixed height */
+    
+  }
+
+  .listing-card img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 6px;
+    margin-bottom: 1px; /* Small gap between image and text */
+  }
+
+  .listing-card .details {
+    font-size: 15px;
+    margin: 0 0 6px;
+    line-height: 1.5;
+  }
+
+  .listing-card button {
+    margin-top: auto;
+    padding: 6px 10px;
+    font-size: 16px;
+    border-radius: 5px;
+    align-self: center;
   }
 }
 

@@ -930,6 +930,7 @@ h2.preview {
   font-family: 'Pacifico', cursive, sans-serif;
   letter-spacing: 2px;
   animation: slideDownFadeIn 1s cubic-bezier(0.23, 1, 0.32, 1) both;
+  text-shadow: 0 2px 12px #ffd699;
 }
 
 /* Animate each listing card in PreviewListings */
@@ -1273,4 +1274,116 @@ h2.preview {
   letter-spacing: 2px;
   text-align: center;
   margin-bottom: 2.5rem;
+}
+
+@media (max-width: 480px) {
+  .how-section {
+    padding: 2px 0;
+  }
+
+  .how-title {
+    font-size: 1.2rem;
+    margin: 0 0 6px 0;
+  }
+
+  .steps-horizontal {
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.1rem 0;
+  }
+
+  .how-step,
+  .flip-card {
+    width: 96%;
+    min-height: 160px;
+    height: auto;
+    padding: 10px;
+    margin-bottom: 0.5rem;
+    font-size: 1.02rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    box-sizing: border-box;
+    position: static !important;
+    text-align: center;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .how-step:hover,
+  .flip-card:hover {
+    transform: scale(1.02);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  .how-img {
+    max-width: 38px;
+    max-height: 38px;
+    margin: 8px 0;
+    display: block;
+  }
+
+  .flip-card-inner,
+  .flip-card-front,
+  .flip-card-back {
+    min-height: 160px !important;
+    height: auto !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    position: static !important;
+    width: 100% !important;
+    text-align: center !important;
+    flex-direction: column !important;
+    box-sizing: border-box !important;
+    padding: 10px !important;
+  }
+
+  .flip-card-front {
+    display: flex !important;
+  }
+
+  .flip-card.flipped .flip-card-front {
+    display: none !important;
+  }
+
+  .flip-card-back {
+    display: none !important;
+  }
+
+  .flip-card.flipped .flip-card-back {
+    display: flex !important;
+  }
+
+  .step-title {
+    font-size: 1.08rem;
+    margin-bottom: 6px;
+    text-align: center;
+    width: 100%;
+  }
+
+  .how-step .how-img {
+    margin-bottom: 6px;
+  }
+
+  .how-step p,
+  .how-step .note {
+    margin: 4px 0 0 0;
+    padding: 0;
+    font-size: 1rem;
+    text-align: center;
+    width: 100%;
+  }
+
+  .flip-card-back p,
+  .flip-card-back .note {
+    margin: 0;
+    padding: 0;
+    font-size: 1rem;
+    text-align: center;
+  }
 }
