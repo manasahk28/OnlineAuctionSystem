@@ -2731,5 +2731,11 @@ app.register_blueprint(listings_bp, url_prefix="/api")
 app.register_blueprint(auth_bp, url_prefix='/api/auth')
 
 if __name__ == '__main__':
-    app.run(debug=True, use_reloader=True, extra_files=[], reloader_type='watchdog')
-
+    app.run(
+        host="0.0.0.0",
+        port=5000,
+        debug=True,
+        use_reloader=True,
+        extra_files=[],
+        reloader_type='watchdog'
+    )
