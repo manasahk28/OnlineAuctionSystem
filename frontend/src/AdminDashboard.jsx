@@ -15,7 +15,7 @@ const AdminDashboard = () => {
 
   const refreshItems = async () => {
     try {
-      const res = await axios.get(`/api/admin/items/${activeTab}`);
+      const res = await axios.get(`http://localhost:5000/api/admin/items/${activeTab}`);
       console.log("📦 Refreshed items:", res.data);
       if (Array.isArray(res.data)) {
         setItems(res.data);
@@ -32,7 +32,7 @@ const AdminDashboard = () => {
     const fetchItems = async () => {
       setLoading(true);
       try {
-        const res = await axios.get(`/api/admin/items/${activeTab}`);
+        const res = await axios.get(`http://localhost:5000/api/admin/items/${activeTab}`);
         console.log("📦 Items fetched from backend:", res.data);
         if (Array.isArray(res.data)) {
           setItems(res.data);
