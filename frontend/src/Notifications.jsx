@@ -7,7 +7,7 @@ const NotificationsPage = () => {
   const user = JSON.parse(localStorage.getItem('user') || '{}');
   const userEmail = user.email;
   const token = localStorage.getItem('token');
-  const backend = process.env.REACT_APP_BACKEND_URL;
+  // const backend = process.env.REACT_APP_BACKEND_URL;
 
   const [preferences, setPreferences] = useState({});
   const [notifications, setNotifications] = useState([]);
@@ -29,7 +29,7 @@ const NotificationsPage = () => {
     setPreferences(updatedPrefs);
     try {
       await axios.post(
-        `${backend}/api/notifications/preferences/update`,
+        `http://localhost:5000/api/notifications/preferences/update`,
         {
           email: userEmail,
           preferences: updatedPrefs,
@@ -38,7 +38,7 @@ const NotificationsPage = () => {
       );
       // Re-fetch preferences to ensure UI matches DB
       const prefsRes = await axios.get(
-        `{backend}/api/notifications/preferences/${userEmail}`,
+        `http://localhost:5000/api/notifications/preferences/${userEmail}`,
         authHeader
       );
       setPreferences(prefsRes.data.preferences || {});
@@ -50,7 +50,7 @@ const NotificationsPage = () => {
 
   const markAsRead = async (notificationId) => {
     try {
-      await axios.post(`${backend}/api/notifications/mark_seen`, {
+      await axios.post(`http://localhost:5000/api/notifications/mark_seen`, {
         notification_id: notificationId,
       });
       setNotifications((prev) =>
@@ -71,9 +71,9 @@ const NotificationsPage = () => {
     const fetchData = async () => {
       try {
         const [notifRes, prefsRes] = await Promise.all([
-          axios.get(`${backend}/api/notifications/${userEmail}`),
+          axios.get(`http://localhost:5000/api/notifications/${userEmail}`),
           axios.get(
-            `${backend}/api/notifications/preferences/${userEmail}`,
+            `http://localhost:5000/api/notifications/preferences/${userEmail}`,
             authHeader
           ),
         ]);
@@ -156,9 +156,9 @@ const NotificationsPage = () => {
         const fetchData = async () => {
           try {
             const [notifRes, prefsRes] = await Promise.all([
-              axios.get(`${backend}/api/notifications/${userEmail}`),
+              axios.get(`http://localhost:5000/api/notifications/${userEmail}`),
               axios.get(
-                `${backend}/api/notifications/preferences/${userEmail}`,
+                `http://localhost:5000/api/notifications/preferences/${userEmail}`,
                 authHeader
               ),
             ]);

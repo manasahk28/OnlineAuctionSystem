@@ -4,7 +4,7 @@ import './MyListings.css';
 const MyListings = ({ setEditingItemId, setActiveSection }) => {
   const [listings, setListings] = useState([]);
   const [loading, setLoading] = useState(true);
-  const backend = process.env.REACT_APP_BACKEND_URL;
+  // const backend = process.env.REACT_APP_BACKEND_URL;
 
   const user = JSON.parse(localStorage.getItem('user'));
 
@@ -17,7 +17,7 @@ const MyListings = ({ setEditingItemId, setActiveSection }) => {
     }
 
     try {
-      const res = await fetch(`${backend}/api/items/user/${user.email}`);
+      const res = await fetch(`http://localhost:5000/api/items/user/${user.email}`);
       const data = await res.json();
 
       if (data.status === 'success') {
@@ -117,7 +117,7 @@ const MyListings = ({ setEditingItemId, setActiveSection }) => {
                         console.log('✅ Delete confirmed, sending request...');
 
                         try {
-                          const deleteUrl = `${backend}/api/items/${item._id}`;
+                          const deleteUrl = `http://localhost:5000/api/items/${item._id}`;
                           console.log('🗑️ Sending DELETE request to:', deleteUrl);
 
                           const res = await fetch(deleteUrl, {

@@ -7,13 +7,13 @@ const RecentActivity = () => {
   const [filterLoading, setFilterLoading] = useState(false);
   const [filter, setFilter] = useState('all'); // all, posts, bids, profile, payments
   const user = JSON.parse(localStorage.getItem('user'));
-  const backend = process.env.REACT_APP_BACKEND_URL;
+  // const backend = process.env.REACT_APP_BACKEND_URL;
 
   const fetchActivities = async (showLoading = true) => {
     if (showLoading) setLoading(true);
     try {
       // Fetch activities from the new user activities API
-      const activitiesRes = await fetch(`${backend}/api/user-activities/${user.email}`);
+      const activitiesRes = await fetch(`http://localhost:5000/api/user-activities/${user.email}`);
       const activitiesData = await activitiesRes.json();
 
       if (activitiesData.status === 'success') {
@@ -21,11 +21,11 @@ const RecentActivity = () => {
       } else {
         // Fallback to old method if new API is not available
         const [postedRes, bidsRes, profileRes, paymentsRes, notificationsRes] = await Promise.all([
-          fetch(`${backend}/api/items/user/${user.email}`),
-          fetch(`${backend}/my-bids/email/${user.email}`),
-          fetch(`${backend}/api/get-profile?email=${user.email}`),
-          fetch(`${backend}/api/payments/${user.email}`),
-          fetch(`${backend}/api/notifications/${user.email}`)
+          fetch(`http://localhost:5000/api/items/user/${user.email}`),
+          fetch(`http://localhost:5000/my-bids/email/${user.email}`),
+          fetch(`http://localhost:5000/api/get-profile?email=${user.email}`),
+          fetch(`http://localhost:5000/api/payments/${user.email}`),
+          fetch(`http://localhost:5000/api/notifications/${user.email}`)
         ]);
 
         const postedData = await postedRes.json();
@@ -259,7 +259,7 @@ const RecentActivity = () => {
 
     try {
       // Always try to populate activities first when filter is clicked
-      const populateRes = await fetch(`${backend}/api/populate-activities/${user.email}`, {
+      const populateRes = await fetch(`http://localhost:5000/api/populate-activities/${user.email}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' }
       });
@@ -268,7 +268,7 @@ const RecentActivity = () => {
 
       if (populateData.status === 'success') {
         // Fetch activities after populating
-        const activitiesRes = await fetch(`${backend}/api/user-activities/${user.email}`);
+        const activitiesRes = await fetch(`http://localhost:5000/api/user-activities/${user.email}`);
         const activitiesData = await activitiesRes.json();
 
         if (activitiesData.status === 'success') {
@@ -297,7 +297,7 @@ const RecentActivity = () => {
 
     try {
       // Always try to populate activities first when refresh is clicked
-      const populateRes = await fetch(`${backend}/api/populate-activities/${user.email}`, {
+      const populateRes = await fetch(`http://localhost:5000/api/populate-activities/${user.email}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' }
       });
@@ -306,7 +306,7 @@ const RecentActivity = () => {
 
       if (populateData.status === 'success') {
         // Fetch activities after populating
-        const activitiesRes = await fetch(`${backend}/api/user-activities/${user.email}`);
+        const activitiesRes = await fetch(`http://localhost:5000/api/user-activities/${user.email}`);
         const activitiesData = await activitiesRes.json();
 
         if (activitiesData.status === 'success') {

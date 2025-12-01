@@ -30,12 +30,12 @@ const ItemDetail = () => {
   const isAuctionUpcoming = item && new Date(item.start_date_time) > new Date();
   const isAuctionLive = item && new Date(item.start_date_time) <= new Date() && new Date(item.end_date_time) >= new Date();
   const isOwnItem = item && user && (user.email === item.seller_id || user.email === item.contact_email);
-  const backend = process.env.REACT_APP_BACKEND_URL;
+  // const backend = process.env.REACT_APP_BACKEND_URL;
 
   useEffect(() => {
     const fetchItem = async () => {
       try {
-        const res = await axios.get(`${backend}/api/item/${id}`);
+        const res = await axios.get(`http://localhost:5000/api/item/${id}`);
         if (res.data.status === 'success') {
           const fetchedItem = res.data.item;
           setItem(fetchedItem);
@@ -64,7 +64,7 @@ const ItemDetail = () => {
   useEffect(() => {
     const fetchHighestBid = async () => {
       try {
-        const res = await axios.get(`${backend}/api/item/${id}/highest-bid`);
+        const res = await axios.get(`http://localhost:5000/api/item/${id}/highest-bid`);
         if (res.data.status === 'success') {
           console.log("✅ Highest Bid API Response:", res.data); // Add this!
           setHighestBid(res.data);
@@ -169,7 +169,7 @@ const ItemDetail = () => {
 
     try {
       const user = JSON.parse(localStorage.getItem('user'));
-      const res = await axios.post(`${backend}/api/place-bid`, {
+      const res = await axios.post(`http://localhost:5000/api/place-bid`, {
         item_id: item._id,
         bid_amount: numericBid,
         bidder_email: user?.email || '',

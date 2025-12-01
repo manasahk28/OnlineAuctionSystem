@@ -14,7 +14,7 @@ const PostItems = () => {
   const [imagePreviews, setImagePreviews] = useState([]);
   const [videoPreview, setVideoPreview] = useState(null);
   const [isPosting, setIsPosting] = useState(false);
-  const backend = process.env.REACT_APP_BACKEND_URL;
+  // const backend = process.env.REACT_APP_BACKEND_URL;
 
   const [form, setForm] = useState({
     title: '',
@@ -150,7 +150,7 @@ const PostItems = () => {
     };
 
     try {
-      const response = await fetch(`${backend}/api/post-item`, {
+      const response = await fetch(`http://localhost:5000/api/post-item`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),

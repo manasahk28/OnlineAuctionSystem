@@ -14,7 +14,7 @@ const Layout = ({ children, hideFooter, hideChatBot }) => {
   const [showFarewell, setShowFarewell] = useState(false);
   const [fadePopup, setFadePopup] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const backend = process.env.REACT_APP_BACKEND_URL;
+  // const backend = process.env.REACT_APP_BACKEND_URL;
 
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
@@ -190,7 +190,7 @@ export const Contact = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch('${backend}/api/contact', {
+      const response = await fetch('http://localhost:5000/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),

@@ -14,7 +14,7 @@ const ExploreItems = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sortOrder, setSortOrder] = useState('');
-  const backend = process.env.REACT_APP_BACKEND_URL;
+  // const backend = process.env.REACT_APP_BACKEND_URL;
 
   const [filters, setFilters] = useState({
     category: [],
@@ -104,7 +104,7 @@ const ExploreItems = () => {
         params.append('time_filter', filters.timeFilter);
       }
 
-      const response = await axios.get(`${backend}/api/items?${params.toString()}`);
+      const response = await axios.get(`http://localhost:5000/api/items?${params.toString()}`);
       if (response.data.status === 'success') {
         setItems(response.data.items);
         localStorage.setItem('explore_items_cache', JSON.stringify(response.data.items));

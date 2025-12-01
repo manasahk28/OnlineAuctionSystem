@@ -11,7 +11,7 @@ const Registration = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [passwordError, setPasswordError] = useState('');
-  const backend = process.env.REACT_APP_BACKEND_URL;
+  // const backend = process.env.REACT_APP_BACKEND_URL;
 
   const [formData, setFormData] = useState({
     UserName: '',
@@ -88,7 +88,7 @@ const Registration = () => {
     };
 
     try {
-      const response = await fetch(`${backend}/api/register`, {
+      const response = await fetch(`http://localhost:5000/api/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(finalFormData),

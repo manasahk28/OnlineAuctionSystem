@@ -34,7 +34,7 @@ const EditItem = ({ itemId, setActiveSection }) => {
   });
 
   const [initialFormData, setInitialFormData] = useState({});
-  const backend = process.env.REACT_APP_BACKEND_URL;
+  // const backend = process.env.REACT_APP_BACKEND_URL;
 
   useEffect(() => {
     const defaultForm = {
@@ -70,7 +70,7 @@ const EditItem = ({ itemId, setActiveSection }) => {
 
     const fetchItem = async () => {
       try {
-        const res = await fetch(`${backend}/api/item/${itemId}`);
+        const res = await fetch(`http://localhost:5000/api/item/${itemId}`);
         const data = await res.json();
 
         if (data.status === 'success') {
@@ -168,7 +168,7 @@ const EditItem = ({ itemId, setActiveSection }) => {
     }
 
     try {
-      const res = await fetch(`${backend}/api/items/${itemId}`, {
+      const res = await fetch(`http://localhost:5000/api/items/${itemId}`, {
         method: 'PUT',
         body: form
       });
