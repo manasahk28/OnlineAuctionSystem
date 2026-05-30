@@ -5,6 +5,16 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { ThemeProvider } from './ThemeContext';
 
+// Global native alert interceptor for custom React Toast notifications
+window.__activeAlertCallback = null;
+window.alert = (message) => {
+  if (window.__activeAlertCallback) {
+    window.__activeAlertCallback(message);
+  } else {
+    console.warn("ALERT INTERCEPTED (before React mounted):", message);
+  }
+};
+
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>

@@ -14,6 +14,38 @@ const Layout = ({ children, hideFooter, hideChatBot }) => {
   const [showFarewell, setShowFarewell] = useState(false);
   const [fadePopup, setFadePopup] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [toast, setToast] = useState(null);
+
+  useEffect(() => {
+    window.__activeAlertCallback = (msg) => {
+      let type = 'info';
+      const cleanMsg = msg.replace(/[✅❌⚠️🚫🎉]/g, '').trim();
+      
+      if (msg.toLowerCase().includes('success') || msg.includes('✅') || msg.includes('🎉') || msg.toLowerCase().includes('successful')) {
+        type = 'success';
+      } else if (msg.toLowerCase().includes('fail') || msg.includes('❌') || msg.toLowerCase().includes('error') || msg.toLowerCase().includes('wrong') || msg.includes('🚫')) {
+        type = 'error';
+      } else if (msg.toLowerCase().includes('warning') || msg.includes('⚠️')) {
+        type = 'warning';
+      }
+      
+      setToast({ message: cleanMsg, type });
+    };
+
+    return () => {
+      window.__activeAlertCallback = null;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (toast) {
+      const timer = setTimeout(() => {
+        setToast(null);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [toast]);
+
   // const backend = process.env.REACT_APP_BACKEND_URL;
 
   useEffect(() => {
@@ -96,6 +128,18 @@ const Layout = ({ children, hideFooter, hideChatBot }) => {
           )}
         </div>
       </nav>
+
+      {toast && (
+        <div className="custom-toast-container">
+          <div className={`custom-toast ${toast.type}`}>
+            <span className="custom-toast-icon">
+              {toast.type === 'success' ? '✅' : toast.type === 'error' ? '❌' : toast.type === 'warning' ? '⚠️' : 'ℹ️'}
+            </span>
+            <span className="custom-toast-message">{toast.message}</span>
+            <button className="custom-toast-close" onClick={() => setToast(null)}>×</button>
+          </div>
+        </div>
+      )}
 
       <div className={`layout-content ${sidebarOpen ? 'blurred' : ''}`}>
 

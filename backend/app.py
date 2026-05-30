@@ -2720,6 +2720,213 @@ def populate_existing_activities(email):
             'message': str(e)
         }), 500
 
+@app.route('/api/chat', methods=['POST'])
+def chatbot():
+    import requests
+    from dotenv import load_dotenv
+    load_dotenv(override=True)
+    data = request.get_json() or {}
+    user_message = data.get('message', '').strip()
+    history = data.get('history', [])
+    user_email = data.get('user_email', '').strip()
+
+    if not user_message:
+        return jsonify({'status': 'fail', 'message': 'Message is required'}), 400
+
+    # 1. Check if GROQ_API_KEY is configured
+    groq_api_key = os.getenv("GROQ_API_KEY")
+    groq_model = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
+
+    # FAQ Context
+    faq_context = """
+Platform Rules & FAQs:
+1. Bidding Procedure:
+   - Go to the item's page, click the orange 'Bid Now' button.
+   - Enter a bid amount higher than the current highest bid + minimum increment.
+   - Confirm your bid.
+   - Active and past bids can be viewed in your Profile sidebar under 'My Bids'.
+   - Bidding wars trigger instant in-app notifications if you are outbid.
+   - Bids generally CANNOT be cancelled. If a mistake occurs, contact support immediately.
+2. Post-Bid / Winning:
+   - If you are the highest bidder when the auction ends, you win!
+   - Both seller and winner are immediately notified via email.
+   - You must coordinate payment and delivery directly with the seller (within 24 hours is recommended).
+   - Currently, payments are handled between buyer and seller directly.
+   - Delays in contact/payment can lead to bid cancellation.
+3. Selling & Listings:
+   - Go to 'Post Items' page at the top.
+   - Fill in: Title, description, starting price, minimum increment, category, images (up to 3), video (optional), auction duration, item condition, pickup method.
+   - After submission, it goes to 'Pending' status awaiting admin approval. Once approved, it is live.
+   - Edit or delete listings in 'My Listings' page on your dashboard. Some fields lock after the first bid.
+4. Safety & Guidelines:
+   - Look for the 'Verified Seller' badge and clear photos.
+   - Direct payment transfer is required; verify seller details before sending money.
+   - If an item is received damaged, contact the seller first. If no resolution, report it to support.
+5. Shipping & Delivery:
+   - Coordinated manually between buyer and seller.
+   - Sellers specify shipping fees or pickup methods on the listing page.
+   - Tracking depends on the courier service chosen by the seller.
+6. Account & Password:
+   - Change password in Profile -> Account -> Change Password.
+   - Update phone, LinkedIn, and profile picture in 'Profile Settings'.
+   - Use 'Forgot Password' on the login screen if you forget your password.
+7. Technical Issues:
+   - Refresh page, clear browser cache, or use incognito mode.
+   - Contact support at support@auctionverse.com for persistent issues.
+"""
+
+    # 2. Fetch active approved listings from MongoDB
+    now_ist = datetime.now(ZoneInfo("Asia/Kolkata")).isoformat()
+    try:
+        active_db_items = list(items_collection.find({
+            "is_approved": True,
+            "end_date_time": {"$gte": now_ist}
+        }))
+    except Exception as e:
+        print("Error fetching active items:", e)
+        active_db_items = []
+
+    active_items_list = []
+    for item in active_db_items:
+        # Determine highest bid
+        highest_bid = item.get('highest_bid')
+        if not highest_bid:
+            item_bids = item.get('bids', [])
+            if item_bids:
+                try:
+                    item_bids.sort(key=lambda b: -float(b['bid_amount']))
+                    highest_bid = item_bids[0]['bid_amount']
+                except:
+                    pass
+        
+        highest_bid_str = f"₹{highest_bid}" if highest_bid else "No bids yet"
+        active_items_list.append(
+            f"- [{item.get('custom_item_id', 'N/A')}] {item.get('title')} | Category: {item.get('category')} | Starting Price: ₹{item.get('starting_price')} | Current Highest Bid: {highest_bid_str} | Ends At: {item.get('end_date_time')}"
+        )
+    
+    active_listings_context = "\n".join(active_items_list) if active_items_list else "No active auctions currently."
+
+    # 3. Personalization Context (User-Specific Bids/Listings)
+    user_context = ""
+    if user_email:
+        try:
+            user_doc = users_collection.find_one({'email': user_email})
+            user_name = user_doc.get('UserName', 'User') if user_doc else 'User'
+            
+            user_items = list(items_collection.find({'seller_id': user_email}))
+            user_items_list = []
+            for item in user_items:
+                status_text = "Live" if item.get('is_approved') and item.get('end_date_time', '') >= now_ist else ("Pending Admin Approval" if not item.get('is_approved') and not item.get('is_rejected') else "Ended/Rejected")
+                user_items_list.append(f"  * [{item.get('custom_item_id', 'N/A')}] {item.get('title')} (Status: {status_text}, Starting Price: ₹{item.get('starting_price')})")
+            
+            user_listings_str = "\n".join(user_items_list) if user_items_list else "  * You haven't listed any items yet."
+
+            user_bids = list(bids_collection.find({'bidder_email': user_email}))
+            user_bids.sort(key=lambda b: b.get('timestamp', ''), reverse=True)
+            seen_items = set()
+            user_bids_list = []
+            for bid in user_bids:
+                item_id = bid.get('item_id')
+                if item_id not in seen_items:
+                    seen_items.add(item_id)
+                    outbid_status = "Outbid" if bid.get('outbid') else "Highest Bidder"
+                    user_bids_list.append(f"  * Bid of ₹{bid.get('bid_amount')} on item '{bid.get('item_title', 'Unknown')}' (Status: {outbid_status})")
+            
+            user_bids_str = "\n".join(user_bids_list) if user_bids_list else "  * You haven't placed any bids yet."
+
+            user_context = f"""
+Personalized Current User Details:
+- Name: {user_name}
+- Email: {user_email}
+- Your Listings on AuctionVerse:
+{user_listings_str}
+- Your Active/Recent Bids on AuctionVerse:
+{user_bids_str}
+"""
+        except Exception as e:
+            print("Error gathering user context:", e)
+            user_context = f"\n(Logged in user email is {user_email}, but failed to load database profile details: {str(e)})"
+
+    # Define Groq system prompt
+    system_prompt = f"""You are Noa, the friendly and helpful AI Auction Assistant for AuctionVerse, an online student auction platform.
+Your goal is to assist users with bidding, listing items, account questions, and finding items on the platform.
+
+Here is the context about how the platform works (FAQs):
+{faq_context}
+
+Here is the current state of the database to help you answer questions accurately:
+- Current IST Time: {datetime.now(ZoneInfo("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S')}
+- Active approved listings on the platform:
+{active_listings_context}
+{user_context}
+
+Guidelines:
+1. Be concise, professional, friendly, and helpful. Use emojis occasionally (like 👋, 🎉, 🚀, 💰, 📦).
+2. Answer questions accurately based ONLY on the provided context. If a user asks about active auctions or items for sale, check the active listings context and list matching items with their Custom Item ID, category, starting price, and current highest bid.
+3. If an item is not found or is ended, politely explain that it might have ended or is not currently active.
+4. When talking about active listings, mention their Custom Item ID (e.g., AUC-ELEC-002) so the user can easily find them.
+5. If the user asks about their own listings or bids, refer to the Personalized Current User Details section.
+6. If a user asks how to bid or do something, explain the step-by-step procedure from the FAQs.
+7. If you cannot answer a question based on the context, politely state that you don't know and ask them to contact platform support at support@auctionverse.com.
+8. Keep your response relatively brief (less than 150 words per message) so it fits well in a chat panel. Do not include markdown headers or lists unless necessary; bold text is fine.
+"""
+
+    if not groq_api_key or groq_api_key.strip() == "":
+        print("WARNING: GROQ_API_KEY is not configured in backend/.env!")
+        return jsonify({
+            'status': 'success',
+            'reply': f"Hi {user_email.split('@')[0] if user_email else ''}! 👋 I am ready to be powered by AI! Please configure the `GROQ_API_KEY` in the backend `.env` file to unlock my full AI potential. \n\nFor now, you can select any of the standard category options below to view our FAQs, or ask general questions. If there's anything else, feel free to contact us at support@auctionverse.com! 💛"
+        }), 200
+
+    # Build history messages for Groq API
+    groq_messages = [
+        {"role": "system", "content": system_prompt}
+    ]
+    
+    # Add history
+    for msg in history[-10:]:
+        role = "assistant" if msg.get("from") == "nia" else "user"
+        groq_messages.append({"role": role, "content": msg.get("text", "")})
+    
+    # Add user's current message
+    groq_messages.append({"role": "user", "content": user_message})
+
+    try:
+        url = "https://api.groq.com/openai/v1/chat/completions"
+        headers = {
+            "Authorization": f"Bearer {groq_api_key}",
+            "Content-Type": "application/json"
+        }
+        payload = {
+            "model": groq_model,
+            "messages": groq_messages,
+            "temperature": 0.5,
+            "max_tokens": 1024
+        }
+        
+        response = requests.post(url, json=payload, headers=headers, timeout=15)
+        
+        if response.status_code == 200:
+            res_data = response.json()
+            reply = res_data['choices'][0]['message']['content'].strip()
+            return jsonify({
+                'status': 'success',
+                'reply': reply
+            }), 200
+        else:
+            print(f"Groq API Error: {response.status_code} - {response.text}")
+            return jsonify({
+                'status': 'success',
+                'reply': "Oops, I encountered a brief technical glitch while processing that. 🤖 Please try again in a moment, or use our quick-selection categories!"
+            }), 200
+
+    except Exception as e:
+        print("Exception in Groq API request:", e)
+        return jsonify({
+            'status': 'success',
+            'reply': "Sorry, I am having trouble connecting to my AI brain right now. 🧠 Please make sure my servers are active, or choose from the categories below!"
+        }), 200
+
 @app.route('/')
 def home():
     return "✅ Flask backend with MongoDB, JWT Auth, and Auction APIs is live!"
