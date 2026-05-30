@@ -59,7 +59,7 @@ const UserDashboard = () => {
     const userData = JSON.parse(localStorage.getItem("user") || '{}');
     if (!userData.email) return;
 
-    fetch(`http://localhost:5000/api/get-profile?email=${userData.email}`)
+    fetch(`https://online-auction-backend-mkn1.onrender.com/api/get-profile?email=${userData.email}`)
       .then(res => res.json())
       .then(data => {
         if (data.status === 'success') {
@@ -84,7 +84,7 @@ const UserDashboard = () => {
 
   useEffect(() => {
     if (!user?.email) return;
-    fetch(`http://localhost:5000/api/user-category-stats/${user.email}`)
+    fetch(`https://online-auction-backend-mkn1.onrender.com/api/user-category-stats/${user.email}`)
       .then(res => res.json())
       .then(data => {
         if (data.status === 'success') {
@@ -135,7 +135,7 @@ const UserDashboard = () => {
       setProfileImage(updatedImage);
 
       try {
-        const res1 = await fetch(`http://localhost:5000/api/get-profile?email=${user.email}`);
+        const res1 = await fetch(`https://online-auction-backend-mkn1.onrender.com/api/get-profile?email=${user.email}`);
         const data1 = await res1.json();
         const existingProfile = data1.profile;
 
@@ -145,7 +145,7 @@ const UserDashboard = () => {
           profileImage: updatedImage
         };
 
-        const res = await fetch(`http://localhost:5000/api/update-profile`, {
+        const res = await fetch(`https://online-auction-backend-mkn1.onrender.com/api/update-profile`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(updatedProfile)
@@ -179,7 +179,7 @@ const UserDashboard = () => {
 
     try {
       // Get current profile data
-      const res1 = await fetch(`http://localhost:5000/api/get-profile?email=${user.email}`);
+      const res1 = await fetch(`https://online-auction-backend-mkn1.onrender.com/api/get-profile?email=${user.email}`);
       const data1 = await res1.json();
       const existingProfile = data1.profile;
 
@@ -190,7 +190,7 @@ const UserDashboard = () => {
         profileImage: '' // Set to empty string to remove the image
       };
 
-      const res = await fetch(`http://localhost:5000/api/update-profile`, {
+      const res = await fetch(`https://online-auction-backend-mkn1.onrender.com/api/update-profile`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updatedProfile)

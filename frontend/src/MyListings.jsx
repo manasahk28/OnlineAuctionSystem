@@ -17,7 +17,7 @@ const MyListings = ({ setEditingItemId, setActiveSection }) => {
     }
 
     try {
-      const res = await fetch(`http://localhost:5000/api/items/user/${user.email}`);
+      const res = await fetch(`https://online-auction-backend-mkn1.onrender.com/api/items/user/${user.email}`);
       const data = await res.json();
 
       if (data.status === 'success') {
@@ -117,7 +117,7 @@ const MyListings = ({ setEditingItemId, setActiveSection }) => {
                         console.log('✅ Delete confirmed, sending request...');
 
                         try {
-                          const deleteUrl = `http://localhost:5000/api/items/${item._id}`;
+                          const deleteUrl = `https://online-auction-backend-mkn1.onrender.com/api/items/${item._id}`;
                           console.log('🗑️ Sending DELETE request to:', deleteUrl);
 
                           const res = await fetch(deleteUrl, {

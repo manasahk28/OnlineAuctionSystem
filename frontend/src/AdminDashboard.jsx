@@ -15,7 +15,7 @@ const AdminDashboard = () => {
 
   const refreshItems = async () => {
     try {
-      const res = await axios.get(`http://localhost:5000/api/admin/items/${activeTab}`);
+      const res = await axios.get(`https://online-auction-backend-mkn1.onrender.com/api/admin/items/${activeTab}`);
       console.log("📦 Refreshed items:", res.data);
       if (Array.isArray(res.data)) {
         setItems(res.data);
@@ -32,7 +32,7 @@ const AdminDashboard = () => {
     const fetchItems = async () => {
       setLoading(true);
       try {
-        const res = await axios.get(`http://localhost:5000/api/admin/items/${activeTab}`);
+        const res = await axios.get(`https://online-auction-backend-mkn1.onrender.com/api/admin/items/${activeTab}`);
         console.log("📦 Items fetched from backend:", res.data);
         if (Array.isArray(res.data)) {
           setItems(res.data);
@@ -51,7 +51,7 @@ const AdminDashboard = () => {
 
   const handleApproval = async (id, status) => {
     try {
-      await axios.put(`http://localhost:5000/api/items/approve/${id}`, null, {
+      await axios.put(`https://online-auction-backend-mkn1.onrender.com/api/items/approve/${id}`, null, {
         params: {
           is_approved: status === 'Approved',
           is_rejected: status === 'Rejected',
@@ -67,7 +67,7 @@ const AdminDashboard = () => {
 
   const handleSendComment = async () => {
     try {
-      await axios.post(`http://localhost:5000/api/admin/comment`, {
+      await axios.post(`https://online-auction-backend-mkn1.onrender.com/api/admin/comment`, {
         itemId: selectedItem._id,
         sellerId: selectedItem.seller_id,
         comment: commentText,

@@ -23,7 +23,7 @@ const Profile = () => {
 
     const fetchProfileData = async () => {
       try {
-        const res = await fetch(`http://localhost:5000/api/get-profile?email=${userData.email}`);
+        const res = await fetch(`https://online-auction-backend-mkn1.onrender.com/api/get-profile?email=${userData.email}`);
         const data = await res.json();
         if (data.status === 'success') {
           const p = data.profile;
@@ -68,7 +68,7 @@ const Profile = () => {
   const handleSave = async () => {
     try {
       // Step 1: Get the latest profile data from the DB
-      const res1 = await fetch(`http://localhost:5000/api/get-profile?email=${profile.email}`);
+      const res1 = await fetch(`https://online-auction-backend-mkn1.onrender.com/api/get-profile?email=${profile.email}`);
       const data1 = await res1.json();
 
       if (data1.status !== 'success') {
@@ -86,7 +86,7 @@ const Profile = () => {
       };
 
       // Step 3: Save merged data
-      const res = await fetch(`http://localhost:5000/api/update-profile`, {
+      const res = await fetch(`https://online-auction-backend-mkn1.onrender.com/api/update-profile`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updatedProfile)

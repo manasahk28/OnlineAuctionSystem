@@ -104,7 +104,7 @@ const ExploreItems = () => {
         params.append('time_filter', filters.timeFilter);
       }
 
-      const response = await axios.get(`http://localhost:5000/api/items?${params.toString()}`);
+      const response = await axios.get(`https://online-auction-backend-mkn1.onrender.com/api/items?${params.toString()}`);
       if (response.data.status === 'success') {
         setItems(response.data.items);
         localStorage.setItem('explore_items_cache', JSON.stringify(response.data.items));

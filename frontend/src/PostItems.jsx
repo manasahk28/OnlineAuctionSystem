@@ -150,7 +150,7 @@ const PostItems = () => {
     };
 
     try {
-      const response = await fetch(`http://localhost:5000/api/post-item`, {
+      const response = await fetch(`https://online-auction-backend-mkn1.onrender.com/api/post-item`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),

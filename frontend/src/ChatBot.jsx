@@ -31,7 +31,7 @@ const ChatBot = ({ hide }) => {
 
     try {
       const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-      const backendUrl = isLocal ? 'http://localhost:5000' : (process.env.REACT_APP_BACKEND_URL || 'http://localhost:5000');
+      const backendUrl = isLocal ? 'https://online-auction-backend-mkn1.onrender.com' : (process.env.REACT_APP_BACKEND_URL || 'https://online-auction-backend-mkn1.onrender.com');
       const res = await fetch(`${backendUrl}/api/chat`, {
         method: 'POST',
         headers: {

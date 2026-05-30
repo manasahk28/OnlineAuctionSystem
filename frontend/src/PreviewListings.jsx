@@ -24,7 +24,7 @@ const PreviewListings = () => {
   useEffect(() => {
     const fetchItems = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/api/items`);
+        const response = await axios.get(`https://online-auction-backend-mkn1.onrender.com/api/items`);
         if (response.data.status === 'success') {
           const now = new Date();
           const allItems = response.data.items.filter(item => {

@@ -30,7 +30,7 @@ const ChangePassword = () => {
         setLoading(true);
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch(`http://localhost:5000/api/auth/verify-password`, {
+            const res = await fetch(`https://online-auction-backend-mkn1.onrender.com/api/auth/verify-password`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -62,7 +62,7 @@ const ChangePassword = () => {
         setLoading(true);
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch(`http://localhost:5000/api/auth/change-password`, {
+            const res = await fetch(`https://online-auction-backend-mkn1.onrender.com/api/auth/change-password`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -155,7 +155,7 @@ const AccountActions = () => {
             const token = localStorage.getItem('token');
             console.log('JWT token:', token); // Debugging
 
-            const res = await fetch(`http://localhost:5000/api/delete-account`, {
+            const res = await fetch(`https://online-auction-backend-mkn1.onrender.com/api/delete-account`, {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',

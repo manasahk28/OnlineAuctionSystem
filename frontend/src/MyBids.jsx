@@ -20,7 +20,7 @@ const MyBids = () => {
   useEffect(() => {
     const fetchBids = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/my-bids/email/${user.email}`);
+        const response = await axios.get(`https://online-auction-backend-mkn1.onrender.com/my-bids/email/${user.email}`);
         setBids(response.data);
       } catch (error) {
         console.error('Failed to fetch bids:', error);
@@ -40,7 +40,7 @@ const MyBids = () => {
       for (const bid of bids) {
         if (bid.auction_result === 'won') {
           try {
-            await axios.post(`http://localhost:5000/api/handle-auction-win`, {
+            await axios.post(`https://online-auction-backend-mkn1.onrender.com/api/handle-auction-win`, {
               item_id: bid._id,
               bidder_email: user.email
             });
@@ -59,7 +59,7 @@ const MyBids = () => {
   // Handle increasing the bid and send it to backend
   const handleIncreaseBid = async (itemId, newBid) => {
     try {
-      const res = await axios.post(`http://localhost:5000/api/place-bid`, {
+      const res = await axios.post(`https://online-auction-backend-mkn1.onrender.com/api/place-bid`, {
         item_id: itemId,
         bid_amount: Number(newBid),
         bidder_email: user?.email || '',

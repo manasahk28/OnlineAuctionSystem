@@ -25,7 +25,7 @@ const Payments = () => {
   useEffect(() => {
     const fetchPayments = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/api/payments/${user.email}`);
+        const res = await axios.get(`https://online-auction-backend-mkn1.onrender.com/api/payments/${user.email}`);
         setPayments(res.data.payments || []);
       } catch (error) {
         console.error('Error fetching payments:', error);
@@ -44,7 +44,7 @@ const Payments = () => {
   // ✅ Razorpay payment handler
   const handlePayment = async (amount, itemId) => {
     try {
-      const { data } = await axios.post(`http://localhost:5000/api/create-order`, {
+      const { data } = await axios.post(`https://online-auction-backend-mkn1.onrender.com/api/create-order`, {
         amount,
         itemId,
         email: user.email
@@ -58,7 +58,7 @@ const Payments = () => {
         description: 'Payment for item',
         order_id: data.order_id,
         handler: async (response) => {
-          const verifyRes = await axios.post(`http://localhost:5000/api/verify-payment`, {
+          const verifyRes = await axios.post(`https://online-auction-backend-mkn1.onrender.com/api/verify-payment`, {
             razorpay_order_id: response.razorpay_order_id,
             razorpay_payment_id: response.razorpay_payment_id,
             razorpay_signature: response.razorpay_signature,
@@ -70,7 +70,7 @@ const Payments = () => {
           alert(verifyRes.data.message);
 
           // Refresh updated payment status
-          const refreshed = await axios.get(`http://localhost:5000/api/payments/${user.email}`);
+          const refreshed = await axios.get(`https://online-auction-backend-mkn1.onrender.com/api/payments/${user.email}`);
           setPayments(refreshed.data.payments || []);
         },
         theme: { color: '#3399cc' }

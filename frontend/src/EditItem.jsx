@@ -70,7 +70,7 @@ const EditItem = ({ itemId, setActiveSection }) => {
 
     const fetchItem = async () => {
       try {
-        const res = await fetch(`http://localhost:5000/api/item/${itemId}`);
+        const res = await fetch(`https://online-auction-backend-mkn1.onrender.com/api/item/${itemId}`);
         const data = await res.json();
 
         if (data.status === 'success') {
@@ -168,7 +168,7 @@ const EditItem = ({ itemId, setActiveSection }) => {
     }
 
     try {
-      const res = await fetch(`http://localhost:5000/api/items/${itemId}`, {
+      const res = await fetch(`https://online-auction-backend-mkn1.onrender.com/api/items/${itemId}`, {
         method: 'PUT',
         body: form
       });

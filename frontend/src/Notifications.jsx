@@ -29,7 +29,7 @@ const NotificationsPage = () => {
     setPreferences(updatedPrefs);
     try {
       await axios.post(
-        `http://localhost:5000/api/notifications/preferences/update`,
+        `https://online-auction-backend-mkn1.onrender.com/api/notifications/preferences/update`,
         {
           email: userEmail,
           preferences: updatedPrefs,
@@ -38,7 +38,7 @@ const NotificationsPage = () => {
       );
       // Re-fetch preferences to ensure UI matches DB
       const prefsRes = await axios.get(
-        `http://localhost:5000/api/notifications/preferences/${userEmail}`,
+        `https://online-auction-backend-mkn1.onrender.com/api/notifications/preferences/${userEmail}`,
         authHeader
       );
       setPreferences(prefsRes.data.preferences || {});
@@ -50,7 +50,7 @@ const NotificationsPage = () => {
 
   const markAsRead = async (notificationId) => {
     try {
-      await axios.post(`http://localhost:5000/api/notifications/mark_seen`, {
+      await axios.post(`https://online-auction-backend-mkn1.onrender.com/api/notifications/mark_seen`, {
         notification_id: notificationId,
       });
       setNotifications((prev) =>
@@ -71,9 +71,9 @@ const NotificationsPage = () => {
     const fetchData = async () => {
       try {
         const [notifRes, prefsRes] = await Promise.all([
-          axios.get(`http://localhost:5000/api/notifications/${userEmail}`),
+          axios.get(`https://online-auction-backend-mkn1.onrender.com/api/notifications/${userEmail}`),
           axios.get(
-            `http://localhost:5000/api/notifications/preferences/${userEmail}`,
+            `https://online-auction-backend-mkn1.onrender.com/api/notifications/preferences/${userEmail}`,
             authHeader
           ),
         ]);
@@ -156,9 +156,9 @@ const NotificationsPage = () => {
         const fetchData = async () => {
           try {
             const [notifRes, prefsRes] = await Promise.all([
-              axios.get(`http://localhost:5000/api/notifications/${userEmail}`),
+              axios.get(`https://online-auction-backend-mkn1.onrender.com/api/notifications/${userEmail}`),
               axios.get(
-                `http://localhost:5000/api/notifications/preferences/${userEmail}`,
+                `https://online-auction-backend-mkn1.onrender.com/api/notifications/preferences/${userEmail}`,
                 authHeader
               ),
             ]);
